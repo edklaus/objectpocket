@@ -1,0 +1,56 @@
+### ObjectPocket
+- use gson to convert Java object to JSON
+- store simple Java objects (no annotation, interface, extend), just POJO
+- support referencing
+- support cyclic referencing
+- support multiple referencing
+- support inline and spread storage
+- support @Id for custom id usage
+- support storage snapshots
+
+### Objektidentifikation
+- Im Prinzip muss keine ID vorhanden sein, wenn man z.B. Inline speichert
+- Sobald man anfängt Daten separiert zu speichern, müssen Referenzen über IDs aufgelöst werden
+- Man kann beim Speichern einer Datenstruktur automatisch IDs vergeben, ohne Annotation, Vererbung, Interface
+  - Eine Lösung wäre es die POJOs in speziellen Objekten zu referenzieren, die eine ID besitzen, und diese dann in JSON umzuwandeln
+    - dabei ist zu beachten, dass man den Datentyp mit in das JSON Objekt ablegen sollte!
+    
+	// generierte id
+	{	
+		"class":"org.package.Person",
+		"id":"12345",
+		"name":"anton",
+		"address":{"org.package.Address":"55678"}
+		"friends":[{"org.package.Person":"65432"}]
+	}
+    
+- Dem Nutzer soll eine Annotation "@Id" angeboten werden, die es ermöglicht eigene Felder (String) für die Identifikation zu nutzen
+  ? Muss das tatsächlich auf String beschränkt werden?
+  
+	// gewählte id für Klasse person
+	{
+		"class":"org.package.Person",
+		"name":"anton",
+		"address":{"org.package.Address":"55678"}
+		"friends":[{"org.package.Person":"anna"}]
+	}
+
+? Klassenname vorne anhängen oder hinten?
+
+### Inline Speichern
+- Problem: Wie geht man mit mehrfachen Referenzen um, also wenn auf ein und dasselbe Objekt mehrfach referenziert wird?
+  -> Objekt liegt in diesem Fall dann mehrmals vor!
+  -> Bei händischem Editieren müssen Änderungen an einem mehrfach referenzierten Objekt an jeder Stelle vorgenommen werden!
+- Lösung:
+  -> stur inline speichern!
+  
+### Auflösen von Objektreferenzen
+- Objektreferenzen lassen sich sehr schwer auflösen, wenn die referenzierten Objekte nicht
+  - ein bestimmtes Interface implementieren, eine Annotation haben, von einer Oberklasse erben
+- Eine Mischlösung wäre folgender Ansatz
+  1. Man fügt ein POJO hinzu ohne irgendwelche Besonderheiten
+     => POJO wird samt Referenzen komplett inline abgelegt, so wie GSON das standardmäßig machen würde
+  2. Man versieht ein referenziertes POJO mit einer Annotation @Entity
+     => POJO wird inline abgelegt / Referenzen mit @Entity werden in separaten Dateien abgelegt, solange
+     kein inlineForce oder singleFile gesetzt ist!
+     => Bei singleFile wird referenziertes Objekt mit in dieselbe Datei geschrieben

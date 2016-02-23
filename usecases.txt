@@ -1,0 +1,14 @@
+### USECASES ###
+- simple data (Account, User, Address, ...)
+- Configuration (Json PrittyPrint)
+- WindowState (time based persisting)
+
+#### Configuration
+- Einfache Dateistruktur
+- Inline Speichern für händische Bearbeitung
+- Pretty Print für händische Bearbeitung
+- Keine IDs notwendig
+
+#### User Settings
+- Einfache Dateistruktur
+- Mehrfache Referenzen auf ein und dasselbe Objekt möglich

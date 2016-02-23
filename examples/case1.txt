@@ -1,0 +1,26 @@
+## most simple case
+
+class Address {
+    String city;
+}
+
+class Person {
+    String name;
+    Address address;
+}
+
+Address address = new Address();
+address.city = "Karlsruhe";
+Person anton = new Person();
+anton.name = "Anton";
+anton.address = address;
+
+## file: "org.package.Person"
+{
+  "id":"12345",
+  "class":"org.package.Person",
+  "name": "Anton",
+  "address": {
+    "city": "Karlsruhe"
+  }
+}
