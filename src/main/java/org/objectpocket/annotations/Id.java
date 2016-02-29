@@ -24,6 +24,8 @@ import java.lang.annotation.Target;
 
 /**
  * 
+ * Set custom fields to be used as ID.
+ * 
  * @author Edmund Klaus
  *
  */

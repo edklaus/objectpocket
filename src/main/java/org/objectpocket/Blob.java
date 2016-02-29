@@ -17,6 +17,7 @@
 package org.objectpocket;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.objectpocket.storage.BlobStore;
 
@@ -25,13 +26,17 @@ import org.objectpocket.storage.BlobStore;
  * @author Edmund Klaus
  *
  */
-public class Blob extends Identifiable {
+public class Blob {
 
+	private String id = UUID.randomUUID().toString();
 	private String path;
 	private transient byte[] bytes;
 	private transient boolean persist = false;
 	private transient BlobStore blobStore;
 
+	public String getId() {
+		return id;
+	}
 	public final String getPath() {
 		return path;
 	}

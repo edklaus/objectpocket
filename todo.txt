@@ -1,0 +1,5 @@
+## TODO ##
+- JavaDoc ObjectPocket Interface
+- Test Cases
+- First basic implementation
+- lib release in Maven Repo

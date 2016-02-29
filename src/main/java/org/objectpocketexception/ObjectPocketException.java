@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package org.objectpocket.annotations;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package org.objectpocketexception;
 
 /**
- * 
- * Define name of the pocket the object data will be stored in.
  * 
  * @author Edmund Klaus
  *
  */
-@Documented
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Pocket {
-	String name();
+public class ObjectPocketException extends Exception {
+
+	public ObjectPocketException(String message) {
+		super(message);
+	}
+	
+	public ObjectPocketException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }
