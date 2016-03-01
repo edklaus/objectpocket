@@ -1,0 +1,3 @@
+https://blog.idrsolutions.com/2015/06/how-to-upload-your-java-artifact-to-maven-central/
+https://dzone.com/articles/deploy-maven-central
+http://central.sonatype.org/pages/working-with-pgp-signatures.html
