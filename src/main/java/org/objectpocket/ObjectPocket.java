@@ -18,7 +18,7 @@ package org.objectpocket;
 
 import java.util.Collection;
 
-import org.objectpocketexception.ObjectPocketException;
+import org.objectpocket.exception.ObjectPocketException;
 
 /**
  * 
