@@ -1,5 +1,5 @@
 # ObjectPocket
-ObjectPocket is a simple persist/load library for plain Java objects. It serializez Java objects to JSON, so the serialized objects are still human readable and modifiable by hand or other tools.
+ObjectPocket is a simple store/load library for plain Java objects. It serializez Java objects to JSON, so the serialized objects are still human readable and modifiable by hand or other tools.
 
 ### Version
 Experimental stage.
