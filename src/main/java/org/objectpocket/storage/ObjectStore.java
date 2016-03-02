@@ -17,6 +17,7 @@
 package org.objectpocket.storage;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,10 +38,10 @@ public interface ObjectStore extends BlobStore {
 	/**
 	 * Reads json objects of given typeName from the object store.
 	 * @param typeName fully qualified class name
-	 * @return json objects as strings
+	 * @return map of object id, and json objects as strings
 	 * @throws IOException If an I/O error occurs
 	 */
-	public Set<String> readJsonObjects(String typeName) throws IOException;
+	public Map<String, String> readJsonObjects(String typeName) throws IOException;
 	
 	/**
 	 * Writes json objects of given typeName to the object store.

@@ -23,10 +23,13 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.objectpocket.Blob;
+import org.objectpocket.util.JsonHelper;
 
 /**
  * 
@@ -44,6 +47,9 @@ public class FileStore implements ObjectStore {
 
 	@Override
 	public Set<String> getAvailableObjectTypes() throws IOException {
+		// FIXME: change implementation to use an overview file
+		// where type->file mapping is listed
+		// make it resistant against losing this mapping file
 		File dir = initFileStore();
 		File[] list = dir.listFiles();
 		if (list != null && list.length > 0) {
@@ -59,20 +65,34 @@ public class FileStore implements ObjectStore {
 	}
 
 	@Override
-	public Set<String> readJsonObjects(String typeName) throws IOException {
+	public Map<String,String> readJsonObjects(String typeName) throws IOException {
 		if (typeName == null) {
 			return null;
 		}
 		File file = initFile(typeName, true, false);
-		Set<String> objects = null;
+		Map<String, String> objects = null;
 		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
 			String line = null;
-			objects = new HashSet<String>();
+			objects = new HashMap<String, String>();
+			StringBuffer objectBuffer = new StringBuffer();
 			while((line = br.readLine()) != null) {
 				line = line.trim();
 				if (!line.isEmpty()) {
-					objects.add(line);
+					objectBuffer.append(line);
 				}
+			}
+			String s = objectBuffer.toString();
+			String[] jsonStrings = s.split("\\}\n*\\{");
+			for (int i = 0; i < jsonStrings.length; i++) {
+				String jsonString = jsonStrings[i];
+				if (i > 0) {
+					jsonString = "{" + jsonString;
+				}
+				if (i < jsonStrings.length-1) {
+					jsonString = jsonString + "}";
+				}
+				String[] classAndIdFromJson = JsonHelper.getClassAndIdFromJson(jsonString);
+				objects.put(classAndIdFromJson[1], jsonString);
 			}
 		} catch (IOException e) {
 			throw new IOException("Could not read from file. " + file.getPath(), e);
@@ -148,7 +168,7 @@ public class FileStore implements ObjectStore {
 			return bytes;
 		}
 	}
-	
+
 	@Override
 	public String getSource() {
 		return directory;

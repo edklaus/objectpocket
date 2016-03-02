@@ -21,8 +21,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.objectpocket.storage.BlobStore;
+import org.objectpocket.storage.FileStore;
+import org.objectpocket.storage.MemoryStore;
 import org.objectpocket.storage.ObjectStore;
 
 import com.google.gson.GsonBuilder;
@@ -39,16 +42,53 @@ public class ObjectPocketBuilder {
 	private boolean prettyPrinting = true;
 	private boolean serializeNulls = false;
 	
+	/**
+	 * Create an {@link ObjectPocket} instance that will store data into memory.
+	 * @return {@link ObjectPocket}, or null if {@link ObjectPocket} could not be instantiated
+	 */
 	public ObjectPocket createMemoryObjectPocket() {
-		return null;
+		MemoryStore memStore = new MemoryStore();
+		return createObjectPocket(memStore);
 	}
 	
+	/**
+	 * Create an {@link ObjectPocket} instance that will store data into the given directory.
+	 * @param directory
+	 * @return {@link ObjectPocket}, or null if {@link ObjectPocket} could not be instantiated
+	 */
 	public ObjectPocket createFileObjectPocket(String directory) {
-		return null;
+		FileStore fileStore = new FileStore(directory);
+		return createObjectPocket(fileStore);
 	}
 	
+	/**
+	 * Create an {@link ObjectPocket} instance with a given object store.
+	 * @param objectStore 
+	 * @return {@link ObjectPocket}, or null if {@link ObjectPocket} could not be instantiated
+	 */
 	public ObjectPocket createObjectPocket(ObjectStore objectStore) {
-		return null;
+		if (objectStore == null) {
+			Logger.getAnonymousLogger().severe("Argument objectStore is null.");
+			return null;
+		}
+		ObjectPocketImpl objectPocketImpl = new ObjectPocketImpl(objectStore);
+		
+		// TODO: Is this still needed?
+		//addReferenceSupport(objectPocketImpl);
+		
+		if (blobStore != null) {
+			objectPocketImpl.setBlobStore(blobStore);
+		} else {
+			objectPocketImpl.setBlobStore(objectStore);
+		}
+		if (serializeNulls) {
+			objectPocketImpl.serializeNulls();
+		}
+		if (prettyPrinting) {
+			objectPocketImpl.setPrettyPrinting();
+		}
+		objectPocketImpl.setTypeAdapterMap(typeAdapterMap);
+		return objectPocketImpl;
 	}
 	
 	/**
