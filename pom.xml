@@ -3,8 +3,8 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.objectpocket</groupId>
-	<artifactId>ObjectPocket</artifactId>
-	<version>0.0.1</version>
+	<artifactId>objectpocket</artifactId>
+	<version>0.0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>ObjectPocket</name>
@@ -104,10 +104,6 @@
 	</build>
 
 	<distributionManagement>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
 		<snapshotRepository>
 			<id>ossrh</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
