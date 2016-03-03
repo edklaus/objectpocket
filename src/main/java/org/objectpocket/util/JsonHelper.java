@@ -28,13 +28,17 @@ public class JsonHelper {
 
 	// FIXME: make this maximum fast!
 	public static String addClassAndIdToJson(String jsonString, String typeName, String id, boolean prettyPrinting) {
+		System.out.println(jsonString);
 		String classAndIdString = "";
 		if (prettyPrinting) {
 			classAndIdString = "{\n  \"" + CLASS + "\": \"" + typeName + "\","
-							+ "\n  \"" + ID + "\": \"" + id + "\",";
+							+ "\n  \"" + ID + "\": \"" + id + "\"";
 		} else {
 			classAndIdString = "{\"" + CLASS + "\":\"" + typeName + "\","
-					+ "\"" + ID + "\":\"" + id + "\",";
+					+ "\"" + ID + "\":\"" + id + "\"";
+		}
+		if (jsonString.trim().contains(":")) {
+			classAndIdString += ",";
 		}
 		jsonString = jsonString.replaceFirst("\\{", "");
 		jsonString = classAndIdString + jsonString;

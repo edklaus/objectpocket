@@ -1,5 +1,57 @@
+## Bugs ##
+
 ## TODO ##
-- JavaDoc ObjectPocket Interface
-- Test Cases
-- First basic implementation
-- lib release in Maven Repo
+- @Pocket annotation
+- usage und Anwendungsfälle
+  - Doku auf github
+- complex referencing
+- blob support
+- Benchmark erstellen und Zielgruppe von Projekten definieren (Anwendungsfälle)
+
+
+### Wofür @Id?
+- Es ist nicht notwendid um Referenzen aufzulösen
+  - prinzipiell können Referenzen über erzeugte IDs intern gehandhabt werden, völlig transparent für den Nutzer
+  - Einziger Sinn: Nutzer kann beim Browsen der Daten einfacher verstehen was referenziert ist
+  - Weiterer Sinn: Auffinden von Objekten anhand ihrer ID über find
+
+### find erweitern
+- Es macht Sinn find so zu erweitern dass nach allen möglichen Objekten und Feldern gesucht werden kann
+  - Wenn Objekte Inline gespeichert werden, sollten auch diese suchbar sein => komplexeres Auffinden von Referenzen
+  - Alle Felder von Objekten durchsuchbar machen
+    public <T> T find(String fieldname, Object value, Class<T> type);
+    
+### Ideen
+- Automatisches nachladen von änderungen wenn Speicherdatei per Hand oder von anderer Instanz geändert wurde
+- Automatisches Speichern bei Änderungen
+- Asynchrones Speichern
+- tool for data inspection
+- load asynchronous / tests
+- multi instance usage / tests
+- blob support 
+  - cleanup
+  - tests
+- is the fully qualified name really necessary?
+- data partitioning
+  -> separate document
+- write operations
+  - how time consuming is a write operation?
+  - is it possible to write only parts? (vertical partitioning)
+- debug messages for add/persist
+- map support
+- use renaming to safely store files with FileObjectStore
+- custom id with Annotation
+- mapping support (reduce storage size)?
+  - OneToMany, OneToOne, ManyToMany, ...
+- ZipStore
+- encryption support (file/zip?)
+- versioning (history)
+- field renaming support (@PreviousNames="...")
+- class renaming support / class move to other package!
+- time based snapshots (Can object changes be tracked?)
+  - Bytecode Mnipulation (extend set/get)?
+  - JMX
+- time based auto-persist
+- Adapters for MongoDB/ElasticSearch
+- options for serialization exclusion (transient/static/...)
+- extend find() operations to all available fields (like using SQL queries)
