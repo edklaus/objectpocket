@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.objectpocket.ObjectPocketTestSimple.OuterClass.InnerClass;
@@ -32,109 +33,120 @@ public class ObjectPocketTestSimple {
 	
 	@Test
 	public void testBeanWithCustomConstrucor() throws Exception {
-//		Japer japer = new JaperFactory().createMemoryJaper();
-//		BeanWithCustomConstructor bean = new BeanWithCustomConstructor("beanName");
-//		japer.add(bean);
-//		japer.persist();
-//		japer.load();
-//		BeanWithCustomConstructor find = japer.find(bean.getId(), BeanWithCustomConstructor.class);
-//		assertFalse(find.equals(bean));
-//		assertTrue(find.getName().equals(bean.getName()));
+		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
+		BeanWithCustomConstructor bean = new BeanWithCustomConstructor("beanName");
+		objectPocket.add(bean);
+		objectPocket.store();
+		objectPocket.load();
+		Collection<BeanWithCustomConstructor> beans = objectPocket.findAll(BeanWithCustomConstructor.class);
+		assertTrue(beans.size() == 1);
+		BeanWithCustomConstructor found = beans.iterator().next();
+		assertFalse(found.equals(bean));
+		assertTrue(found.getName().equals(bean.getName()));
 	}
 	
 	@Test
 	public void testBeanWithNoGettersAndSetters() throws Exception {
-//		Japer japer = new JaperFactory().createMemoryJaper();
-//		BeanWithNoGettersAndSetters bean = new BeanWithNoGettersAndSetters();
-//		bean.name = "beanName";
-//		japer.add(bean);
-//		japer.persist();
-//		japer.load();
-//		BeanWithNoGettersAndSetters find = japer.find(bean.getId(), BeanWithNoGettersAndSetters.class);
-//		assertFalse(find.equals(bean));
-//		assertTrue(bean.getId().equals(find.getId()));
-//		assertTrue(bean.name.equals(find.name));
+		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
+		BeanWithNoGettersAndSetters bean = new BeanWithNoGettersAndSetters();
+		bean.name = "beanName";
+		objectPocket.add(bean);
+		objectPocket.store();
+		objectPocket.load();
+		Collection<BeanWithNoGettersAndSetters> beans = objectPocket.findAll(BeanWithNoGettersAndSetters.class);
+		assertTrue(beans.size() == 1);
+		BeanWithNoGettersAndSetters found = beans.iterator().next();
+		assertFalse(found.equals(bean));
+		assertFalse(found.equals(bean));
+		assertTrue(found.name.equals(bean.name));
 	}
 	
 	@Test
-	public void testBeanWithReferenceToIdentifiable() throws Exception {
-//		Japer japer = new JaperFactory().createMemoryJaper();
-//		Address address = new Address();
-//		address.setCity("Karlsruhe");
-//		Person person = new Person("person1", address);
-//		japer.add(person);
-//		japer.persist();
-//		japer.load();
-//		Person find = japer.find(person.getId(), Person.class);
-//		assertFalse(find.equals(person));
-//		assertTrue(find.getName().equals(person.getName()));
-//		assertTrue(find.getAddress().getCity().equals(person.getAddress().getCity()));
+	public void testBeanWithReferenceToObject() throws Exception {
+		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
+		Address address = new Address();
+		address.setCity("Karlsruhe");
+		Person person = new Person("person1", address);
+		objectPocket.add(person);
+		objectPocket.store();
+		objectPocket.load();
+		Collection<Person> persons = objectPocket.findAll(Person.class);
+		assertTrue(persons.size() == 1);
+		Person found = persons.iterator().next();
+		assertFalse(found.equals(person));
+		assertTrue(found.getName().equals(person.getName()));
+		assertTrue(found.getAddress().getCity().equals(person.getAddress().getCity()));
 	}
 	
 	@Test
 	public void testNullConstructor() throws Exception {
-//		Japer japer = new JaperFactory().createMemoryJaper();
-//		Person person = new Person(null, null);
-//		japer.add(person);
-//		japer.persist();
-//		japer.load();
-//		Person find = japer.find(person.getId(), Person.class);
-//		assertFalse(find.equals(person));
-//		assertTrue(find.getName() == null);
-//		assertTrue(find.getAddress() == null);
+		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
+		Person person = new Person(null, null);
+		objectPocket.add(person);
+		objectPocket.store();
+		objectPocket.load();
+		Collection<Person> persons = objectPocket.findAll(Person.class);
+		assertTrue(persons.size() == 1);
+		Person found = persons.iterator().next();
+		assertFalse(found.equals(person));
+		assertTrue(found.getName() == null);
+		assertTrue(found.getAddress() == null);
+	}
+	
+	@Test
+	public void testInnerClass() throws Exception {
+		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
+		OuterClass outerClass = new OuterClass();
+		outerClass.setId(UUID.randomUUID().toString());
+		InnerClass referenceToInnerClass = outerClass.getReferenceToInnerClass();
+		objectPocket.add(outerClass);
+		objectPocket.store();
+		objectPocket.load();
+		Collection<OuterClass> outerClasses = objectPocket.findAll(OuterClass.class);
+		assertTrue(outerClasses.size() == 1);
+		OuterClass found = outerClasses.iterator().next();
+		assertTrue(outerClass.getId().equals(found.getId()));
+		assertTrue(referenceToInnerClass.getId().equals(found.getReferenceToInnerClass().getId()));
+	}
+	
+	@Test
+	public void testRemove() throws Exception {
+//		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
+//		SimpleBean simpleBean = new SimpleBean();
+//		simpleBean.setName("simple bean");
+//		objectPocket.add(simpleBean);
+//		objectPocket.store();
+//		objectPocket.load();
+//		Collection<SimpleBean> findAll = objectPocket.findAll(SimpleBean.class);
+//		assertTrue(findAll.size() == 1);
+//		SimpleBean find = findAll.iterator().next();
+//		assertTrue(find.getId().equals(simpleBean.getId()));
+//		objectPocket.remove(simpleBean);
+//		assertTrue(objectPocket.findAll(SimpleBean.class).size() == 0);
+//		objectPocket.store();
+//		assertTrue(objectPocket.findAll(SimpleBean.class).size() == 0);
+//		objectPocket.load();
+//		assertTrue(objectPocket.findAll(SimpleBean.class).size() == 0);
 	}
 	
 	@Test
 	public void testCyclicReferences() throws Exception {
-//		Japer japer = new JaperFactory().createMemoryJaper();
+//		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
 //		Address address = new Address();
 //		address.setCity("Karlsruhe");
 //		Person person = new Person("person1", address);
 //		address.setInhabitant(person);
-//		japer.add(person);
-//		japer.persist();
-//		japer.load();
-//		Collection<Person> persons = japer.findAll(Person.class);
-//		Collection<Address> addresses = japer.findAll(Address.class);
+//		objectPocket.add(person);
+//		objectPocket.store();
+//		objectPocket.load();
+//		Collection<Person> persons = objectPocket.findAll(Person.class);
+//		Collection<Address> addresses = objectPocket.findAll(Address.class);
 //		assertTrue(persons.size() == 1);
 //		assertTrue(addresses.size() == 1);
 //		Person foundPerson = persons.iterator().next();
 //		Address foundAddress = addresses.iterator().next();
 //		assertTrue(foundAddress.getInhabitant().equals(foundPerson));
 //		assertTrue(foundPerson.getAddress().equals(foundAddress));
-	}
-	
-	@Test
-	public void testInnerClass() throws Exception {
-//		Japer japer = new JaperFactory().createMemoryJaper();
-//		OuterClass outerClass = new OuterClass();
-//		InnerClass referenceToInnerClass = outerClass.getReferenceToInnerClass();
-//		japer.add(outerClass);
-//		japer.persist();
-//		japer.load();
-//		OuterClass find = japer.find(outerClass.getId(), OuterClass.class);
-//		assertTrue(outerClass.getId().equals(find.getId()));
-//		assertTrue(referenceToInnerClass.getId().equals(find.getReferenceToInnerClass().getId()));
-	}
-	
-	@Test
-	public void testRemove() throws Exception {
-//		Japer japer = new JaperFactory().createMemoryJaper();
-//		SimpleBean simpleBean = new SimpleBean();
-//		simpleBean.setName("simple bean");
-//		japer.add(simpleBean);
-//		japer.persist();
-//		japer.load();
-//		Collection<SimpleBean> findAll = japer.findAll(SimpleBean.class);
-//		assertTrue(findAll.size() == 1);
-//		SimpleBean find = findAll.iterator().next();
-//		assertTrue(find.getId().equals(simpleBean.getId()));
-//		japer.remove(simpleBean);
-//		assertTrue(japer.findAll(SimpleBean.class).size() == 0);
-//		japer.persist();
-//		assertTrue(japer.findAll(SimpleBean.class).size() == 0);
-//		japer.load();
-//		assertTrue(japer.findAll(SimpleBean.class).size() == 0);
 	}
 	
 	public class SimpleBean {
@@ -203,9 +215,17 @@ public class ObjectPocketTestSimple {
 	}
 	
 	public class OuterClass {
+		private String id;
 		private InnerClass referenceToInnerClass;
 		public OuterClass() {
 			referenceToInnerClass = new InnerClass();
+			referenceToInnerClass.setId(UUID.randomUUID().toString());
+		}
+		public String getId() {
+			return id;
+		}
+		public void setId(String id) {
+			this.id = id;
 		}
 		public InnerClass getReferenceToInnerClass() {
 			return referenceToInnerClass;
@@ -214,7 +234,13 @@ public class ObjectPocketTestSimple {
 			this.referenceToInnerClass = referenceToInnerClass;
 		}
 		public class InnerClass {
-			
+			private String id;
+			public String getId() {
+				return id;
+			}
+			public void setId(String id) {
+				this.id = id;
+			}
 		}
 	}
 
