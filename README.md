@@ -2,13 +2,13 @@
 ### What is it?
 ObjectPocket is a simple store/load library for plain Java objects. It serializes Java objects to JSON. The serialized objects are still human readable and modifiable by hand or other tools.
 
-### What to use for?
+### What to use it for?
 Generally you can use it for every kind of object store/load task. Some very handy use cases are listed below.
 
-##### Configuration
-Use ObjectPocket to handle your configuration. You will never have to use `Integer.parseInt()` again!
+#### Use Case: Configuration
+Use ObjectPocket to handle your configuration. You will never have to use `Integer.parseInt()` and `Boolean.parseBoolean()` again, to load a configuration!
 ```
-public class Configuration {
+class Configuration {
     private String host;
     private int port;
     private boolean autoconnect = true;
@@ -26,7 +26,7 @@ The resulting file will look like:
 ```
 You can even edit the result by hand and load it into your application. It's plain JSON.
 
-##### User Management
+#### Use Case: User Management
 Use ObjectPocket to easily handle your user data. ObjectPocket loads and stores all of its data at once. There is no database like access to the files on disk. Nevertheless it's very fast in doing that. A dataset of around 100.000 objects needs around 1 second to load and 1 second to store on a standard developer machine. Most of the time you won't have to worry about the performance.
 ```
 class User {
@@ -61,6 +61,28 @@ The resulting file will look like:
   }
 }
 ```
+
+#### Use Case: Window State
+Did you always wanted to save the last state of your application's window when closing the application? And the position and size of the window. To restore the state when starting the application again?
+```
+class WindowState {
+	private Point position;
+	private Dimension dimension;
+	private int State;
+}
+
+WindowState windowState = new WindowState();
+// fill windowState with values and store
+...
+ObjectPocket objectPocket = new ObjectPocketBuilder().createFileObjectPocket("config");
+objectPocket.add(windowState);
+objectPocket.store();
+
+// load last window state
+objectPocket.load();
+WindowState windowState = objectPocket.findAll(WindowState.class).iterator().next();
+```
+
 
 ### How to use it
 You can store/load just every Java object you want. There are no prerequisites like constructors, getters/setters, Annotations, Interfaces, ... ObjectPocket also support inheritance. It will store the superclass fields for you if you extend a class. 
