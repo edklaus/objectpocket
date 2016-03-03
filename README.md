@@ -1,18 +1,5 @@
 # ObjectPocket
 
-### Library Download
-The current build is availabe at The Central Repository.
-#### Maven
-```
-<dependency>
-  <groupId>org.objectpocket</groupId>
-  <artifactId>objectpocket</artifactId>
-  <version>0.0.3</version>
-</dependency>
-```
-#### Direct Download
-http://repo1.maven.org/maven2/org/objectpocket/objectpocket/0.0.3/
-
 ### What is it?
 ObjectPocket is a simple store/load library for plain Java objects. It serializes Java objects to JSON. The serialized objects are still human readable and modifiable by hand or other tools.
 
@@ -133,6 +120,19 @@ Result:
  
 * ObjectPocket creates a new file "filename" in "directory". This is where the MyClass objects will go now, instead of "org.package.MyClass"
 * When loading the data, ObjectPocket will automatically detect in which files the different object types have been stored. This is where ".op_index" helps.
+
+### Download
+The latest build is availabe at The Central Repository.
+#### Maven
+```
+<dependency>
+  <groupId>org.objectpocket</groupId>
+  <artifactId>objectpocket</artifactId>
+  <version>0.0.3</version>
+</dependency>
+```
+#### Direct Download
+http://repo1.maven.org/maven2/org/objectpocket/objectpocket/0.0.3/
 
 ### Version
 Experimental stage. 
