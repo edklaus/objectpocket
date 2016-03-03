@@ -123,7 +123,7 @@ Result:
 
 ### Version
 Experimental stage. 
-current version: 0.0.2
+current version: 0.0.3
 
 ### Tech
 ObjectPocket uses the Gson library to convert Java objects to JSON. https://github.com/google/gson
