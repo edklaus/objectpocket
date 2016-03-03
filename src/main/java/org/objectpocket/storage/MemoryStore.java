@@ -18,6 +18,7 @@ package org.objectpocket.storage;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,11 +57,15 @@ public class MemoryStore implements ObjectStore {
 	}
 
 	@Override
-	public void writeJsonObjects(Set<String> jsonObjects, String typeName) {
+	public void writeJsonObjects(Map<String, Set<String>> jsonObjects, String typeName) {
 		if (jsonObjects == null || jsonObjects.isEmpty()) {
 			jsonObjectMap.remove(typeName);
 		}
-		jsonObjectMap.put(typeName, jsonObjects);
+		Set<String> allObjects = new HashSet<String>();
+		for (String key : jsonObjects.keySet()) {
+			allObjects.addAll(jsonObjects.get(key));
+		}
+		jsonObjectMap.put(typeName, allObjects);
 	}
 
 	@Override

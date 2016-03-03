@@ -1,12 +1,14 @@
 ## Bugs ##
 
 ## TODO ##
-- @Pocket annotation
+- setFilename für
+  - Objekttypen
 - usage und Anwendungsfälle
   - Doku auf github
 - complex referencing
 - blob support
 - Benchmark erstellen und Zielgruppe von Projekten definieren (Anwendungsfälle)
+- Wie löschen??
 
 
 ### Wofür @Id?

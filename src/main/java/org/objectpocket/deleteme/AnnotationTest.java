@@ -20,7 +20,6 @@ import java.lang.reflect.Field;
 
 import org.objectpocket.annotations.Entity;
 import org.objectpocket.annotations.Id;
-import org.objectpocket.annotations.Pocket;
 
 /**
  * 
@@ -29,7 +28,6 @@ import org.objectpocket.annotations.Pocket;
  */
 public class AnnotationTest {
 	
-	@Pocket(name="myfilename")
 	@Entity
 	class Person {
 		@Id
@@ -37,12 +35,6 @@ public class AnnotationTest {
 	}
 	
 	public AnnotationTest() {
-		
-		if (Person.class.isAnnotationPresent(Pocket.class)) {
-			System.out.println("Class " + Person.class.getName() + " has annotation " + 
-					Pocket.class.getName() + " with value \"" + 
-					Person.class.getAnnotation(Pocket.class).name() + "\"");
-		}
 		
 		if (Person.class.isAnnotationPresent(Entity.class)) {
 			System.out.println("Class " + Person.class.getName() + " has annotation " + 

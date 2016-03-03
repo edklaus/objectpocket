@@ -54,6 +54,8 @@ public class ObjectPocketImpl implements ObjectPocket{
 	// this extra map is necessary for faster lookup of already traced objects
 	// objectMap.values.values is too slow for a proper lookup
 	private Set<Object> tracedObjects = new HashSet<Object>();
+	// holds specific filenames for objects, set by the user
+	private Map<Object, String> objectFilenames = new HashMap<Object, String>();
 
 	public ObjectPocketImpl(ObjectStore objectStore) {
 		this.objectStore = objectStore;
@@ -83,6 +85,16 @@ public class ObjectPocketImpl implements ObjectPocket{
 //			obj.getOwningInstance().add(obj);
 //		}
 	}
+	
+	@Override
+	public void add(Object obj, String filename) {
+		// TODO: validate filename to not be something like /home... or C:/...
+		// throw exception in that case?
+		this.add(obj);
+		if (tracedObjects.contains(obj)) {
+			objectFilenames.put(obj, filename);
+		}
+	}
 
 	@Override
 	public void store() throws ObjectPocketException {
@@ -105,15 +117,23 @@ public class ObjectPocketImpl implements ObjectPocket{
 			if (map.values() == null) {
 				return;
 			}
-			Set<String> jsonStrings = new HashSet<String>(map.values().size());
+			Map<String, Set<String>> jsonStrings = new HashMap<String, Set<String>>(map.values().size());
 			String jsonString = null;
+			String filename = typeName;
 			for (String id : map.keySet()) {
 				// TODO: Is this necessary any more?
 //				if (!identifiable.isProxy()) {
 //					identifiable.serializeAsRoot = true;
-					jsonString = gson.toJson(map.get(id));
+					Object object = map.get(id);
+					jsonString = gson.toJson(object);
 					jsonString = JsonHelper.addClassAndIdToJson(jsonString, typeName, id, prettyPrinting);
-					jsonStrings.add(jsonString);
+					if (objectFilenames.get(object) != null) {
+						filename = objectFilenames.get(object);
+					}
+					if (jsonStrings.get(filename) == null) {
+						jsonStrings.put(filename, new HashSet<String>());
+					}
+					jsonStrings.get(filename).add(jsonString);
 //				}
 			}
 			try {
@@ -231,6 +251,11 @@ public class ObjectPocketImpl implements ObjectPocket{
 	public void link(ObjectPocket objectPocket) {
 		throw new UnsupportedOperationException();
 		
+	}
+	
+	@Override
+	public void setDefaultFilename(Class<?> type, String filename) {
+		throw new UnsupportedOperationException();
 	}
 	
 	private void loadObjectsFromJsonStrings(String typeName) throws ClassNotFoundException, IOException {

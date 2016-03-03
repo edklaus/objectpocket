@@ -65,6 +65,19 @@ public interface ObjectPocket {
 	public void add(Object obj);
 	
 	/**
+	 * Behaves like {@link #add(Object)}</br></br>
+	 * In addition you can pass a filename that defines in what file the object will be stored.</br>
+	 * This is useful when you store a configuration file that you also want to edit by hand from
+	 * time to time.</br></br>
+	 * You should be aware that when the given object is inside the ObjectPocket persistence context already,
+	 * the call of this method will set/change the filename for this object.
+	 * 
+	 * @param obj
+	 * @param filename where to store the object, the file will be created inside the object store of your choice
+	 */
+	public void add(Object obj, String filename);
+	
+	/**
 	 * Persist all objects inside the ObjectPocket persistence context to an object store.
 	 * @throws ObjectPocketException If store operation fails
 	 */
@@ -153,5 +166,18 @@ public interface ObjectPocket {
 	 * @param objectPocket
 	 */
 	public void link(ObjectPocket objectPocket);
+	
+	/**
+	 * 
+	 * You can pass a filename that defines in what file the objects of the given type will be stored.</br>
+	 * This will override the default behavior of creating the filename from the fully qualified class name.</br>
+	 * You should also be aware that using {@link #add(Object, String)} will override the filename setting for the
+	 * given object.
+	 * 
+	 * @param type
+	 * @param filename filename where to store the objects of the given type, 
+	 *   the file will be created inside the object store of your choice
+	 */
+	public void setDefaultFilename(Class<?> type, String filename);
 
 }

@@ -45,13 +45,13 @@ public interface ObjectStore extends BlobStore {
 	
 	/**
 	 * Writes json objects of given typeName to the object store.
-	 * @param jsonObjects json objects as strings.
-	 *   If null or an empty Set is passed as argument the type will be removed
+	 * @param jsonObjects json objects as strings, sorted by filenames.
+	 *   If null or an empty Map is passed as argument the type will be removed
 	 *   and will not be available anymore.
 	 * @param typeName fully qualified class name
 	 * @throws IOException If an I/O error occurs
 	 */
-	public void writeJsonObjects(Set<String> jsonObjects, String typeName) throws IOException;
+	public void writeJsonObjects(Map<String, Set<String>> jsonObjects, String typeName) throws IOException;
 	
 	/**
 	 * Returns the source where data is loaded from.

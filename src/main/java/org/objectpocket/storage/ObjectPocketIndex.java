@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package org.objectpocket.annotations;
+package org.objectpocket.storage;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * 
- * Define name of the pocket the object data will be stored in.
  * 
  * @author Edmund Klaus
  *
  */
-@Documented
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Pocket {
-	String name();
+public class ObjectPocketIndex {
+	
+	private Map<String, Set<String>> typeToFilenamesMapping = new HashMap<String, Set<String>>();
+
+	protected Map<String, Set<String>> getTypeToFilenamesMapping() {
+		return typeToFilenamesMapping;
+	}
+	
 }
