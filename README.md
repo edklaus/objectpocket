@@ -1,10 +1,71 @@
 # ObjectPocket
+### What is it?
 ObjectPocket is a simple store/load library for plain Java objects. It serializes Java objects to JSON. The serialized objects are still human readable and modifiable by hand or other tools.
 
-### Usage
+### What to use for?
+Generally you can use it for every kind of object store/load task. Some very handy use cases are listed below.
+
+##### Configuration
+Use ObjectPocket to handle your configuration. You will never have to use `Integer.parseInt()` again!
+```
+public class Configuration {
+    private String host;
+    private int port;
+    private boolean autoconnect = true;
+}
+```
+The resulting file will look like:
+```
+{
+  "op_class": "org.package.Configuration",
+  "op_id": "cdd4b552-4484-471a-a52f-6a66ee28e6d4",
+  "host": "localhost",
+  "port": 12345,
+  "autoconnect": true
+}
+```
+You can even edit the result by hand and load it into your application. It's plain JSON.
+
+##### User Management
+Use ObjectPocket to easily handle your user data. ObjectPocket loads and stores all of its data at once. There is no database like access to the files on disk. Nevertheless it's very fast in doing that. A dataset of around 100.000 objects needs around 1 second to load and 1 second to store on a standard developer machine. Most of the time you won't have to worry about the performance.
+```
+class User {
+    private String name = "username";
+    private Date birthdate = new Date();
+    private Address address;
+    public void setAddress(Address address) {
+		this.address = address;
+	}
+}
+class Address {
+	private String country;
+	private int postalCode;
+	public void setCountry(String country) {
+		this.country = country;
+	}
+	public void setPostalCode(int postalCode) {
+		this.postalCode = postalCode;
+	}
+}
+```
+The resulting file will look like:
+```
+{
+  "op_class": "org.package.User",
+  "op_id": "2c8c5270-caac-441c-94d6-3942c8a182af",
+  "name": "username",
+  "birthdate": "Mar 3, 2016 3:09:27 PM",
+  "address": {
+    "country": "Thailand",
+    "postalCode": 123456
+  }
+}
+```
+
+### How to use it
 You can store/load just every Java object you want. There are no prerequisites like constructors, getters/setters, Annotations, Interfaces, ... ObjectPocket also support inheritance. It will store the superclass fields for you if you extend a class. 
 
-#### Store
+#### Store Objects
 ```
 MyClass obj = new MyClass();
 ObjectPocket objectPocket = new ObjectPocketBuilder().createFileObjectPocket("directory");
@@ -18,14 +79,14 @@ Result:
 * It also creates a file named ".op_index".
 * If "directory" does not exist, ObjectPocket automatically creates it 
 
-#### Load
+#### Load Objects
 ```
 ObjectPocket objectPocket = new ObjectPocketBuilder().createFileObjectPocket("directory");
 objectPocket.load();
 MyClass obj = objectPocket.findAll(MyClass.class).iterator().next();
 ```
 
-#### Storing objects in specific files
+#### Store Objects in specific files
 You can pass a filename along with an object to store that object in the given file.
 ```
 ...
