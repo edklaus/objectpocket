@@ -28,6 +28,7 @@ public class JsonHelper {
 
 	// FIXME: make this maximum fast!
 	public static String addClassAndIdToJson(String jsonString, String typeName, String id, boolean prettyPrinting) {
+		System.out.println(jsonString);
 		String classAndIdString = "";
 		if (prettyPrinting) {
 			classAndIdString = "{\n  \"" + CLASS + "\": \"" + typeName + "\","
