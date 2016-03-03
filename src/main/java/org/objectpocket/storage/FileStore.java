@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.objectpocket.Blob;
 import org.objectpocket.util.JsonHelper;
@@ -52,25 +53,8 @@ public class FileStore implements ObjectStore {
 
 	@Override
 	public Set<String> getAvailableObjectTypes() throws IOException {
-		objectPocketIndex = null;
 		readIndexFile();
-		if (objectPocketIndex == null) {
-			// this is a fallback in case of index does not exists in directory
-			File dir = initFileStore();
-			File[] list = dir.listFiles();
-			if (list != null && list.length > 0) {
-				Set<String> set = new HashSet<String>(list.length);
-				for (File file : list) {
-					if (!file.isDirectory()) {
-						set.add(file.getName());
-					}
-				}
-				return set;
-			}
-		} else {
-			return objectPocketIndex.getTypeToFilenamesMapping().keySet();
-		}
-		return null;
+		return objectPocketIndex.getTypeToFilenamesMapping().keySet();
 	}
 
 	@Override
@@ -192,6 +176,10 @@ public class FileStore implements ObjectStore {
 		if (!f.exists()) {
 			try {
 				f.createNewFile();
+				if (typeName.equals(INDEX_FILE_NAME)) {
+					Logger.getAnonymousLogger().warning("Could not find index file. Will create.");
+					writeIndexFileData(f);
+				}
 			} catch (IOException e) {
 				throw new IOException("File could not be created. " + filename, e);
 			}
@@ -207,20 +195,14 @@ public class FileStore implements ObjectStore {
 
 	private File initFileStore() throws IOException {
 		File dir = new File(directory);
-		boolean justCreated = false;
 		if (!dir.exists()) {
 			dir.mkdirs();
-			justCreated = true;
 		}
 		if (!dir.exists()) {
 			throw new IOException("File store does not exist. " + directory);
 		}
 		if (!dir.isDirectory()) {
 			throw new IOException("File store is not a directory. " + directory);
-		}
-		if (justCreated) {
-			// create initial index
-			writeIndexFile();
 		}
 		return dir;
 	}
@@ -267,6 +249,10 @@ public class FileStore implements ObjectStore {
 	
 	private void writeIndexFile() throws IOException {
 		File file = initFile(INDEX_FILE_NAME, true, false);
+		writeIndexFileData(file);
+	}
+	
+	private void writeIndexFileData(File file) throws IOException {
 		try (FileWriter fw = new FileWriter(file)) {
 			Gson gson = new Gson();
 			String jsonString = gson.toJson(objectPocketIndex);
