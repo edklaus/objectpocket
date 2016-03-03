@@ -1,12 +1,12 @@
 # ObjectPocket
 
-### What is it?
+## What is it?
 ObjectPocket is a simple store/load library for plain Java objects. It serializes Java objects to JSON. The serialized objects are still human readable and modifiable by hand or other tools.
 
-### What to use it for?
+## What to use it for?
 Generally you can use it for every kind of object store/load task. Some very handy use cases are listed below.
 
-#### Use Case: Configuration
+### Use Case: Configuration
 Use ObjectPocket to handle your configuration. You will never have to use `Integer.parseInt()` and `Boolean.parseBoolean()` again, to load a configuration!
 ```
 class Configuration {
@@ -27,7 +27,7 @@ The resulting file will look like:
 ```
 You can even edit the result by hand and load it into your application. It's plain JSON.
 
-#### Use Case: User Management
+### Use Case: User Management
 Use ObjectPocket to easily handle your user data. ObjectPocket loads and stores all of its data at once. There is no database like access to the files on disk. Nevertheless it's very fast in doing that. A dataset of around 100.000 objects needs around 1 second to load and 1 second to store on a standard developer machine. Most of the time you won't have to worry about the performance.
 ```
 class User {
@@ -63,7 +63,7 @@ The resulting file will look like:
 }
 ```
 
-#### Use Case: Window State
+### Use Case: Window State
 Did you always wanted to save the last state of your application's window when closing the application? And the position and size of the window. To restore the state when starting the application again?
 ```
 class WindowState {
@@ -85,10 +85,10 @@ WindowState windowState = objectPocket.findAll(WindowState.class).iterator().nex
 ```
 
 
-### How to use it
+## How to use it
 You can store/load just every Java object you want. There are no prerequisites like constructors, getters/setters, Annotations, Interfaces, ... ObjectPocket also support inheritance. It will store the superclass fields for you if you extend a class. 
 
-#### Store Objects
+### Store Objects
 ```
 MyClass obj = new MyClass();
 ObjectPocket objectPocket = new ObjectPocketBuilder().createFileObjectPocket("directory");
@@ -102,14 +102,14 @@ Result:
 * It also creates a file named ".op_index".
 * If "directory" does not exist, ObjectPocket automatically creates it 
 
-#### Load Objects
+### Load Objects
 ```
 ObjectPocket objectPocket = new ObjectPocketBuilder().createFileObjectPocket("directory");
 objectPocket.load();
 MyClass obj = objectPocket.findAll(MyClass.class).iterator().next();
 ```
 
-#### Store Objects in specific files
+### Store Objects in specific files
 You can pass a filename along with an object to store that object in the given file.
 ```
 ...
@@ -121,9 +121,10 @@ Result:
 * ObjectPocket creates a new file "filename" in "directory". This is where the MyClass objects will go now, instead of "org.package.MyClass"
 * When loading the data, ObjectPocket will automatically detect in which files the different object types have been stored. This is where ".op_index" helps.
 
-### Download
+## Download
 The latest build is availabe at The Central Repository.
-#### Maven
+
+### Maven
 ```
 <dependency>
   <groupId>org.objectpocket</groupId>
@@ -131,15 +132,16 @@ The latest build is availabe at The Central Repository.
   <version>0.0.3</version>
 </dependency>
 ```
-#### Direct Download
+
+### Direct Download
 http://repo1.maven.org/maven2/org/objectpocket/objectpocket/0.0.3/
 
-### Version
+## Version
 Experimental stage. 
 current version: 0.0.3
 
-### Tech
+## Tech
 ObjectPocket uses the Gson library to convert Java objects to JSON. https://github.com/google/gson
 
-### License
+## License
 ObjectPocket is released under the [Apache 2.0 license](LICENSE).

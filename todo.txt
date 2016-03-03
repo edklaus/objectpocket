@@ -57,3 +57,7 @@
 - Adapters for MongoDB/ElasticSearch
 - options for serialization exclusion (transient/static/...)
 - extend find() operations to all available fields (like using SQL queries)
+- add comments to json files. handy for handling configurations.
+  - strip comments out automatically on load
+  - add again on store
+  - why JSON has no comments: http://stackoverflow.com/questions/244777/can-i-use-comments-inside-a-json-file
