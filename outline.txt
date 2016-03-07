@@ -1,5 +1,4 @@
 ### Verbesserungsideen
-- alle JSON-Strings einer Datei sollten innerhalb eines JSON Objektes gespeichert werden "Speicherobjekt"
 - index beibehalten
   - Fallback:
     - Dateien mit .json Endung scannen

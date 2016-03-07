@@ -25,10 +25,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.objectpocket.Blob;
 import org.objectpocket.util.JsonHelper;
 
@@ -41,6 +45,11 @@ import com.google.gson.Gson;
  */
 public class FileStore implements ObjectStore {
 
+	private static final String JSON_PREFIX = "{\"objects\":[";
+	private static final String JSON_PREFIX_REGEX_PATTERN = "\\{\\s*\"objects\"\\s*:\\s*\\[";
+	private static final String JSON_SUFFIX = "]}";
+	private static final String JSON_SUFFIX_REGEX_PATTERN_REVERSED = "\\s*\\}\\s*\\]";
+	
 	private String directory;
 	private static final String BLOB_STORE_DIRNAME = "blobstore";
 	
@@ -76,7 +85,11 @@ public class FileStore implements ObjectStore {
 					}
 				}
 				String s = objectBuffer.toString();
-				String[] jsonStrings = s.split("\\}\n*\\{");
+				s = s.replaceFirst(JSON_PREFIX_REGEX_PATTERN, "");
+				s = StringUtils.reverse(s);
+				s = s.replaceFirst(JSON_SUFFIX_REGEX_PATTERN_REVERSED, "");
+				s = StringUtils.reverse(s);
+				String[] jsonStrings = s.split("\\}\\s*,\\s*\\{");
 				for (int i = 0; i < jsonStrings.length; i++) {
 					String jsonString = jsonStrings[i];
 					if (i > 0) {
@@ -104,9 +117,17 @@ public class FileStore implements ObjectStore {
 			File file = initFile(filename, true, true);
 			try (FileWriter fw = new FileWriter(file)) {
 				addToIndex(typeName, filename);
-				for (String string : jsonObjects.get(filename)) {
-					fw.write(string + "\n");
+				fw.write(JSON_PREFIX + "\n");
+				Set<String> objectSet = jsonObjects.get(filename);
+				Iterator<String> iterator = objectSet.iterator();
+				while(iterator.hasNext()) {
+					fw.write(iterator.next());
+					if (iterator.hasNext()) {
+						fw.write(",");
+					}
+					fw.write("\n");
 				}
+				fw.write(JSON_SUFFIX);
 			} catch (IOException e) {
 				throw new IOException("Could not write to file. " + file.getPath(), e);
 			}
