@@ -27,6 +27,8 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.objectpocket.exception.ObjectPocketException;
+import org.objectpocket.gson.CustomTypeAdapterFactory;
+import org.objectpocket.references.ReferenceSupport;
 import org.objectpocket.storage.BlobStore;
 import org.objectpocket.storage.ObjectStore;
 import org.objectpocket.util.JsonHelper;
@@ -51,11 +53,20 @@ public class ObjectPocketImpl implements ObjectPocket{
 	
 	// <typeName:<id,object>>
 	private Map<String, Map<String, Object>> objectMap = new HashMap<String, Map<String, Object>>();
-	// this extra map is necessary for faster lookup of already traced objects
+	
+	// this extra map<object,id> is necessary for faster lookup of already traced objects
 	// objectMap.values.values is too slow for a proper lookup
-	private Set<Object> tracedObjects = new HashSet<Object>();
+	private Map<Object, String> tracedObjects = new HashMap<Object, String>();
+	
+	private Set<Object> serializeAsRoot;
+	
 	// holds specific filenames for objects, set by the user
 	private Map<Object, String> objectFilenames = new HashMap<Object, String>();
+	
+	// support for complex referencing
+	private Set<ReferenceSupport> referenceSupportSet = new HashSet<ReferenceSupport>();
+	
+	private Map<Object, String> idsFromReadObjects = new HashMap<Object, String>();
 
 	public ObjectPocketImpl(ObjectStore objectStore) {
 		this.objectStore = objectStore;
@@ -73,14 +84,15 @@ public class ObjectPocketImpl implements ObjectPocket{
 				objectMap.put(typeName, new HashMap<String, Object>());
 			}
 			Map<String, Object> map = objectMap.get(typeName);
-			if (!tracedObjects.contains(obj)) {
-				tracedObjects.add(obj);
+			if (!tracedObjects.containsKey(obj)) {
 				// TODO: check if @Id has been set before generating ID
 				// custom ID might change at runtime!! Is this a problem?
-				map.put(UUID.randomUUID().toString(), obj);
+				String objectId = UUID.randomUUID().toString();
+				tracedObjects.put(obj, objectId);
+				map.put(objectId, obj);
 			}
 			// add references
-			//addReferences(obj);
+			addReferences(obj);
 //		} else {
 //			obj.getOwningInstance().add(obj);
 //		}
@@ -91,25 +103,45 @@ public class ObjectPocketImpl implements ObjectPocket{
 		// TODO: validate filename to not be something like /home... or C:/...
 		// throw exception in that case?
 		this.add(obj);
-		if (tracedObjects.contains(obj)) {
+		if (tracedObjects.containsKey(obj)) {
 			objectFilenames.put(obj, filename);
+		}
+	}
+	
+	private void addReferences(Object obj) {
+		for (ReferenceSupport referenceSupport : referenceSupportSet) {
+			Set<Object> references = referenceSupport.getReferences(obj);
+			if (references != null) {
+				for (Object reference : references) {
+					// this supports cyclic references between objects
+					if (reference != null) {
+//						if (objectMap.get(reference.getClass().getTypeName()) == null || 
+//								!objectMap.get(reference.getClass().getTypeName()).containsKey(reference.getId())) {
+						if (!tracedObjects.containsKey(reference)) {
+							add(reference);
+						}
+//						}
+					}
+				}
+			}
 		}
 	}
 
 	@Override
 	public void store() throws ObjectPocketException {
 		long time = System.currentTimeMillis();
+		serializeAsRoot = new HashSet<Object>();
 		// rescan for references
-//		for (String typeName : objectMap.keySet()) {
-//			Map<String, Identifiable> map = objectMap.get(typeName);
-//			if (map.values() != null) {
-//				for (Identifiable obj : map.values()) {
-//					addReferences(obj);
-//				}
-//			}
-//		}
+		for (String typeName : objectMap.keySet()) {
+			Map<String, Object> map = objectMap.get(typeName);
+			if (map.values() != null) {
+				for (Object obj : map.values()) {
+					addReferences(obj);
+				}
+			}
+		}
 
-		// go through all types that have been add to Japer
+		// go through all types that have been add to ObjectPocket
 		Gson gson = configureGson();
 		for (String typeName : objectMap.keySet()) {
 			// store objects
@@ -125,6 +157,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 //				if (!identifiable.isProxy()) {
 //					identifiable.serializeAsRoot = true;
 					Object object = map.get(id);
+					serializeAsRoot.add(object);
 					jsonString = gson.toJson(object);
 					jsonString = JsonHelper.addClassAndIdToJson(jsonString, typeName, id, prettyPrinting);
 					if (objectFilenames.get(object) != null) {
@@ -170,6 +203,8 @@ public class ObjectPocketImpl implements ObjectPocket{
 	public void load() throws ObjectPocketException {
 		loading = true;
 		long timeAll = System.currentTimeMillis();
+		
+		idsFromReadObjects.clear();
 
 		/**
 		 * get all available object types
@@ -196,7 +231,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 			}
 		}
 
-		//injectReferences();
+		injectReferences();
 
 		Logger.getAnonymousLogger().info("Loaded all objects fomr " + objectStore.getSource() + 
 				" in " + (System.currentTimeMillis()-timeAll) + " ms.");
@@ -269,7 +304,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 		Map<String, String> jsonObjects = objectStore.readJsonObjects(typeName);
 		if (jsonObjects != null && !jsonObjects.isEmpty()) {
 			HashMap<String, Object> map = new HashMap<String, Object>();
-			objectMap.put(clazz.getName(), map);
+			objectMap.put(typeName, map);
 			Gson gson = configureGson();
 			for (String id : jsonObjects.keySet()) {
 				Object object = gson.fromJson(jsonObjects.get(id), clazz);
@@ -281,12 +316,47 @@ public class ObjectPocketImpl implements ObjectPocket{
 				//						((Blob)object).setBlobStore(blobStore);
 				//					}
 
-				objectMap.get(clazz.getName()).put(id, object);
+				objectMap.get(typeName).put(id, object);
 				counter++;
 			}
 		}
 		Logger.getAnonymousLogger().info("Loaded " + counter + " objects of type\n  "
 				+ clazz.getName() + " in " + (System.currentTimeMillis()-time) + " ms");
+	}
+	
+	private void injectReferences() {
+		// get property descriptors for types (ReferenceDetector)
+		// go through propyrtDescriptors
+		long time = System.currentTimeMillis();
+		for (ReferenceSupport referenceSupport : referenceSupportSet) {
+			Map<String, Map<String, Object>> globalMap = new HashMap<String, Map<String, Object>>(objectMap);
+			// TODO: extends to more instances
+//			for (JaperImpl japer : otherJapers) {
+//				amendMap(globalMap, japer.objectMap);
+//			}
+			for(String typeName : globalMap.keySet()) {
+				Collection<Object> values = globalMap.get(typeName).values();
+				for (Object object : values) {
+					referenceSupport.injectReferences(object, globalMap, idsFromReadObjects);
+				}
+			}
+		}
+		Logger.getAnonymousLogger().info("Injection took " + (System.currentTimeMillis()-time) + " ms");
+	}
+	
+	private void amendMap(Map<String, Map<String, Object>> dest, Map<String, Map<String, Object>> source) {
+		for (String key : source.keySet()) {
+			if (dest.get(key) != null) {
+				Map<String, Object> map = dest.get(key);
+				map.putAll(source.get(key));
+			} else {
+				dest.put(key, source.get(key));
+			}
+		}
+	}
+	
+	public void addIdFromReadObject(Object obj, String id) {
+		idsFromReadObjects.put(obj, id);
 	}
 	
 	private Gson configureGson() {
@@ -296,8 +366,8 @@ public class ObjectPocketImpl implements ObjectPocket{
 			gsonBuilder.serializeNulls();
 		}
 		
-		// TODO: Find out if this is needed any more 
-		//gsonBuilder.registerTypeAdapterFactory(new CustomTypeAdapterFactory());
+		// This is where the referencing entry magic happens
+		gsonBuilder.registerTypeAdapterFactory(new CustomTypeAdapterFactory(this));
 		
 		// add custom type adapters
 		for (Type type : typeAdapterMap.keySet()) {
@@ -326,6 +396,26 @@ public class ObjectPocketImpl implements ObjectPocket{
 
 	public void setBlobStore(BlobStore blobStore) {
 		this.blobStore = blobStore;
+	}
+	
+	public void addReferenceSupport(ReferenceSupport referenceSupport) {
+		referenceSupportSet.add(referenceSupport);
+	}
+	
+	public String getIdForObject(Object obj) {
+		return tracedObjects.get(obj);
+	}
+	
+	public boolean isSerializeAsRoot(Object obj) {
+		return serializeAsRoot.contains(obj);
+	}
+	
+	public void setSerializeAsRoot(Object obj, boolean val) {
+		if (val) {
+		serializeAsRoot.add(obj);
+		} else {
+			serializeAsRoot.remove(obj);
+		}
 	}
 	
 }

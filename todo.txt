@@ -1,10 +1,10 @@
 ## Bugs ##
+- Unbedingt mixed mode testen wegen CustomTypeadapterFactory!!
 
 ## TODO ##
+- JSON Ausgabe überarbeiten (s. outline)
 - setFilename für
   - Objekttypen
-- usage und Anwendungsfälle
-  - Doku auf github
 - complex referencing
 - blob support
 - Benchmark erstellen und Zielgruppe von Projekten definieren (Anwendungsfälle)

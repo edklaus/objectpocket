@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.objectpocket.references.SimpleReferenceSupport;
 import org.objectpocket.storage.BlobStore;
 import org.objectpocket.storage.FileStore;
 import org.objectpocket.storage.MemoryStore;
@@ -72,10 +73,7 @@ public class ObjectPocketBuilder {
 			return null;
 		}
 		ObjectPocketImpl objectPocketImpl = new ObjectPocketImpl(objectStore);
-		
-		// TODO: Is this still needed?
-		//addReferenceSupport(objectPocketImpl);
-		
+		addReferenceSupport(objectPocketImpl);
 		if (blobStore != null) {
 			objectPocketImpl.setBlobStore(blobStore);
 		} else {
@@ -120,6 +118,12 @@ public class ObjectPocketBuilder {
 			typeAdapterMap.put(type, new HashSet<Object>());
 		}
 		typeAdapterMap.get(type).add(typeAdapter);
+	}
+	
+	private void addReferenceSupport(ObjectPocketImpl objectPocketImpl) {
+		objectPocketImpl.addReferenceSupport(new SimpleReferenceSupport());
+//		objectPocketImpl.addReferenceSupport(new ArrayReferenceSupport());
+//		objectPocketImpl.addReferenceSupport(new CollectionReferenceSupport());
 	}
 
 }

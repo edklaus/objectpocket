@@ -1,3 +1,18 @@
+### Verbesserungsideen
+- alle JSON-Strings einer Datei sollten innerhalb eines JSON Objektes gespeichert werden "Speicherobjekt"
+- index beibehalten
+  - Fallback:
+    - Dateien mit .json Endung scannen
+    - eine 167MB groﬂe Datei mit 1Mio eintr‰ge braucht 2s um alle darin enthaltenen Typen herauszufinden
+    - 17MB und 100.000 Eintr‰ge kommen mit 269ms aus
+- JSON Dateien sollten mit .json enden
+- evtl. ist es interessant die erzeugten json dateien auf Standard-Konformit‰t zu validieren "http://jsonlint.com/"
+
+### Tr‰gerobjekte
+- Es macht sinn zu serialisierende Objekte in Tr‰gerobjekte zu packen in denen felder wie
+  - serializeAsRoot und id vorhanden sind
+  - anderenfalls muss man diese Infos in Listen halten
+
 ### ObjectPocket
 - use gson to convert Java object to JSON
 - store simple Java objects (no annotation, interface, extend), just POJO

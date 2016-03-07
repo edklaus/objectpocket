@@ -16,6 +16,7 @@
 
 package org.objectpocket.util;
 
+
 /**
  * 
  * @author Edmund Klaus
