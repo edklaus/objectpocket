@@ -172,6 +172,9 @@ public class FileStore implements ObjectStore {
 	private File initFile(String typeName, boolean read, boolean write) throws IOException {
 		File dir = initFileStore();
 		String filename = dir.getPath() + File.separatorChar + typeName;
+		if (!typeName.equals(INDEX_FILE_NAME)) {
+			filename += ".json";
+		}
 		File f = new File(filename);
 		if (!f.exists()) {
 			try {
