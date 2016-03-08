@@ -23,7 +23,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.objectpocket.Blob;
-import org.objectpocket.util.JsonHelper;
+import org.objectpocket.ProxyIn;
+
+import com.google.gson.Gson;
 
 /**
  * 
@@ -49,9 +51,10 @@ public class MemoryStore implements ObjectStore {
 	public Map<String,String> readJsonObjects(String typeName) {
 		Set<String> set = jsonObjectMap.get(typeName);
 		Map<String, String> jsonObjects = new HashMap<String, String>(set.size());
+		Gson gson = new Gson();
 		for (String string : set) {
-			String[] classAndIdFromJson = JsonHelper.getClassAndIdFromJson(string);
-			jsonObjects.put(classAndIdFromJson[1], string);
+			ProxyIn proxy = gson.fromJson(string, ProxyIn.class);
+			jsonObjects.put(proxy.getId(), string);
 		}
 		return jsonObjects;
 	}

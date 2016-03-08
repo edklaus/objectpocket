@@ -158,8 +158,8 @@ public class ObjectPocketImpl implements ObjectPocket{
 //					identifiable.serializeAsRoot = true;
 					Object object = map.get(id);
 					serializeAsRoot.add(object);
-					jsonString = gson.toJson(object);
-					jsonString = JsonHelper.addClassAndIdToJson(jsonString, typeName, id, prettyPrinting);
+					StringBuilder sb = new StringBuilder(gson.toJson(object));
+					jsonString = JsonHelper.addTypeAndIdToJson(sb, typeName, id, prettyPrinting);
 					if (objectFilenames.get(object) != null) {
 						filename = objectFilenames.get(object);
 					}

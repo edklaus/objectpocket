@@ -31,46 +31,39 @@ public class JsonHelper {
 	
 	public static final String TYPE = "op_type";
 	public static final String ID = "op_id";
-
-	// FIXME: make this maximum fast!
-	public static String addClassAndIdToJson(String jsonString, String typeName, String id, boolean prettyPrinting) {
-		String classAndIdString = "";
-		if (prettyPrinting) {
-			classAndIdString = "{\n  \"" + TYPE + "\": \"" + typeName + "\","
-							+ "\n  \"" + ID + "\": \"" + id + "\"";
-		} else {
-			classAndIdString = "{\"" + TYPE + "\":\"" + typeName + "\","
-					+ "\"" + ID + "\":\"" + id + "\"";
-		}
-		if (jsonString.trim().contains(":")) {
-			classAndIdString += ",";
-		}
-		jsonString = jsonString.replaceFirst("\\{", "");
-		jsonString = classAndIdString + jsonString;
-		return jsonString;
-	}
 	
-	// FIXME: make this maximum fast!
-	public static String[] getClassAndIdFromJson(String jsonString) {
-		String regex = "\"" + TYPE + "\":.*\"" + ID + "\":.*,";
-		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(jsonString);
-		if (matcher.find()) {
-			jsonString = jsonString.substring(matcher.start(), matcher.end());
+	public static String addTypeAndIdToJson(StringBuilder jsonString, String typeName, String id, boolean prettyPrinting) {
+		StringBuilder sb = new StringBuilder();
+		if (prettyPrinting) {
+			sb.append("{\n  \"");
+			sb.append(TYPE);
+			sb.append("\": \"");
+			sb.append(typeName);
+			sb.append("\",\n  \"");
+			sb.append(ID);
+			sb.append("\": \"");
+			sb.append(id);
+			sb.append("\"");
+		} else {
+			sb.append("\"");
+			sb.append(TYPE);
+			sb.append("\":\"");
+			sb.append(typeName);
+			sb.append("\",\"");
+			sb.append(ID);
+			sb.append("\":\"");
+			sb.append(id);
+			sb.append("\"");
 		}
-		String[] classAndId = new String[2];
-		String[] fields = jsonString.split(",");
-		// class
-		String[] classField = fields[0].split(":");
-		if (classField[0].contains(TYPE)) {
-			classAndId[0] = classField[1].trim().replaceAll("\"", "").replaceAll("\n", "");
+		if (jsonString.indexOf(":") > -1) {
+			sb.append(",");
 		}
-		// id
-		String[] idField = fields[1].split(":");
-		if (idField[0].contains(ID)) {
-			classAndId[1] = idField[1].trim().replaceAll("\"", "").replaceAll("\n", "");
+		int index = jsonString.indexOf("{");
+		if (index > -1) {
+			jsonString = jsonString.replace(0, index+1, "");
 		}
-		return classAndId;
+		sb.append(jsonString);
+		return sb.toString();
 	}
 	
 	public static List<String> splitToTopLevelJsonObjects(String s) {
