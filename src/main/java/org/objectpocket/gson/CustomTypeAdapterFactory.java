@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import org.objectpocket.ObjectPocketImpl;
-import org.objectpocket.Proxy;
+import org.objectpocket.ProxyOut;
 import org.objectpocket.annotations.Entity;
 import org.objectpocket.util.ReflectionUtil;
 
@@ -60,7 +60,7 @@ public class CustomTypeAdapterFactory implements TypeAdapterFactory {
 						String id = objectPocket.getIdForObject(obj);
 						// normalize
 						if (!objectPocket.isSerializeAsRoot(obj)) {
-							gson.toJson(new Proxy(obj.getClass().getTypeName(), id), Proxy.class, out);
+							gson.toJson(new ProxyOut(obj.getClass().getTypeName(), id), ProxyOut.class, out);
 							return;
 						} 
 						else {

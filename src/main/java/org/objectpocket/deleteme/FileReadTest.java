@@ -44,7 +44,7 @@ public class FileReadTest {
 		}
 		br.close();
 		String string = buf.toString();
-		Pattern pattern = Pattern.compile("\"op_class\":.+\\,");
+		Pattern pattern = Pattern.compile("\"op_type\":.+\\,");
 		Matcher matcher = pattern.matcher(string);
 		String group = "";
 		Set<String> classes = new HashSet<String>();

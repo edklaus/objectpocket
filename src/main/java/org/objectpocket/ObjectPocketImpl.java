@@ -316,7 +316,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 				//						((Blob)object).setBlobStore(blobStore);
 				//					}
 
-				objectMap.get(typeName).put(id, object);
+				map.put(id, object);
 				counter++;
 			}
 		}

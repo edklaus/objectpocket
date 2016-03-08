@@ -18,7 +18,7 @@ class Configuration {
 The resulting file will look like:
 ```
 {
-  "op_class": "org.package.Configuration",
+  "op_type": "org.package.Configuration",
   "op_id": "cdd4b552-4484-471a-a52f-6a66ee28e6d4",
   "host": "localhost",
   "port": 12345,
@@ -52,7 +52,7 @@ class Address {
 The resulting file will look like:
 ```
 {
-  "op_class": "org.package.User",
+  "op_type": "org.package.User",
   "op_id": "2c8c5270-caac-441c-94d6-3942c8a182af",
   "name": "username",
   "birthdate": "Mar 3, 2016 3:09:27 PM",

@@ -29,17 +29,17 @@ import java.util.regex.Pattern;
  */
 public class JsonHelper {
 	
-	public static final String CLASS = "op_class";
+	public static final String TYPE = "op_type";
 	public static final String ID = "op_id";
 
 	// FIXME: make this maximum fast!
 	public static String addClassAndIdToJson(String jsonString, String typeName, String id, boolean prettyPrinting) {
 		String classAndIdString = "";
 		if (prettyPrinting) {
-			classAndIdString = "{\n  \"" + CLASS + "\": \"" + typeName + "\","
+			classAndIdString = "{\n  \"" + TYPE + "\": \"" + typeName + "\","
 							+ "\n  \"" + ID + "\": \"" + id + "\"";
 		} else {
-			classAndIdString = "{\"" + CLASS + "\":\"" + typeName + "\","
+			classAndIdString = "{\"" + TYPE + "\":\"" + typeName + "\","
 					+ "\"" + ID + "\":\"" + id + "\"";
 		}
 		if (jsonString.trim().contains(":")) {
@@ -52,7 +52,7 @@ public class JsonHelper {
 	
 	// FIXME: make this maximum fast!
 	public static String[] getClassAndIdFromJson(String jsonString) {
-		String regex = "\"" + CLASS + "\":.*\"" + ID + "\":.*,";
+		String regex = "\"" + TYPE + "\":.*\"" + ID + "\":.*,";
 		Pattern pattern = Pattern.compile(regex);
 		Matcher matcher = pattern.matcher(jsonString);
 		if (matcher.find()) {
@@ -62,7 +62,7 @@ public class JsonHelper {
 		String[] fields = jsonString.split(",");
 		// class
 		String[] classField = fields[0].split(":");
-		if (classField[0].contains(CLASS)) {
+		if (classField[0].contains(TYPE)) {
 			classAndId[0] = classField[1].trim().replaceAll("\"", "").replaceAll("\n", "");
 		}
 		// id

@@ -31,8 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.StringUtils;
 import org.objectpocket.Blob;
+import org.objectpocket.ProxyIn;
 import org.objectpocket.util.JsonHelper;
 
 import com.google.gson.Gson;
@@ -45,13 +45,11 @@ import com.google.gson.Gson;
 public class FileStore implements ObjectStore {
 
 	private static final String JSON_PREFIX = "{\"objects\":[";
-	private static final String JSON_PREFIX_REGEX_PATTERN = "\\{\\s*\"objects\"\\s*:\\s*\\[";
 	private static final String JSON_SUFFIX = "]}";
-	private static final String JSON_SUFFIX_REGEX_PATTERN_REVERSED = "\\s*\\}\\s*\\]";
-	
+
 	private String directory;
 	private static final String BLOB_STORE_DIRNAME = "blobstore";
-	
+
 	private final String INDEX_FILE_NAME = ".op_index";
 	private ObjectPocketIndex objectPocketIndex = new ObjectPocketIndex();
 
@@ -73,34 +71,35 @@ public class FileStore implements ObjectStore {
 		Set<String> filenames = objectPocketIndex.getTypeToFilenamesMapping().get(typeName);
 		Map<String, String> objects = new HashMap<String, String>();
 		for (String filename : filenames) {
+			long time = System.currentTimeMillis();
 			File file = initFile(filename, true, false);
 			try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-				long time = System.currentTimeMillis();
 				String line = null;
-				StringBuffer objectBuffer = new StringBuffer();
+				StringBuilder stringBuilder = new StringBuilder();
 				while((line = br.readLine()) != null) {
-					line = line.trim();
-					if (!line.isEmpty()) {
-						objectBuffer.append(line);
-					}
+					stringBuilder.append(line);
 				}
-				String s = objectBuffer.toString();
-				//System.out.println(System.currentTimeMillis() - time);
-				s = s.replaceFirst(JSON_PREFIX_REGEX_PATTERN, "");
-				// TODO: this is maybe faster with regex?? \\]\\s*\\}\\s*
-				s = StringUtils.reverse(s);
-				s = s.replaceFirst(JSON_SUFFIX_REGEX_PATTERN_REVERSED, "");
-				s = StringUtils.reverse(s);
-				//System.out.println(System.currentTimeMillis() - time);
+				String s = null;
+				// remove first occurrence of "{", as this is the start of the container object
+				// all other object splitting will work with that!
+				int index = stringBuilder.indexOf("{");
+				if (index > -1) {
+					s = stringBuilder.substring(index+1, stringBuilder.length());
+				} else {
+					s = stringBuilder.toString();
+				}
+				//System.out.println(System.currentTimeMillis()-time);
 				List<String> jsonStrings = JsonHelper.splitToTopLevelJsonObjects(s);
-				//System.out.println(System.currentTimeMillis() - time);
+				//System.out.println(System.currentTimeMillis()-time);
+				Gson gson = new Gson();
 				for (int i = 0; i < jsonStrings.size(); i++) {
-					String[] classAndIdFromJson = JsonHelper.getClassAndIdFromJson(jsonStrings.get(i));
-					if (classAndIdFromJson[0].equals(typeName)) {
-						objects.put(classAndIdFromJson[1], jsonStrings.get(i));
+					// TODO: maybe there is more potential for optimization here!
+					ProxyIn proxy = gson.fromJson(jsonStrings.get(i), ProxyIn.class);
+					if (proxy.getType().equals(typeName)) {
+						objects.put(proxy.getId(), jsonStrings.get(i));
 					}
 				}
-				//System.out.println(System.currentTimeMillis() - time);
+				//System.out.println(System.currentTimeMillis()-time);
 			} catch (IOException e) {
 				throw new IOException("Could not read from file. " + file.getPath(), e);
 			}
@@ -242,14 +241,14 @@ public class FileStore implements ObjectStore {
 		}
 		return dir;
 	}
-	
+
 	private void addToIndex(String typeName, String filename) {
 		if (objectPocketIndex.getTypeToFilenamesMapping().get(typeName) == null) {
 			objectPocketIndex.getTypeToFilenamesMapping().put(typeName, new HashSet<String>());
 		}
 		objectPocketIndex.getTypeToFilenamesMapping().get(typeName).add(filename);
 	}
-	
+
 	private void readIndexFile() throws IOException {
 		File file = initFile(INDEX_FILE_NAME, true, false);
 		String line = null;
@@ -268,12 +267,12 @@ public class FileStore implements ObjectStore {
 		}
 		throw new IOException("Could not parse index file data to index object. " + file.getPath());
 	}
-	
+
 	private void writeIndexFile() throws IOException {
 		File file = initFile(INDEX_FILE_NAME, true, false);
 		writeIndexFileData(file);
 	}
-	
+
 	private void writeIndexFileData(File file) throws IOException {
 		try (FileWriter fw = new FileWriter(file)) {
 			Gson gson = new Gson();

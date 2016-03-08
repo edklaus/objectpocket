@@ -21,12 +21,15 @@ package org.objectpocket;
  * @author Edmund Klaus
  *
  */
-public class Proxy {
-	String op_ref;
-	public Proxy(String type, String id) {
+public class ProxyOut {
+	
+	private String op_ref;
+	
+	public ProxyOut(String type, String id) {
 		this.op_ref = id + "@" + type;
 	}
-	public String getId() {
-		return op_ref.substring(0, op_ref.indexOf("@"));
+	public String getRef() {
+		return op_ref;
 	}
+	
 }
