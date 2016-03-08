@@ -16,6 +16,9 @@
 
 package org.objectpocket.deleteme.complex;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.objectpocket.annotations.Entity;
 
 /**
@@ -25,11 +28,15 @@ import org.objectpocket.annotations.Entity;
  */
 @Entity
 public class Person {
+	
 	private String name;
 	private Person mother;
 	private Person child;
 	private Address address;
-	private Car car;
+	private Car[] cars;
+	private List<Dog> dogs;
+	
+	
 	public String getName() {
 		return name;
 	}
@@ -54,10 +61,27 @@ public class Person {
 	public void setAddress(Address address) {
 		this.address = address;
 	}
-	public Car getCar() {
-		return car;
+	public Car[] getCars() {
+		return cars;
 	}
-	public void setCar(Car car) {
-		this.car = car;
+	public void addCar(Car car) {
+		if (cars == null) {
+			cars = new Car[0];
+		}
+		Car[] newCars = new Car[cars.length+1];
+		for (int i = 0; i < cars.length; i++) {
+			newCars[i] = cars[i];
+		}
+		newCars[newCars.length-1] = car;
+		cars = newCars;
+	}
+	public List<Dog> getDogs() {
+		return dogs;
+	}
+	public void addDog(Dog dog) {
+		if (dogs == null) {
+			dogs = new ArrayList<Dog>();
+		}
+		dogs.add(dog);
 	}
 }

@@ -1,7 +1,11 @@
-## Bugs ##
-- Unbedingt mixed mode testen wegen CustomTypeadapterFactory!!
+## BUGS ##
+- performance in FileStore.readJsonObjects ist sehr dürftig
+  => commit machen mit reference support für array und collection
+  => der gesamte String wird bereits 1x durchgenudelt um in Objekte aufzusplitten
+     bei dieser Gelegenheit kann man auch op_class und op_id extrahieren
 
 ## TODO ##
+- In den Support.injectReferences Methoden setProxy Methode aufrufen
 - JSON Ausgabe überarbeiten (s. outline)
 - setFilename für
   - Objekttypen

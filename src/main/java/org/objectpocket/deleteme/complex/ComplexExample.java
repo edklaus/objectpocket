@@ -17,6 +17,7 @@
 package org.objectpocket.deleteme.complex;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.objectpocket.ObjectPocket;
 import org.objectpocket.ObjectPocketBuilder;
@@ -48,13 +49,20 @@ public class ComplexExample {
 		Car childsCar = new Car();
 		childsCar.setName("Audio");
 		
+		Dog mothersDog1 = new Dog();
+		mothersDog1.setName("mothers dog1");
+		Dog mothersDog2 = new Dog();
+		mothersDog2.setName("mothers dog2");
+		
 		child.setAddress(childsAddress);
-		child.setCar(childsCar);
+		child.addCar(childsCar);
 		
 		mother.setAddress(mothersAddress);
 		mother.setChild(child);
 		child.setMother(mother);
-		mother.setCar(mothersCar);
+		mother.addCar(mothersCar);
+		mother.addDog(mothersDog1);
+		mother.addDog(mothersDog2);
 		
 		ObjectPocket objectPocket = new ObjectPocketBuilder().createFileObjectPocket(FILESTORE);
 		objectPocket.add(mother);
@@ -77,7 +85,16 @@ public class ComplexExample {
 		for (Person person : persons) {
 			System.out.println(person.getName());
 			System.out.println(person.getAddress().getCity());
-			System.out.println(person.getCar().getName());
+			Car[] cars = person.getCars();
+			for (Car car : cars) {
+				System.out.println(car.getName());
+			}
+			List<Dog> dogs = person.getDogs();
+			if (dogs != null) {
+				for (Dog dog : dogs) {
+					System.out.println(dog.getName());
+				}
+			}
 		}
 		
 	}

@@ -16,7 +16,9 @@
 
 package org.objectpocket.example;
 
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 
@@ -26,6 +28,8 @@ import java.util.List;
 public class Person {
 
 	private String name;
+	private String surname = UUID.randomUUID().toString();
+	private Date birthdate = new Date();
 	private Address address;
 	private List<Person> friends;
 

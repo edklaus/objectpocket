@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.objectpocket.references.ArrayReferenceSupport;
+import org.objectpocket.references.CollectionReferenceSupport;
 import org.objectpocket.references.SimpleReferenceSupport;
 import org.objectpocket.storage.BlobStore;
 import org.objectpocket.storage.FileStore;
@@ -122,8 +124,8 @@ public class ObjectPocketBuilder {
 	
 	private void addReferenceSupport(ObjectPocketImpl objectPocketImpl) {
 		objectPocketImpl.addReferenceSupport(new SimpleReferenceSupport());
-//		objectPocketImpl.addReferenceSupport(new ArrayReferenceSupport());
-//		objectPocketImpl.addReferenceSupport(new CollectionReferenceSupport());
+		objectPocketImpl.addReferenceSupport(new ArrayReferenceSupport());
+		objectPocketImpl.addReferenceSupport(new CollectionReferenceSupport());
 	}
 
 }

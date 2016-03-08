@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Edmund Klaus
+ * Copyright (C) 2016 Edmund Klaus
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,22 @@
  * limitations under the License.
  */
 
-package org.objectpocket.example;
+package org.objectpocket.deleteme.complex;
 
-import java.util.Random;
-import java.util.UUID;
-
+import org.objectpocket.annotations.Entity;
 
 /**
  * 
  * @author Edmund Klaus
  *
  */
-public class Address {
-
-	private String city;
-	private Person inhabitant;
-	private String street = UUID.randomUUID().toString();
-	private int number = new Random().nextInt(2000);
-
-	public String getCity() {
-		return city;
+@Entity
+public class Dog {
+	private String name;
+	public String getName() {
+		return name;
 	}
-	public void setCity(String city) {
-		this.city = city;
-	}
-	public Person getInhabitant() {
-		return inhabitant;
-	}
-	public void setInhabitant(Person inhabitant) {
-		this.inhabitant = inhabitant;
+	public void setName(String name) {
+		this.name = name;
 	}
 }

@@ -31,13 +31,13 @@ import org.objectpocket.annotations.Entity;
  * @author Edmund Klaus
  *
  */
-public class SimpleReferenceSupport extends ReferenceSupport {
+public class ArrayReferenceSupport extends ReferenceSupport {
 
 	@Override
 	public List<Field> filterReferencingFields(List<Field> fields) {
 		List<Field> filteredFields = null;
 		for (Field field : fields) {
-			if (field.getType().getAnnotation(Entity.class) != null) {
+			if (field.getType().isArray() && field.getType().getComponentType().getAnnotation(Entity.class) != null) {
 				if (filteredFields == null) {
 					filteredFields = new ArrayList<Field>();
 				}
@@ -46,16 +46,18 @@ public class SimpleReferenceSupport extends ReferenceSupport {
 		}
 		return filteredFields;
 	}
-	
+
 	@Override
 	public Set<Object> getObjectsForField(Object obj, Field field) throws InvocationTargetException, IllegalAccessException {
 		if (field != null) {
 			field.setAccessible(true);
-			Object object = field.get(obj);
+			Object[] objectArray = (Object[])field.get(obj);
 			field.setAccessible(false);
-			if (object != null) {
+			if (objectArray != null) {
 				Set<Object> objects = new HashSet<Object>();
-				objects.add(object);
+				for (Object object : objectArray) {
+					objects.add(object);
+				}
 				return objects;
 			}
 		}
@@ -66,19 +68,28 @@ public class SimpleReferenceSupport extends ReferenceSupport {
 	public void injectReferences(Object obj, Field field, Map<String, Map<String, Object>> objectMap,
 			Map<Object, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException {
 		field.setAccessible(true);
-		Object readObject = field.get(obj);
+		Object[] readObjects = (Object[])field.get(obj);
 		field.setAccessible(false);
-		if (readObject != null) {
+		if (readObjects != null) {
 			// TODO:
 			// marking proxy objects as proxy prevents from persisting proxy objects!
-			//readObject.setProxy(true);
-			Map<String, Object> typeMap = objectMap.get(field.getType().getName());
+//			for (Identifiable identifiable : ids) {
+//				if (identifiable != null) {
+//					identifiable.setProxy(true);
+//				}
+//			}
+			String typeName = field.getType().getComponentType().getName();
+			Map<String, Object> typeMap = objectMap.get(typeName);
 			if (typeMap != null) {
-				Object reference = typeMap.get(idsFromReadObjects.get(readObject));
-				if (reference != null) {
-					field.setAccessible(true);
-					field.set(obj, reference);
-					field.setAccessible(false);
+				for (int i = 0; i < readObjects.length; i++) {
+					if (readObjects[i] != null) {
+						Object reference = typeMap.get(idsFromReadObjects.get(readObjects[i]));
+						if (reference != null) {
+							field.setAccessible(true);
+							readObjects[i] = reference;
+							field.setAccessible(false);
+						}
+					}
 				}
 			}
 		}

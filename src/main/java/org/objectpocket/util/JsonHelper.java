@@ -16,6 +16,11 @@
 
 package org.objectpocket.util;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 /**
  * 
@@ -47,6 +52,12 @@ public class JsonHelper {
 	
 	// FIXME: make this maximum fast!
 	public static String[] getClassAndIdFromJson(String jsonString) {
+		String regex = "\"" + CLASS + "\":.*\"" + ID + "\":.*,";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(jsonString);
+		if (matcher.find()) {
+			jsonString = jsonString.substring(matcher.start(), matcher.end());
+		}
 		String[] classAndId = new String[2];
 		String[] fields = jsonString.split(",");
 		// class
@@ -60,6 +71,34 @@ public class JsonHelper {
 			classAndId[1] = idField[1].trim().replaceAll("\"", "").replaceAll("\n", "");
 		}
 		return classAndId;
+	}
+	
+	public static List<String> splitToTopLevelJsonObjects(String s) {
+		List<String> jsonObjects = new ArrayList<String>();
+		int objectStartIndex = 0;
+		int objectStart = 0;
+		int objectEnd = 0;
+		for (int i = 0; i < s.length(); i++) {
+			switch (s.charAt(i)) {
+			case '{':
+				if (objectStart == 0) {
+					objectStartIndex = i;
+				}
+				objectStart++;
+				break;
+			case '}':
+				objectEnd++;
+				if (objectStart == objectEnd) {
+					jsonObjects.add(s.substring(objectStartIndex, i+1));
+					objectStart = 0;
+					objectEnd = 0;
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		return jsonObjects;
 	}
 	
 }

@@ -44,9 +44,6 @@ public abstract class ReferenceSupport {
 	 */
 	public abstract List<Field> filterReferencingFields(List<Field> fields);
 
-	public abstract Set<Object> getObjectsForPropertyDescriptor(Object obj, PropertyDescriptor propertyDescriptor)
-			throws InvocationTargetException, IllegalAccessException;
-
 	public abstract void injectReferences(Object obj, Field field, Map<String, Map<String, Object>> objectMap, 
 			Map<Object, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException;
 
@@ -54,7 +51,8 @@ public abstract class ReferenceSupport {
 			throws InvocationTargetException, IllegalAccessException;
 
 	/**
-	 * Detects references to other objects inside the given object that have been annotated with {@link Entity}.
+	 * Detects references to other objects inside the given object that have 
+	 * been annotated with {@link Entity}.
 	 * Returns the references as a {@link Set} of objects.
 	 * @param obj
 	 * @return

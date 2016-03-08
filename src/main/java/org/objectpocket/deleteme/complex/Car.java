@@ -16,11 +16,14 @@
 
 package org.objectpocket.deleteme.complex;
 
+import org.objectpocket.annotations.Entity;
+
 /**
  * 
  * @author Edmund Klaus
  *
  */
+@Entity
 public class Car {
 	private String name;
 	public String getName() {

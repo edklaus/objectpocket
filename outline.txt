@@ -4,7 +4,6 @@
     - Dateien mit .json Endung scannen
     - eine 167MB große Datei mit 1Mio einträge braucht 2s um alle darin enthaltenen Typen herauszufinden
     - 17MB und 100.000 Einträge kommen mit 269ms aus
-- evtl. ist es interessant die erzeugten json dateien auf Standard-Konformität zu validieren "http://jsonlint.com/"
 
 ### Trägerobjekte
 - Es macht sinn zu serialisierende Objekte in Trägerobjekte zu packen in denen felder wie

@@ -26,11 +26,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.objectpocket.Blob;
@@ -76,6 +75,7 @@ public class FileStore implements ObjectStore {
 		for (String filename : filenames) {
 			File file = initFile(filename, true, false);
 			try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+				long time = System.currentTimeMillis();
 				String line = null;
 				StringBuffer objectBuffer = new StringBuffer();
 				while((line = br.readLine()) != null) {
@@ -85,24 +85,22 @@ public class FileStore implements ObjectStore {
 					}
 				}
 				String s = objectBuffer.toString();
+				//System.out.println(System.currentTimeMillis() - time);
 				s = s.replaceFirst(JSON_PREFIX_REGEX_PATTERN, "");
+				// TODO: this is maybe faster with regex?? \\]\\s*\\}\\s*
 				s = StringUtils.reverse(s);
 				s = s.replaceFirst(JSON_SUFFIX_REGEX_PATTERN_REVERSED, "");
 				s = StringUtils.reverse(s);
-				String[] jsonStrings = s.split("\\}\\s*,\\s*\\{");
-				for (int i = 0; i < jsonStrings.length; i++) {
-					String jsonString = jsonStrings[i];
-					if (i > 0) {
-						jsonString = "{" + jsonString;
-					}
-					if (i < jsonStrings.length-1) {
-						jsonString = jsonString + "}";
-					}
-					String[] classAndIdFromJson = JsonHelper.getClassAndIdFromJson(jsonString);
+				//System.out.println(System.currentTimeMillis() - time);
+				List<String> jsonStrings = JsonHelper.splitToTopLevelJsonObjects(s);
+				//System.out.println(System.currentTimeMillis() - time);
+				for (int i = 0; i < jsonStrings.size(); i++) {
+					String[] classAndIdFromJson = JsonHelper.getClassAndIdFromJson(jsonStrings.get(i));
 					if (classAndIdFromJson[0].equals(typeName)) {
-						objects.put(classAndIdFromJson[1], jsonString);
+						objects.put(classAndIdFromJson[1], jsonStrings.get(i));
 					}
 				}
+				//System.out.println(System.currentTimeMillis() - time);
 			} catch (IOException e) {
 				throw new IOException("Could not read from file. " + file.getPath(), e);
 			}
