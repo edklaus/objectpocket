@@ -23,6 +23,10 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.CharBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -71,39 +75,38 @@ public class FileStore implements ObjectStore {
 		Set<String> filenames = objectPocketIndex.getTypeToFilenamesMapping().get(typeName);
 		Map<String, String> objects = new HashMap<String, String>();
 		for (String filename : filenames) {
-			long time = System.currentTimeMillis();
 			File file = initFile(filename, true, false);
-			try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-				String line = null;
-				StringBuilder stringBuilder = new StringBuilder();
-				while((line = br.readLine()) != null) {
-					stringBuilder.append(line);
-				}
-				String s = null;
-				// remove first occurrence of "{", as this is the start of the container object
-				// all other object splitting will work with that!
-				int index = stringBuilder.indexOf("{");
-				if (index > -1) {
-					s = stringBuilder.substring(index+1, stringBuilder.length());
-				} else {
-					s = stringBuilder.toString();
-				}
-				//System.out.println(System.currentTimeMillis()-time);
-				List<String> jsonStrings = JsonHelper.splitToTopLevelJsonObjects(s);
-				//System.out.println(System.currentTimeMillis()-time);
-				Gson gson = new Gson();
-				for (int i = 0; i < jsonStrings.size(); i++) {
-					// TODO: maybe there is more potential for optimization here!
-					// the complete string is already read in splitToTopLevelJsonObjects()!!
-					ProxyIn proxy = gson.fromJson(jsonStrings.get(i), ProxyIn.class);
-					if (proxy.getType().equals(typeName)) {
-						objects.put(proxy.getId(), jsonStrings.get(i));
-					}
-				}
-				//System.out.println(System.currentTimeMillis()-time);
-			} catch (IOException e) {
-				throw new IOException("Could not read from file. " + file.getPath(), e);
+
+			// maximum fast file reading
+			Charset charset = Charset.forName("UTF-8");
+			FileInputStream f = new FileInputStream(file);
+			FileChannel ch = f.getChannel();
+			MappedByteBuffer mbb = ch.map(FileChannel.MapMode.READ_ONLY, 0L, ch.size());
+			StringBuilder stringBuilder = new StringBuilder(charset.decode(mbb));
+			f.close();
+
+			String s = null;
+			// remove first occurrence of "{", as this is the start of the container object
+			// all other object splitting will work with that!
+			int index = stringBuilder.indexOf("{");
+			if (index > -1) {
+				s = stringBuilder.substring(index+1, stringBuilder.length());
+			} else {
+				s = stringBuilder.toString();
 			}
+			//System.out.println(System.currentTimeMillis()-time);
+			List<String> jsonStrings = JsonHelper.splitToTopLevelJsonObjects(s);
+			//System.out.println(System.currentTimeMillis()-time);
+			Gson gson = new Gson();
+			for (int i = 0; i < jsonStrings.size(); i++) {
+				// TODO: maybe there is more potential for optimization here!
+				// the complete string is already read in splitToTopLevelJsonObjects()!!
+				ProxyIn proxy = gson.fromJson(jsonStrings.get(i), ProxyIn.class);
+				if (proxy.getType().equals(typeName)) {
+					objects.put(proxy.getId(), jsonStrings.get(i));
+				}
+			}
+			//System.out.println(System.currentTimeMillis()-time);
 		}
 		return objects;
 	}

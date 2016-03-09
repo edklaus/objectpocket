@@ -35,7 +35,7 @@ public class SpeedTest {
 		long time = System.currentTimeMillis();
 		ObjectPocket objectPocket = new ObjectPocketBuilder().createFileObjectPocket(FILESTORE);
 		
-		int numPersons = 180_000;
+		int numPersons = 100_000;
 		
 		for (int i = 0; i < numPersons; i++) {
 			Address a = new Address();

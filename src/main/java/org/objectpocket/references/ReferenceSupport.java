@@ -16,7 +16,6 @@
 
 package org.objectpocket.references;
 
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -45,7 +44,7 @@ public abstract class ReferenceSupport {
 	public abstract List<Field> filterReferencingFields(List<Field> fields);
 
 	public abstract void injectReferences(Object obj, Field field, Map<String, Map<String, Object>> objectMap, 
-			Map<Object, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException;
+			Map<Integer, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException;
 
 	public abstract Set<Object> getObjectsForField(Object obj, Field field)
 			throws InvocationTargetException, IllegalAccessException;
@@ -79,17 +78,15 @@ public abstract class ReferenceSupport {
 	}
 
 	private List<Field> getFields(Object obj) {
-		if (fieldsForType.get(obj.getClass().getName()) == null) {
+		if (!fieldsForType.containsKey(obj.getClass().getName())) {
 			List<Field> allFields = FieldUtils.getAllFieldsList(obj.getClass());
 			List<Field> filteredFields = filterReferencingFields(allFields);
-			if (filteredFields != null && !filteredFields.isEmpty()) {
-				fieldsForType.put(obj.getClass().getName(), filteredFields);
-			}
+			fieldsForType.put(obj.getClass().getName(), filteredFields);
 		}
 		return fieldsForType.get(obj.getClass().getName());
 	}
 
-	public void injectReferences(Object obj,  Map<String, Map<String, Object>> objectMap, Map<Object, String> idsFromReadObjects) {
+	public void injectReferences(Object obj,  Map<String, Map<String, Object>> objectMap, Map<Integer, String> idsFromReadObjects) {
 		List<Field> objectFields = getFields(obj);
 		if (objectFields != null && !objectFields.isEmpty()) {
 			for (Field field : objectFields) {

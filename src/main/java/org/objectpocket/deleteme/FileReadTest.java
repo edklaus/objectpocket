@@ -34,15 +34,16 @@ public class FileReadTest {
 	public static void main(String[] args) throws Exception {
 		
 		long time = System.currentTimeMillis();
-		File f = new File("C:/Users/klause/objectpocket_example/org.objectpocket.example.Person");
+		File f = new File("C:/Users/klause/objectpocket_example/org.objectpocket.example.Person.json");
 		FileReader fr = new FileReader(f);
 		BufferedReader br = new BufferedReader(fr);
 		String line = null;
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		while((line = br.readLine()) != null) {
 			buf.append(line);
 		}
 		br.close();
+		System.out.println(System.currentTimeMillis() - time);
 		String string = buf.toString();
 		Pattern pattern = Pattern.compile("\"op_type\":.+\\,");
 		Matcher matcher = pattern.matcher(string);

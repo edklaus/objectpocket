@@ -66,7 +66,8 @@ public class ObjectPocketImpl implements ObjectPocket{
 	// support for complex referencing
 	private Set<ReferenceSupport> referenceSupportSet = new HashSet<ReferenceSupport>();
 	
-	private Map<Object, String> idsFromReadObjects = new HashMap<Object, String>();
+	// <object hash, id>
+	private Map<Integer, String> idsFromReadObjects = new HashMap<Integer, String>();
 
 	public ObjectPocketImpl(ObjectStore objectStore) {
 		this.objectStore = objectStore;
@@ -246,7 +247,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 
 	@Override
 	public boolean isLoading() {
-		throw new UnsupportedOperationException();
+		return loading;
 	}
 
 	@Override
@@ -355,8 +356,8 @@ public class ObjectPocketImpl implements ObjectPocket{
 		}
 	}
 	
-	public void addIdFromReadObject(Object obj, String id) {
-		idsFromReadObjects.put(obj, id);
+	public void addIdFromReadObject(int hashcode, String id) {
+		idsFromReadObjects.put(hashcode, id);
 	}
 	
 	private Gson configureGson() {

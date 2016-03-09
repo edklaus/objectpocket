@@ -18,8 +18,6 @@ package org.objectpocket.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 /**
@@ -67,7 +65,7 @@ public class JsonHelper {
 	}
 	
 	public static List<String> splitToTopLevelJsonObjects(String s) {
-		List<String> jsonObjects = new ArrayList<String>();
+		List<String> jsonObjects = new ArrayList<String>(1000000);
 		int objectStartIndex = 0;
 		int objectStart = 0;
 		int objectEnd = 0;

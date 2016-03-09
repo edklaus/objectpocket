@@ -76,8 +76,8 @@ public class CustomTypeAdapterFactory implements TypeAdapterFactory {
 					if (in.getPath().length() > 2) {
 						in.beginObject();
 						in.nextName();
-						String id = in.nextString();
-						id = id.substring(0, id.indexOf("@"));
+						StringBuilder sb = new StringBuilder(in.nextString());
+						String id = sb.substring(0, sb.indexOf("@"));
 						in.endObject();
 						T obj = null;
 						try {
@@ -85,9 +85,9 @@ public class CustomTypeAdapterFactory implements TypeAdapterFactory {
 						} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | 
 								NoSuchMethodException | InvocationTargetException e) {
 							throw new IOException("Could not instanciate class " + type.getRawType().getName() + "\n"
-									+ "\tMight by that the class has no default constructor!", e);
+									+ "\tMight be that the class has no default constructor!", e);
 						}
-						objectPocket.addIdFromReadObject(obj, id);
+						objectPocket.addIdFromReadObject(obj.hashCode(), id);
 						return obj;
 					} else {
 						T obj = delegate.read(in);

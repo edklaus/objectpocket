@@ -64,7 +64,7 @@ public class SimpleReferenceSupport extends ReferenceSupport {
 
 	@Override
 	public void injectReferences(Object obj, Field field, Map<String, Map<String, Object>> objectMap,
-			Map<Object, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException {
+			Map<Integer, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException {
 		field.setAccessible(true);
 		Object readObject = field.get(obj);
 		field.setAccessible(false);
@@ -74,7 +74,7 @@ public class SimpleReferenceSupport extends ReferenceSupport {
 			//readObject.setProxy(true);
 			Map<String, Object> typeMap = objectMap.get(field.getType().getName());
 			if (typeMap != null) {
-				Object reference = typeMap.get(idsFromReadObjects.get(readObject));
+				Object reference = typeMap.get(idsFromReadObjects.get(readObject.hashCode()));
 				if (reference != null) {
 					field.setAccessible(true);
 					field.set(obj, reference);

@@ -1,3 +1,15 @@
+## HOSTSPOTS ##
+- FileStore.readJsonObjects
+  - Gson.fromJson (Umwandlung in Proxy Objekte) verbraucht ca. 10% der Zeit
+- splitTopLevelJsonObjects braucht ca. 5%
+
+## BUGS ##
+- Einträge in op_index haben keine .json Endung
+
+## OPTIMIZATION POSSIBILITIES ##
+- File Write mit https://examples.javacodegeeks.com/core-java/nio/mappedbytebuffer/java-mappedbytebuffer-example/
+- Durch implementieren eines schnellen hashCode lassen sich ca. 14% rausholen
+
 ## TODO ##
 - In den Support.injectReferences Methoden setProxy Methode aufrufen
 - JSON Ausgabe überarbeiten (s. outline)
