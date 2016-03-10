@@ -19,8 +19,6 @@ package org.objectpocket;
 import java.io.IOException;
 import java.util.UUID;
 
-import javax.swing.JFrame;
-
 import org.objectpocket.storage.BlobStore;
 
 /**
@@ -66,7 +64,6 @@ public class Blob {
 	}
 	public final void setBlobStore(BlobStore blobStore) {
 		this.blobStore = blobStore;
-		JFrame frame = new JFrame();
 	}
 
 }

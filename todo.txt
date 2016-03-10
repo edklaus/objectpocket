@@ -4,7 +4,6 @@
 - splitTopLevelJsonObjects braucht ca. 5%
 
 ## BUGS ##
-- Wenn JSON nicht pretty print => Fehler beim Einlesen
 - Einträge in op_index haben keine .json Endung
 
 ## OPTIMIZATION POSSIBILITIES ##
@@ -12,6 +11,7 @@
 - Durch implementieren eines schnellen hashCode lassen sich ca. 14% rausholen
 
 ## TODO ##
+- Write Profilen
 - In den Support.injectReferences Methoden setProxy Methode aufrufen
 - JSON Ausgabe überarbeiten (s. outline)
 - setFilename für

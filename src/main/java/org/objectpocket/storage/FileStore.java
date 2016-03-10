@@ -23,7 +23,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -94,9 +93,7 @@ public class FileStore implements ObjectStore {
 			} else {
 				s = stringBuilder.toString();
 			}
-			//System.out.println(System.currentTimeMillis()-time);
 			List<String> jsonStrings = JsonHelper.splitToTopLevelJsonObjects(s);
-			//System.out.println(System.currentTimeMillis()-time);
 			Gson gson = new Gson();
 			for (int i = 0; i < jsonStrings.size(); i++) {
 				// TODO: maybe there is more potential for optimization here!
@@ -106,7 +103,6 @@ public class FileStore implements ObjectStore {
 					objects.put(proxy.getId(), jsonStrings.get(i));
 				}
 			}
-			//System.out.println(System.currentTimeMillis()-time);
 		}
 		return objects;
 	}
@@ -115,9 +111,9 @@ public class FileStore implements ObjectStore {
 	public void writeJsonObjects(Map<String, Set<String>> jsonObjects, String typeName) throws IOException {
 		readIndexFile();
 		for (String filename : jsonObjects.keySet()) {
-			File file = initFile(filename, true, true);
+			File file = initFile(filename + ".json", true, true);
 			try (FileWriter fw = new FileWriter(file)) {
-				addToIndex(typeName, filename);
+				addToIndex(typeName, file.getName());
 				fw.write(JSON_PREFIX + "\n");
 				Set<String> objectSet = jsonObjects.get(filename);
 				Iterator<String> iterator = objectSet.iterator();
@@ -194,9 +190,6 @@ public class FileStore implements ObjectStore {
 	private File initFile(String typeName, boolean read, boolean write) throws IOException {
 		File dir = initFileStore();
 		String filename = dir.getPath() + File.separatorChar + typeName;
-		if (!typeName.equals(INDEX_FILE_NAME)) {
-			filename += ".json";
-		}
 		File f = new File(filename);
 		if (!f.exists()) {
 			try {
