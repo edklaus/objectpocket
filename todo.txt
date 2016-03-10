@@ -4,6 +4,7 @@
 - splitTopLevelJsonObjects braucht ca. 5%
 
 ## BUGS ##
+- Wenn JSON nicht pretty print => Fehler beim Einlesen
 - Einträge in op_index haben keine .json Endung
 
 ## OPTIMIZATION POSSIBILITIES ##

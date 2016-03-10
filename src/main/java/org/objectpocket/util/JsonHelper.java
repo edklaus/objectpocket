@@ -43,7 +43,7 @@ public class JsonHelper {
 			sb.append(id);
 			sb.append("\"");
 		} else {
-			sb.append("\"");
+			sb.append("{\"");
 			sb.append(TYPE);
 			sb.append("\":\"");
 			sb.append(typeName);
