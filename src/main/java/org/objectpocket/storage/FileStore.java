@@ -77,12 +77,13 @@ public class FileStore implements ObjectStore {
 			File file = initFile(filename, true, false);
 
 			// maximum fast file reading
-			Charset charset = Charset.forName("UTF-8");
-			FileInputStream f = new FileInputStream(file);
-			FileChannel ch = f.getChannel();
-			MappedByteBuffer mbb = ch.map(FileChannel.MapMode.READ_ONLY, 0L, ch.size());
-			StringBuilder stringBuilder = new StringBuilder(charset.decode(mbb));
-			f.close();
+			StringBuilder stringBuilder = new StringBuilder();
+			try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+				String line = null;
+				while((line = br.readLine()) != null) {
+					stringBuilder.append(line);
+				}
+			}
 
 			String s = null;
 			// remove first occurrence of "{", as this is the start of the container object
