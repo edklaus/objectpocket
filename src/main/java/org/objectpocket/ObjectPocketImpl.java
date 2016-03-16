@@ -42,63 +42,65 @@ import com.google.gson.GsonBuilder;
  *
  */
 public class ObjectPocketImpl implements ObjectPocket{
-	
+
 	private ObjectStore objectStore;
 	private BlobStore blobStore;
 	private boolean serializeNulls = false;
 	private boolean prettyPrinting = false;
 	private Map<Type, Set<Object>> typeAdapterMap = new HashMap<Type, Set<Object>>();
+
+	private Gson gson = null;
 	
 	private boolean loading = false;
-	
+
 	// <typeName:<id,object>>
 	private Map<String, Map<String, Object>> objectMap = new HashMap<String, Map<String, Object>>();
-	
+
 	// this extra map<object,id> is necessary for faster lookup of already traced objects
 	// objectMap.values.values is too slow for a proper lookup
 	private Map<Object, String> tracedObjects = new HashMap<Object, String>();
-	
+
 	private Set<Object> serializeAsRoot;
-	
+
 	// holds specific filenames for objects, set by the user
 	private Map<Object, String> objectFilenames = new HashMap<Object, String>();
-	
+
 	// support for complex referencing
 	private Set<ReferenceSupport> referenceSupportSet = new HashSet<ReferenceSupport>();
-	
+
 	// <object hash, id>
 	private Map<Integer, String> idsFromReadObjects = new HashMap<Integer, String>();
 
 	public ObjectPocketImpl(ObjectStore objectStore) {
 		this.objectStore = objectStore;
 	}
-	
+
 	@Override
 	public void add(Object obj) {
 		// TODO: check who owns the object (in case more than 1 ObjectPocket)
-//		if (obj.getOwningInstance() == null || obj.getOwningInstance().equals(this)) {
-//			// attach given object to this japer instance
-//			obj.setOwningInstance(this);
-//			// add object to objectMap
-			String typeName = obj.getClass().getTypeName();
-			if (objectMap.get(typeName) == null) {
-				objectMap.put(typeName, new HashMap<String, Object>());
-			}
-			Map<String, Object> map = objectMap.get(typeName);
-			if (!tracedObjects.containsKey(obj)) {
-				// TODO: check if @Id has been set before generating ID
-				// custom ID might change at runtime!! Is this a problem?
-				String objectId = UUID.randomUUID().toString();
-				tracedObjects.put(obj, objectId);
-				map.put(objectId, obj);
-			}
-			// add references
-			addReferences(obj);
-//		} else {
-//			obj.getOwningInstance().add(obj);
-//		}
+		//		if (obj.getOwningInstance() == null || obj.getOwningInstance().equals(this)) {
+		//			// attach given object to this japer instance
+		//			obj.setOwningInstance(this);
+		//			// add object to objectMap
+		String typeName = obj.getClass().getTypeName();
+		if (objectMap.get(typeName) == null) {
+			objectMap.put(typeName, new HashMap<String, Object>());
+		}
+		Map<String, Object> map = objectMap.get(typeName);
+		if (!tracedObjects.containsKey(obj)) {
+			// TODO: check if @Id has been set before generating ID
+			// custom ID might change at runtime!! Is this a problem?
+			String objectId = UUID.randomUUID().toString();
+			tracedObjects.put(obj, objectId);
+			map.put(objectId, obj);
+		}
+		// add references
+		addReferences(obj);
+		//		} else {
+		//			obj.getOwningInstance().add(obj);
+		//		}
 	}
-	
+
 	@Override
 	public void add(Object obj, String filename) {
 		// TODO: validate filename to not be something like /home... or C:/...
@@ -108,7 +110,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 			objectFilenames.put(obj, filename);
 		}
 	}
-	
+
 	private void addReferences(Object obj) {
 		for (ReferenceSupport referenceSupport : referenceSupportSet) {
 			Set<Object> references = referenceSupport.getReferences(obj);
@@ -116,12 +118,10 @@ public class ObjectPocketImpl implements ObjectPocket{
 				for (Object reference : references) {
 					// this supports cyclic references between objects
 					if (reference != null) {
-//						if (objectMap.get(reference.getClass().getTypeName()) == null || 
-//								!objectMap.get(reference.getClass().getTypeName()).containsKey(reference.getId())) {
 						if (!tracedObjects.containsKey(reference)) {
+							System.out.println(reference + " is not traced");
 							add(reference);
 						}
-//						}
 					}
 				}
 			}
@@ -155,20 +155,26 @@ public class ObjectPocketImpl implements ObjectPocket{
 			String filename = typeName;
 			for (String id : map.keySet()) {
 				// TODO: Is this necessary any more?
-//				if (!identifiable.isProxy()) {
-//					identifiable.serializeAsRoot = true;
-					Object object = map.get(id);
-					serializeAsRoot.add(object);
-					StringBuilder sb = new StringBuilder(gson.toJson(object));
-					jsonString = JsonHelper.addTypeAndIdToJson(sb, typeName, id, prettyPrinting);
-					if (objectFilenames.get(object) != null) {
-						filename = objectFilenames.get(object);
-					}
-					if (jsonStrings.get(filename) == null) {
-						jsonStrings.put(filename, new HashSet<String>());
-					}
-					jsonStrings.get(filename).add(jsonString);
-//				}
+				//				if (!identifiable.isProxy()) {
+				//					identifiable.serializeAsRoot = true;
+				Object object = map.get(id);
+				if (object instanceof ProxyIn) {
+					System.out.println("proxyIn");
+				}
+				if (object instanceof ProxyOut) {
+					System.out.println("proxyOut");
+				}
+				serializeAsRoot.add(object);
+				StringBuilder sb = new StringBuilder(gson.toJson(object));
+				jsonString = JsonHelper.addTypeAndIdToJson(sb, typeName, id, prettyPrinting);
+				if (objectFilenames.get(object) != null) {
+					filename = objectFilenames.get(object);
+				}
+				if (jsonStrings.get(filename) == null) {
+					jsonStrings.put(filename, new HashSet<String>());
+				}
+				jsonStrings.get(filename).add(jsonString);
+				//				}
 			}
 			try {
 				objectStore.writeJsonObjects(jsonStrings, typeName);
@@ -177,23 +183,23 @@ public class ObjectPocketImpl implements ObjectPocket{
 			}
 
 			// persist blob data
-//			try {
-//				Class<?>  clazz = Class.forName(typeName);
-//				if (Blob.class.isAssignableFrom(clazz)) {
-//					Set<Blob> blobsToPersist = new HashSet<Blob>();
-//					for (Identifiable identifiable : objectMap.get(typeName).values()) {
-//						Blob blob = (Blob)identifiable;
-//						if (blob.isPersist()) {
-//							blobsToPersist.add(blob);
-//						}
-//					}
-//					if (!blobsToPersist.isEmpty()) {
-//						blobStore.writeBlobs(blobsToPersist);
-//					}
-//				}
-//			} catch (ClassNotFoundException|IOException e) {
-//				throw new JaperException("Could not collect blobs for typeName. " + typeName, e);
-//			}
+			//			try {
+			//				Class<?>  clazz = Class.forName(typeName);
+			//				if (Blob.class.isAssignableFrom(clazz)) {
+			//					Set<Blob> blobsToPersist = new HashSet<Blob>();
+			//					for (Identifiable identifiable : objectMap.get(typeName).values()) {
+			//						Blob blob = (Blob)identifiable;
+			//						if (blob.isPersist()) {
+			//							blobsToPersist.add(blob);
+			//						}
+			//					}
+			//					if (!blobsToPersist.isEmpty()) {
+			//						blobStore.writeBlobs(blobsToPersist);
+			//					}
+			//				}
+			//			} catch (ClassNotFoundException|IOException e) {
+			//				throw new JaperException("Could not collect blobs for typeName. " + typeName, e);
+			//			}
 
 		}
 		Logger.getAnonymousLogger().info("Stored all objects in " + objectStore.getSource() + 
@@ -204,7 +210,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 	public void load() throws ObjectPocketException {
 		loading = true;
 		long timeAll = System.currentTimeMillis();
-		
+
 		idsFromReadObjects.clear();
 
 		/**
@@ -218,23 +224,50 @@ public class ObjectPocketImpl implements ObjectPocket{
 			throw new ObjectPocketException("Could not acquire available objects.", e);
 		}
 
+//		ExecutorService threadPool = Executors.newCachedThreadPool();
+
 		/**
 		 * load json objects strings into real objects
 		 */
 		if (availableObjectTypes != null) {
 			for (String typeName : availableObjectTypes) {
+
+//				Runnable r = new Runnable() {
+//					@Override
+//					public void run() {
+//						try {
+//							loadObjectsFromJsonStrings(typeName);	
+//						} catch (ClassNotFoundException | IOException e) {
+//							loading = false;
+//							//throw new ObjectPocketException("Could not load objects for type. " + typeName, e);
+//							Logger.getAnonymousLogger().log(Level.SEVERE, "Could not load objects for type. " + typeName, e);
+//						}
+//					}
+//				};
+//
+//				threadPool.execute(r);
+
 				try {
-					loadObjectsFromJsonStrings(typeName);
+					loadObjectsFromJsonStrings(typeName);	
 				} catch (ClassNotFoundException | IOException e) {
 					loading = false;
 					throw new ObjectPocketException("Could not load objects for type. " + typeName, e);
 				}
+
 			}
 		}
 
+//		threadPool.shutdown();
+//		try {
+//			threadPool.awaitTermination(60, TimeUnit.SECONDS);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+
 		injectReferences();
 
-		Logger.getAnonymousLogger().info("Loaded all objects fomr " + objectStore.getSource() + 
+		Logger.getAnonymousLogger().info("Loaded all objects from " + objectStore.getSource() + 
 				" in " + (System.currentTimeMillis()-timeAll) + " ms.");
 		loading = false;
 	}
@@ -242,7 +275,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 	@Override
 	public void loadAsynchronous(Class<?>... preload) throws ObjectPocketException {
 		throw new UnsupportedOperationException();
-		
+
 	}
 
 	@Override
@@ -274,26 +307,26 @@ public class ObjectPocketImpl implements ObjectPocket{
 	public void remove(Object obj) throws ObjectPocketException {
 		tracedObjects.remove(obj);
 		throw new UnsupportedOperationException();
-		
+
 	}
 
 	@Override
 	public void cleanup() {
 		throw new UnsupportedOperationException();
-		
+
 	}
 
 	@Override
 	public void link(ObjectPocket objectPocket) {
 		throw new UnsupportedOperationException();
-		
+
 	}
-	
+
 	@Override
 	public void setDefaultFilename(Class<?> type, String filename) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	private void loadObjectsFromJsonStrings(String typeName) throws ClassNotFoundException, IOException {
 		Class<?> clazz = Class.forName(typeName);
 		boolean insertBlobStore = false;
@@ -316,7 +349,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 				//					if (insertBlobStore) {
 				//						((Blob)object).setBlobStore(blobStore);
 				//					}
-
+				tracedObjects.put(object, id);
 				map.put(id, object);
 				counter++;
 			}
@@ -324,7 +357,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 		Logger.getAnonymousLogger().info("Loaded " + counter + " objects of type\n  "
 				+ clazz.getName() + " in " + (System.currentTimeMillis()-time) + " ms");
 	}
-	
+
 	private void injectReferences() {
 		// get property descriptors for types (ReferenceDetector)
 		// go through propyrtDescriptors
@@ -332,9 +365,9 @@ public class ObjectPocketImpl implements ObjectPocket{
 		for (ReferenceSupport referenceSupport : referenceSupportSet) {
 			Map<String, Map<String, Object>> globalMap = new HashMap<String, Map<String, Object>>(objectMap);
 			// TODO: extends to more instances
-//			for (JaperImpl japer : otherJapers) {
-//				amendMap(globalMap, japer.objectMap);
-//			}
+			//			for (JaperImpl japer : otherJapers) {
+			//				amendMap(globalMap, japer.objectMap);
+			//			}
 			for(String typeName : globalMap.keySet()) {
 				Collection<Object> values = globalMap.get(typeName).values();
 				for (Object object : values) {
@@ -344,7 +377,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 		}
 		Logger.getAnonymousLogger().info("Injection took " + (System.currentTimeMillis()-time) + " ms");
 	}
-	
+
 	private void amendMap(Map<String, Map<String, Object>> dest, Map<String, Map<String, Object>> source) {
 		for (String key : source.keySet()) {
 			if (dest.get(key) != null) {
@@ -355,32 +388,35 @@ public class ObjectPocketImpl implements ObjectPocket{
 			}
 		}
 	}
-	
+
 	public void addIdFromReadObject(int hashcode, String id) {
 		idsFromReadObjects.put(hashcode, id);
 	}
-	
+
 	private Gson configureGson() {
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		// null serialization
-		if (serializeNulls) {
-			gsonBuilder.serializeNulls();
-		}
-		
-		// This is where the referencing entry magic happens
-		gsonBuilder.registerTypeAdapterFactory(new CustomTypeAdapterFactory(this));
-		
-		// add custom type adapters
-		for (Type type : typeAdapterMap.keySet()) {
-			for (Object typeAdapter : typeAdapterMap.get(type)) {
-				gsonBuilder.registerTypeAdapter(type, typeAdapter);
+		if (gson == null) {
+			GsonBuilder gsonBuilder = new GsonBuilder();
+			// null serialization
+			if (serializeNulls) {
+				gsonBuilder.serializeNulls();
 			}
+
+			// This is where the referencing entry magic happens
+			gsonBuilder.registerTypeAdapterFactory(new CustomTypeAdapterFactory(this));
+
+			// add custom type adapters
+			for (Type type : typeAdapterMap.keySet()) {
+				for (Object typeAdapter : typeAdapterMap.get(type)) {
+					gsonBuilder.registerTypeAdapter(type, typeAdapter);
+				}
+			}
+			// pretty printing
+			if (prettyPrinting) {
+				gsonBuilder.setPrettyPrinting();
+			}
+			gson = gsonBuilder.create();
 		}
-		// pretty printing
-		if (prettyPrinting) {
-			gsonBuilder.setPrettyPrinting();
-		}
-		return gsonBuilder.create();
+		return gson;
 	}
 
 	public void serializeNulls() {
@@ -398,25 +434,25 @@ public class ObjectPocketImpl implements ObjectPocket{
 	public void setBlobStore(BlobStore blobStore) {
 		this.blobStore = blobStore;
 	}
-	
+
 	public void addReferenceSupport(ReferenceSupport referenceSupport) {
 		referenceSupportSet.add(referenceSupport);
 	}
-	
+
 	public String getIdForObject(Object obj) {
 		return tracedObjects.get(obj);
 	}
-	
+
 	public boolean isSerializeAsRoot(Object obj) {
 		return serializeAsRoot.contains(obj);
 	}
-	
+
 	public void setSerializeAsRoot(Object obj, boolean val) {
 		if (val) {
-		serializeAsRoot.add(obj);
+			serializeAsRoot.add(obj);
 		} else {
 			serializeAsRoot.remove(obj);
 		}
 	}
-	
+
 }

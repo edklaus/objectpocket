@@ -32,7 +32,7 @@ public class ComplexExample {
 	
 	private static final String FILESTORE = System.getProperty("user.home") + "/objectpocket_example_complex";
 	
-	private void store() {
+	private void store() throws Exception {
 		
 		Person mother = new Person();
 		mother.setName("mother");
@@ -97,9 +97,12 @@ public class ComplexExample {
 			}
 		}
 		
+		objectPocket2.store();
+		objectPocket2.load();
+		
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		ComplexExample complexExample = new ComplexExample();
 		complexExample.store();
 	}

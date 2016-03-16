@@ -4,14 +4,30 @@
 - splitTopLevelJsonObjects braucht ca. 5%
 
 ## BUGS ##
-- Einträge in op_index haben keine .json Endung
+- store erzeugt fehler, liegt evtl. an Proxy Objekt Einstellung
+  - Store durchimplementieren
 
 ## OPTIMIZATION POSSIBILITIES ##
-- File Write mit https://examples.javacodegeeks.com/core-java/nio/mappedbytebuffer/java-mappedbytebuffer-example/
+- Man kann folgende Vorgänge parallelisieren:
+  - Lesen der Dateien von Platte
+  - Verarbeiten der gelesenen Strings (split, ...)
+  - Umwandeln von JSON in Objekte
+- Multithreading in Methode load() bringt schon viel Geschw.vorteil
+- Es ist sicher noch besser jeden einzelnen Aufruf von "fromJson" an den ThreadPoolExecutor zu übergeben
+  - So lässt sich sicherein maximaler Geschwindigkeitsvorteil rausholen
+- Allerdings erzeugt es auch einige Fehler beim Zugriff auf Listen!!
+  -> Hier muss man nochmal genau prüfen
+- Auch beim store lässt sich sicher gut parallelisieren
 - Durch implementieren eines schnellen hashCode lassen sich ca. 14% rausholen
 
 ## TODO ##
-- Write Profilen
+- Write Profilen und mit anderen Implementierungen vergleichen
+  - Write zur Zeit bei 	2310
+  - Japer 				2398
+  - JSON to Zip 		3922
+- Blob support implementieren
+- Zip File storage
+- UnitTests
 - In den Support.injectReferences Methoden setProxy Methode aufrufen
 - JSON Ausgabe überarbeiten (s. outline)
 - setFilename für
