@@ -25,7 +25,6 @@
   - Write zur Zeit bei 	2310
   - Japer 				2398
   - JSON to Zip 		3922
-- Blob support implementieren
 - Zip File storage
 - UnitTests
 - In den Support.injectReferences Methoden setProxy Methode aufrufen

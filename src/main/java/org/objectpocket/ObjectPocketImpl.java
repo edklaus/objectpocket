@@ -183,23 +183,23 @@ public class ObjectPocketImpl implements ObjectPocket{
 			}
 
 			// persist blob data
-			//			try {
-			//				Class<?>  clazz = Class.forName(typeName);
-			//				if (Blob.class.isAssignableFrom(clazz)) {
-			//					Set<Blob> blobsToPersist = new HashSet<Blob>();
-			//					for (Identifiable identifiable : objectMap.get(typeName).values()) {
-			//						Blob blob = (Blob)identifiable;
-			//						if (blob.isPersist()) {
-			//							blobsToPersist.add(blob);
-			//						}
-			//					}
-			//					if (!blobsToPersist.isEmpty()) {
-			//						blobStore.writeBlobs(blobsToPersist);
-			//					}
-			//				}
-			//			} catch (ClassNotFoundException|IOException e) {
-			//				throw new JaperException("Could not collect blobs for typeName. " + typeName, e);
-			//			}
+			try {
+				Class<?> clazz = Class.forName(typeName);
+				if (Blob.class.isAssignableFrom(clazz)) {
+					Set<Blob> blobsToPersist = new HashSet<Blob>();
+					for (Object o : objectMap.get(typeName).values()) {
+						Blob blob = (Blob)o;
+						if (blob.doPersist()) {
+							blobsToPersist.add(blob);
+						}
+					}
+					if (!blobsToPersist.isEmpty()) {
+						blobStore.writeBlobs(blobsToPersist);
+					}
+				}
+			} catch (ClassNotFoundException|IOException e) {
+				throw new ObjectPocketException("Could not collect blobs for typeName. " + typeName, e);
+			}
 
 		}
 		Logger.getAnonymousLogger().info("Stored all objects in " + objectStore.getSource() + 
@@ -346,9 +346,9 @@ public class ObjectPocketImpl implements ObjectPocket{
 				// TODO: map to owning ObjectPocket
 				//object.setOwningInstance(this);
 
-				//					if (insertBlobStore) {
-				//						((Blob)object).setBlobStore(blobStore);
-				//					}
+				if (insertBlobStore) {
+					((Blob)object).setBlobStore(blobStore);
+				}
 				tracedObjects.put(object, id);
 				map.put(id, object);
 				counter++;

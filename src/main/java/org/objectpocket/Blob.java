@@ -19,6 +19,7 @@ package org.objectpocket;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.objectpocket.annotations.Entity;
 import org.objectpocket.storage.BlobStore;
 
 /**
@@ -26,6 +27,7 @@ import org.objectpocket.storage.BlobStore;
  * @author Edmund Klaus
  *
  */
+@Entity
 public class Blob {
 
 	private String id = UUID.randomUUID().toString();
@@ -53,7 +55,7 @@ public class Blob {
 		this.bytes = bytes;
 		persist = true;
 	}
-	public final boolean isPersist() {
+	public final boolean doPersist() {
 		if (bytes != null && bytes.length > 0) {
 			return persist;
 		}
