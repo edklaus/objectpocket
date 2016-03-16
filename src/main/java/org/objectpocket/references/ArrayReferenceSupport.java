@@ -66,7 +66,7 @@ public class ArrayReferenceSupport extends ReferenceSupport {
 
 	@Override
 	public void injectReferences(Object obj, Field field, Map<String, Map<String, Object>> objectMap,
-			Map<Integer, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException {
+			Map<Object, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException {
 		field.setAccessible(true);
 		Object[] readObjects = (Object[])field.get(obj);
 		field.setAccessible(false);
@@ -83,7 +83,7 @@ public class ArrayReferenceSupport extends ReferenceSupport {
 			if (typeMap != null) {
 				for (int i = 0; i < readObjects.length; i++) {
 					if (readObjects[i] != null) {
-						Object reference = typeMap.get(idsFromReadObjects.get(readObjects[i].hashCode()));
+						Object reference = typeMap.get(idsFromReadObjects.get(readObjects[i]));
 						if (reference != null) {
 							field.setAccessible(true);
 							readObjects[i] = reference;

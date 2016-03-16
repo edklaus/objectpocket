@@ -55,6 +55,8 @@ public class CustomTypeAdapterFactory implements TypeAdapterFactory {
 		// @Entity
 		if (type.getRawType().getAnnotation(Entity.class) != null) {
 			return new TypeAdapter<T>() {
+				
+				// SERIALIZE
 				public void write(JsonWriter out, T obj) throws IOException {
 					if (obj != null) {
 						String id = objectPocket.getIdForObject(obj);
@@ -70,6 +72,8 @@ public class CustomTypeAdapterFactory implements TypeAdapterFactory {
 					// default serialization
 					delegate.write(out, obj);
 				};
+				
+				// DESERIALIZE
 				@SuppressWarnings("unchecked")
 				@Override
 				public T read(JsonReader in) throws IOException {
@@ -87,7 +91,7 @@ public class CustomTypeAdapterFactory implements TypeAdapterFactory {
 							throw new IOException("Could not instanciate class " + type.getRawType().getName() + "\n"
 									+ "\tMight be that the class has no default constructor!", e);
 						}
-						objectPocket.addIdFromReadObject(obj.hashCode(), id);
+						objectPocket.addIdFromReadObject(obj, id);
 						return obj;
 					} else {
 						T obj = delegate.read(in);

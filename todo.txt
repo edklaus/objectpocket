@@ -18,7 +18,6 @@
 - Allerdings erzeugt es auch einige Fehler beim Zugriff auf Listen!!
   -> Hier muss man nochmal genau prüfen
 - Auch beim store lässt sich sicher gut parallelisieren
-- Durch implementieren eines schnellen hashCode lassen sich ca. 14% rausholen
 
 ## TODO ##
 - Write Profilen und mit anderen Implementierungen vergleichen

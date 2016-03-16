@@ -85,7 +85,7 @@ public class CollectionReferenceSupport extends ReferenceSupport {
 
 	@Override
 	public void injectReferences(Object obj, Field field, Map<String, Map<String, Object>> objectMap, 
-			Map<Integer, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException {
+			Map<Object, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException {
 		field.setAccessible(true);
 		@SuppressWarnings("unchecked")
 		Collection<Object> readObjects = (Collection<Object>)field.get(obj);
@@ -108,9 +108,9 @@ public class CollectionReferenceSupport extends ReferenceSupport {
 				Object[] tempArray = new Object[readObjects.size()];
 				int i = 0;
 				for (Object object : readObjects) {
-					Object reference = typeMap.get(idsFromReadObjects.get(object.hashCode()));
+					Object reference = typeMap.get(idsFromReadObjects.get(object));
 					if (reference != null) {
-						tempArray[i] = objectMap.get(typeName).get(idsFromReadObjects.get(object.hashCode()));
+						tempArray[i] = objectMap.get(typeName).get(idsFromReadObjects.get(object));
 					} else {
 						tempArray[i] = object;
 					}

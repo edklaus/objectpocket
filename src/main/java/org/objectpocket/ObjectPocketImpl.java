@@ -68,8 +68,8 @@ public class ObjectPocketImpl implements ObjectPocket{
 	// support for complex referencing
 	private Set<ReferenceSupport> referenceSupportSet = new HashSet<ReferenceSupport>();
 
-	// <object hash, id>
-	private Map<Integer, String> idsFromReadObjects = new HashMap<Integer, String>();
+	// <object, id>
+	private Map<Object, String> idsFromReadObjects = new HashMap<Object, String>();
 
 	public ObjectPocketImpl(ObjectStore objectStore) {
 		this.objectStore = objectStore;
@@ -119,7 +119,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 					// this supports cyclic references between objects
 					if (reference != null) {
 						if (!tracedObjects.containsKey(reference)) {
-							System.out.println(reference + " is not traced");
+							System.out.println(reference + " is not traced, but referenced by " + obj);
 							add(reference);
 						}
 					}
@@ -200,7 +200,6 @@ public class ObjectPocketImpl implements ObjectPocket{
 			} catch (ClassNotFoundException|IOException e) {
 				throw new ObjectPocketException("Could not collect blobs for typeName. " + typeName, e);
 			}
-
 		}
 		Logger.getAnonymousLogger().info("Stored all objects in " + objectStore.getSource() + 
 				" in "+ (System.currentTimeMillis()-time) + " ms.");
@@ -329,9 +328,9 @@ public class ObjectPocketImpl implements ObjectPocket{
 
 	private void loadObjectsFromJsonStrings(String typeName) throws ClassNotFoundException, IOException {
 		Class<?> clazz = Class.forName(typeName);
-		boolean insertBlobStore = false;
+		boolean setBlobStore = false;
 		if (Blob.class.isAssignableFrom(clazz)) {
-			insertBlobStore = true;
+			setBlobStore = true;
 		}
 		long time = System.currentTimeMillis();
 		int counter = 0;
@@ -346,7 +345,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 				// TODO: map to owning ObjectPocket
 				//object.setOwningInstance(this);
 
-				if (insertBlobStore) {
+				if (setBlobStore) {
 					((Blob)object).setBlobStore(blobStore);
 				}
 				tracedObjects.put(object, id);
@@ -359,8 +358,6 @@ public class ObjectPocketImpl implements ObjectPocket{
 	}
 
 	private void injectReferences() {
-		// get property descriptors for types (ReferenceDetector)
-		// go through propyrtDescriptors
 		long time = System.currentTimeMillis();
 		for (ReferenceSupport referenceSupport : referenceSupportSet) {
 			Map<String, Map<String, Object>> globalMap = new HashMap<String, Map<String, Object>>(objectMap);
@@ -389,8 +386,8 @@ public class ObjectPocketImpl implements ObjectPocket{
 		}
 	}
 
-	public void addIdFromReadObject(int hashcode, String id) {
-		idsFromReadObjects.put(hashcode, id);
+	public void addIdFromReadObject(Object object, String id) {
+		idsFromReadObjects.put(object, id);
 	}
 
 	private Gson configureGson() {

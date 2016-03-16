@@ -44,7 +44,7 @@ public abstract class ReferenceSupport {
 	public abstract List<Field> filterReferencingFields(List<Field> fields);
 
 	public abstract void injectReferences(Object obj, Field field, Map<String, Map<String, Object>> objectMap, 
-			Map<Integer, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException;
+			Map<Object, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException;
 
 	public abstract Set<Object> getObjectsForField(Object obj, Field field)
 			throws InvocationTargetException, IllegalAccessException;
@@ -86,7 +86,7 @@ public abstract class ReferenceSupport {
 		return fieldsForType.get(obj.getClass().getName());
 	}
 
-	public void injectReferences(Object obj,  Map<String, Map<String, Object>> objectMap, Map<Integer, String> idsFromReadObjects) {
+	public void injectReferences(Object obj,  Map<String, Map<String, Object>> objectMap, Map<Object, String> idsFromReadObjects) {
 		List<Field> objectFields = getFields(obj);
 		if (objectFields != null && !objectFields.isEmpty()) {
 			for (Field field : objectFields) {

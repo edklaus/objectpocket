@@ -29,7 +29,7 @@ import org.objectpocket.storage.BlobStore;
  */
 @Entity
 public class Blob {
-
+	
 	private String id = UUID.randomUUID().toString();
 	private String path;
 	private transient byte[] bytes;
