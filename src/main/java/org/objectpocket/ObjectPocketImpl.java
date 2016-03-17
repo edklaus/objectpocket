@@ -119,7 +119,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 					// this supports cyclic references between objects
 					if (reference != null) {
 						if (!tracedObjects.containsKey(reference)) {
-							System.out.println(reference + " is not traced, but referenced by " + obj);
+							//System.out.println(reference + " is not traced, but referenced by " + obj);
 							add(reference);
 						}
 					}

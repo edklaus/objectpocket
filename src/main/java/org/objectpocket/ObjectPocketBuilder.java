@@ -73,7 +73,7 @@ public class ObjectPocketBuilder {
 	 * @param password
 	 * @return {@link ObjectPocket}, or null if {@link ObjectPocket} could not be instantiated
 	 */
-	public ObjectPocket createCryptedFileStore(String directory, String password) {
+	public ObjectPocket createCryptoFileObjectPocket(String directory, String password) {
 		CryptoFileStore fileStore = new CryptoFileStore(directory, password);
 		return createObjectPocket(fileStore);
 	}
