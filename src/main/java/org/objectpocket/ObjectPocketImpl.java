@@ -19,12 +19,16 @@ package org.objectpocket;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
+
+import javax.swing.SwingWorker;
 
 import org.objectpocket.exception.ObjectPocketException;
 import org.objectpocket.gson.CustomTypeAdapterFactory;
@@ -237,7 +241,6 @@ public class ObjectPocketImpl implements ObjectPocket{
 //						try {
 //							loadObjectsFromJsonStrings(typeName);	
 //						} catch (ClassNotFoundException | IOException e) {
-//							loading = false;
 //							//throw new ObjectPocketException("Could not load objects for type. " + typeName, e);
 //							Logger.getAnonymousLogger().log(Level.SEVERE, "Could not load objects for type. " + typeName, e);
 //						}
@@ -263,7 +266,9 @@ public class ObjectPocketImpl implements ObjectPocket{
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-
+//		loading = false;
+		
+		
 		injectReferences();
 
 		Logger.getAnonymousLogger().info("Loaded all objects from " + objectStore.getSource() + 
@@ -273,8 +278,70 @@ public class ObjectPocketImpl implements ObjectPocket{
 
 	@Override
 	public void loadAsynchronous(Class<?>... preload) throws ObjectPocketException {
-		throw new UnsupportedOperationException();
+		loading = true;
+		long timeAll = System.currentTimeMillis();
+		/**
+		 * get all available object types
+		 */
+		Set<String> availableObjectTypes = null;
+		try {
+			availableObjectTypes = new HashSet<String>(objectStore.getAvailableObjectTypes());
+		} catch (IOException e) {
+			loading = false;
+			throw new ObjectPocketException("Could not acquire available objects.", e);
+		}
 
+		if (preload != null) {
+			for (Class<?> type : preload) {
+				if (type != null) {
+					// remove type from all types
+					availableObjectTypes.remove(type.getName());
+					// preload objects for this type
+					try {
+						loadObjectsFromJsonStrings(type.getName());
+					} catch (ClassNotFoundException | IOException e) {
+						loading = false;
+						throw new ObjectPocketException("Could not load objects for type. " + type.getName(), e);
+					}
+				}
+			}
+		}
+
+		injectReferences();
+
+		final Set<String> otherTypes = availableObjectTypes;
+		// do everything else asynchronous
+		SwingWorker<Void, Void> sw = new SwingWorker<Void, Void>() {
+			@Override
+			protected Void doInBackground() throws Exception {
+				// load the rest of object types
+				for (String typeName : otherTypes) {
+					try {
+						loadObjectsFromJsonStrings(typeName);
+					} catch (ClassNotFoundException | IOException e) {
+						loading = false;
+						throw new ObjectPocketException("Could not load objects asynchronously for type. " + typeName, e);
+					}
+				}
+				injectReferences();
+				Logger.getAnonymousLogger().info("Loaded all objects fomr " + objectStore.getSource() + 
+						" in " + (System.currentTimeMillis()-timeAll) + " ms.");
+				loading = false;
+				return null;
+			}
+			
+			@Override
+			protected void done() {
+				try {
+					get();
+				} catch (InterruptedException | ExecutionException e) {
+					loading = false;
+					Logger.getAnonymousLogger().severe("Could not load objects asynchronously.");
+					e.printStackTrace();
+				}
+			}
+		};
+		sw.execute();
 	}
 
 	@Override
@@ -337,7 +404,6 @@ public class ObjectPocketImpl implements ObjectPocket{
 		Map<String, String> jsonObjects = objectStore.readJsonObjects(typeName);
 		if (jsonObjects != null && !jsonObjects.isEmpty()) {
 			HashMap<String, Object> map = new HashMap<String, Object>();
-			objectMap.put(typeName, map);
 			Gson gson = configureGson();
 			for (String id : jsonObjects.keySet()) {
 				Object object = gson.fromJson(jsonObjects.get(id), clazz);
@@ -352,6 +418,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 				map.put(id, object);
 				counter++;
 			}
+			objectMap.put(typeName, map);
 		}
 		Logger.getAnonymousLogger().info("Loaded " + counter + " objects of type\n  "
 				+ clazz.getName() + " in " + (System.currentTimeMillis()-time) + " ms");
