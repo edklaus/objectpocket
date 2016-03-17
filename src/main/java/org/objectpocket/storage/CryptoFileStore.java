@@ -46,8 +46,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class CryptoFileStore extends FileStore {
 
-	private Cipher cipherWrite;
-	private Cipher cipherRead;
+	private SecretKey secret = null;
 
 	public CryptoFileStore(String directory, String password) {
 		super(directory);
@@ -55,26 +54,34 @@ public class CryptoFileStore extends FileStore {
 			SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 			KeySpec keySpec = new PBEKeySpec(password.toCharArray(), new byte[]{13,-45,89,-63,-76,78,9,101}, 65536, 128);
 			SecretKey secretKey = factory.generateSecret(keySpec);
-			SecretKey secret = new SecretKeySpec(secretKey.getEncoded(), "AES");
-			cipherWrite = Cipher.getInstance("AES");
-			cipherWrite.init(Cipher.ENCRYPT_MODE, secret);
-			cipherRead = Cipher.getInstance("AES");
-			cipherRead.init(Cipher.DECRYPT_MODE, secret);
-		} catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException e) {
+			secret = new SecretKeySpec(secretKey.getEncoded(), "AES");
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			Logger.getAnonymousLogger().log(Level.SEVERE, "Could not instanciate " + this.getClass().getName(), e);
 		}
 	}
 
 	@Override
 	protected OutputStreamWriter getOutputStreamWriterWriter(File file) throws IOException {
-		return new OutputStreamWriter(new CipherOutputStream(new FileOutputStream(file), cipherWrite));
+		try {
+			Cipher cipherWrite = Cipher.getInstance("AES");
+			cipherWrite.init(Cipher.ENCRYPT_MODE, secret);
+			return new OutputStreamWriter(new CipherOutputStream(new FileOutputStream(file), cipherWrite));
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
+			throw new IOException("Could not instanciate OutputStreamWriter for file " + file.getPath(), e);
+		}
 	}
 
 	@Override
 	protected BufferedReader getBufferedReader(File file) throws IOException {
-		return new BufferedReader(new InputStreamReader(new CipherInputStream(new FileInputStream(file), cipherRead)));
+		try {
+			Cipher cipherRead = Cipher.getInstance("AES");
+			cipherRead.init(Cipher.DECRYPT_MODE, secret);
+			return new BufferedReader(new InputStreamReader(new CipherInputStream(new FileInputStream(file), cipherRead)));
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
+			throw new IOException("Could not instanciate BufferedReader for file " + file.getPath(), e);
+		}
 	}
-	
+
 	protected String getReadErrorMessage() {
 		return "The given password might be wrong.";
 	}
