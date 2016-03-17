@@ -27,9 +27,11 @@ import org.objectpocket.references.ArrayReferenceSupport;
 import org.objectpocket.references.CollectionReferenceSupport;
 import org.objectpocket.references.SimpleReferenceSupport;
 import org.objectpocket.storage.BlobStore;
+import org.objectpocket.storage.CryptoFileStore;
 import org.objectpocket.storage.FileStore;
 import org.objectpocket.storage.MemoryStore;
 import org.objectpocket.storage.ObjectStore;
+import org.objectpocket.storage.ZipFileStore;
 
 import com.google.gson.GsonBuilder;
 
@@ -62,6 +64,23 @@ public class ObjectPocketBuilder {
 	public ObjectPocket createFileObjectPocket(String directory) {
 		FileStore fileStore = new FileStore(directory);
 		return createObjectPocket(fileStore);
+	}
+	
+	/**
+	 * Create an {@link ObjectPocket} instance that will store data into the given directory.</br>
+	 * Data will be stored encrypted. For encryption and decryption a password is needed.
+	 * @param directory
+	 * @param password
+	 * @return {@link ObjectPocket}, or null if {@link ObjectPocket} could not be instantiated
+	 */
+	public ObjectPocket createCryptedFileStore(String directory, String password) {
+		CryptoFileStore fileStore = new CryptoFileStore(directory, password);
+		return createObjectPocket(fileStore);
+	}
+	
+	public ObjectPocket createZipFileObjectPocket(String filename) {
+		ZipFileStore zipFileStore = new ZipFileStore(filename);
+		return createObjectPocket(zipFileStore);
 	}
 	
 	/**

@@ -2,6 +2,7 @@
 - FileStore.readJsonObjects
   - Gson.fromJson (Umwandlung in Proxy Objekte) verbraucht ca. 10% der Zeit
 - splitTopLevelJsonObjects braucht ca. 5%
+- mapping von objekten auf IDs in ObjectPocketImpl.idsFromReadObjects ist langsam und macht ca. 10% aus
 
 ## BUGS ##
 - store erzeugt fehler, liegt evtl. an Proxy Objekt Einstellung
@@ -25,6 +26,8 @@
   - Japer 				2398
   - JSON to Zip 		3922
 - Zip File storage
+  - ZipEntry werden innerhalb des streams nur alle nacheinander am Stück geschrieben!
+    - Man müsste dazu also den gesamten Datensatz am Stück übergeben!
 - UnitTests
 - In den Support.injectReferences Methoden setProxy Methode aufrufen
 - JSON Ausgabe überarbeiten (s. outline)

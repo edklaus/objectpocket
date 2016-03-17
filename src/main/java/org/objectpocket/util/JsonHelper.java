@@ -30,6 +30,9 @@ public class JsonHelper {
 	public static final String TYPE = "op_type";
 	public static final String ID = "op_id";
 	
+	public static final String JSON_PREFIX = "{\"objects\":[";
+	public static final String JSON_SUFFIX = "]}";
+	
 	public static String addTypeAndIdToJson(StringBuilder jsonString, String typeName, String id, boolean prettyPrinting) {
 		StringBuilder sb = new StringBuilder();
 		if (prettyPrinting) {
