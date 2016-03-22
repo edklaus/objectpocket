@@ -38,7 +38,8 @@ public interface ObjectStore extends BlobStore {
 	/**
 	 * Reads json objects of given typeName from the object store.
 	 * @param typeName fully qualified class name
-	 * @return map of object id, and json objects as strings
+	 * @return map of json objects as strings, and object id (id cna be reference
+	 *  when custom id has been set with @Id)
 	 * @throws IOException If an I/O error occurs
 	 */
 	public Map<String, String> readJsonObjects(String typeName) throws IOException;

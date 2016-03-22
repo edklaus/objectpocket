@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.junit.Test;
 import org.objectpocket.ObjectPocketTestSimple.OuterClass.InnerClass;
 import org.objectpocket.annotations.Entity;
+import org.objectpocket.annotations.Id;
 
 /**
  * 
@@ -148,6 +149,8 @@ public class ObjectPocketTestSimple {
 		Address2 foundAddress = addresses.iterator().next();
 		assertFalse(foundAddress.getInhabitant() == null);
 		assertFalse(foundPerson.getAddress() == null);
+		System.out.println(foundAddress.getInhabitant());
+		System.out.println(foundPerson);
 		assertTrue(foundAddress.getInhabitant().equals(foundPerson));
 		assertTrue(foundPerson.getAddress().equals(foundAddress));
 	}

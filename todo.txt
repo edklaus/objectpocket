@@ -21,6 +21,9 @@
 - Auch beim store lässt sich sicher gut parallelisieren
 
 ## TODO ##
+- @Id Annotation um custom IDs zu nutzen!!
+  - Muss vererbbar sein! 
+  - Mit ausführlicher Impl ausprobieren
 - Write Profilen und mit anderen Implementierungen vergleichen
   - Write zur Zeit bei 	2310
   - Japer 				2398

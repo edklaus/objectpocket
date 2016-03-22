@@ -48,13 +48,13 @@ public class MemoryStore implements ObjectStore {
 	}
 	
 	@Override
-	public Map<String,String> readJsonObjects(String typeName) {
+	public Map<String, String> readJsonObjects(String typeName) {
 		Set<String> set = jsonObjectMap.get(typeName);
 		Map<String, String> jsonObjects = new HashMap<String, String>(set.size());
 		Gson gson = new Gson();
 		for (String string : set) {
 			ProxyIn proxy = gson.fromJson(string, ProxyIn.class);
-			jsonObjects.put(proxy.getId(), string);
+			jsonObjects.put(string, proxy.getId());
 		}
 		return jsonObjects;
 	}

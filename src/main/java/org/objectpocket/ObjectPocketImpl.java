@@ -19,12 +19,10 @@ package org.objectpocket;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
@@ -35,6 +33,7 @@ import org.objectpocket.gson.CustomTypeAdapterFactory;
 import org.objectpocket.references.ReferenceSupport;
 import org.objectpocket.storage.BlobStore;
 import org.objectpocket.storage.ObjectStore;
+import org.objectpocket.util.IdSupport;
 import org.objectpocket.util.JsonHelper;
 
 import com.google.gson.Gson;
@@ -74,7 +73,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 
 	// <object, id>
 	private Map<Object, String> idsFromReadObjects = new HashMap<Object, String>();
-
+	
 	public ObjectPocketImpl(ObjectStore objectStore) {
 		this.objectStore = objectStore;
 	}
@@ -92,9 +91,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 		}
 		Map<String, Object> map = objectMap.get(typeName);
 		if (!tracedObjects.containsKey(obj)) {
-			// TODO: check if @Id has been set before generating ID
-			// custom ID might change at runtime!! Is this a problem?
-			String objectId = UUID.randomUUID().toString();
+			String objectId = IdSupport.getId(obj, false);
 			tracedObjects.put(obj, objectId);
 			map.put(objectId, obj);
 		}
@@ -136,6 +133,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 	public void store() throws ObjectPocketException {
 		long time = System.currentTimeMillis();
 		serializeAsRoot = new HashSet<Object>();
+		
 		// rescan for references
 		for (String typeName : objectMap.keySet()) {
 			Map<String, Object> map = objectMap.get(typeName);
@@ -144,6 +142,22 @@ public class ObjectPocketImpl implements ObjectPocket{
 					addReferences(obj);
 				}
 			}
+		}
+		
+		// update ids for all objects, 
+		// they might have been changed by the user in the meantime
+		objectMap.clear();
+		String newId = null;
+		for (Object obj : tracedObjects.keySet()) {
+			newId = IdSupport.getId(obj, false, tracedObjects.get(obj));
+			tracedObjects.put(obj, newId);
+			String typeName = obj.getClass().getName();
+			Map<String, Object> map = objectMap.get(typeName);
+			if (map == null) {
+				map = new HashMap<String, Object>();
+				objectMap.put(typeName, map);
+			}
+			map.put(newId, obj);
 		}
 
 		// go through all types that have been add to ObjectPocket
@@ -170,7 +184,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 				}
 				serializeAsRoot.add(object);
 				StringBuilder sb = new StringBuilder(gson.toJson(object));
-				jsonString = JsonHelper.addTypeAndIdToJson(sb, typeName, id, prettyPrinting);
+				jsonString = JsonHelper.addTypeAndIdToJson(sb, typeName, IdSupport.getId(object, true, id), prettyPrinting);
 				if (objectFilenames.get(object) != null) {
 					filename = objectFilenames.get(object);
 				}
@@ -204,7 +218,9 @@ public class ObjectPocketImpl implements ObjectPocket{
 			} catch (ClassNotFoundException|IOException e) {
 				throw new ObjectPocketException("Could not collect blobs for typeName. " + typeName, e);
 			}
+			
 		}
+		
 		Logger.getAnonymousLogger().info("Stored all objects in " + objectStore.getSource() + 
 				" in "+ (System.currentTimeMillis()-time) + " ms.");
 	}
@@ -405,8 +421,8 @@ public class ObjectPocketImpl implements ObjectPocket{
 		if (jsonObjects != null && !jsonObjects.isEmpty()) {
 			HashMap<String, Object> map = new HashMap<String, Object>();
 			Gson gson = configureGson();
-			for (String id : jsonObjects.keySet()) {
-				Object object = gson.fromJson(jsonObjects.get(id), clazz);
+			for (String jsonObject : jsonObjects.keySet()) {
+				Object object = gson.fromJson(jsonObject, clazz);
 
 				// TODO: map to owning ObjectPocket
 				//object.setOwningInstance(this);
@@ -414,6 +430,9 @@ public class ObjectPocketImpl implements ObjectPocket{
 				if (setBlobStore) {
 					((Blob)object).setBlobStore(blobStore);
 				}
+				
+				String id = IdSupport.getId(object, jsonObjects.get(jsonObject));
+				
 				tracedObjects.put(object, id);
 				map.put(id, object);
 				counter++;

@@ -97,7 +97,7 @@ public class FileStore implements ObjectStore {
 				// the complete string is already read in splitToTopLevelJsonObjects()!!
 				ProxyIn proxy = gson.fromJson(jsonStrings.get(i), ProxyIn.class);
 				if (proxy.getType().equals(typeName)) {
-					objects.put(proxy.getId(), jsonStrings.get(i));
+					objects.put(jsonStrings.get(i), proxy.getId());
 				}
 			}
 		}
