@@ -78,8 +78,8 @@ public class ObjectPocketBuilder {
 		return createObjectPocket(fileStore);
 	}
 	
-	public ObjectPocket createZipFileObjectPocket(String filename) {
-		ZipFileStore zipFileStore = new ZipFileStore(filename);
+	public ObjectPocket createZipFileObjectPocket(String filename, int compressionLevel, String password) {
+		ZipFileStore zipFileStore = new ZipFileStore(filename, compressionLevel, password);
 		return createObjectPocket(zipFileStore);
 	}
 	

@@ -41,9 +41,13 @@ public class ZipFileStore extends FileStore {
 	private String zipfile;
 	private ZipOutputStream zipOutputStream;
 	private OutputStreamWriter outputStreamWriter;
+	private int compressionLevel = 0;
+	private String password;
 	
-	public ZipFileStore(String filename) {
+	public ZipFileStore(String filename, int compressionLevel, String password) {
 		super(null);
+		this.compressionLevel = compressionLevel;
+		this.password = password;
 		this.zipfile = filename;
 	}
 	
@@ -69,6 +73,8 @@ public class ZipFileStore extends FileStore {
 		if (zipOutputStream == null) {
 			FileOutputStream fileOutputStream = new FileOutputStream(zipfile);
 			zipOutputStream = new ZipOutputStream(fileOutputStream);
+			zipOutputStream.setMethod(ZipOutputStream.DEFLATED);
+			zipOutputStream.setLevel(this.compressionLevel);
 			outputStreamWriter = new OutputStreamWriter(zipOutputStream);
 		} else {
 			zipOutputStream.closeEntry();
@@ -101,6 +107,7 @@ public class ZipFileStore extends FileStore {
 		if (!f.exists() && !f.createNewFile()) {
 			throw new IOException("Could not create zip file. " + f.getPath());
 		}
+		this.directory = f.getParent();
 		boolean indexFileFound = false;
 		try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipfile))) {
 			ZipEntry entry = null;
