@@ -105,25 +105,28 @@ public class FileStore implements ObjectStore {
 	}
 
 	@Override
-	public void writeJsonObjects(Map<String, Set<String>> jsonObjects, String typeName) throws IOException {
+	public void writeJsonObjects(Map<String, Map<String, Set<String>>> jsonObjects) throws IOException {
 		readIndexFile();
-		for (String filename : jsonObjects.keySet()) {
-			File file = initFile(filename + ".json", true, true);
-			try (OutputStreamWriter out = getOutputStreamWriterWriter(file)) {
-				addToIndex(typeName, file.getName());
-				out.write(JsonHelper.JSON_PREFIX + "\n");
-				Set<String> objectSet = jsonObjects.get(filename);
-				Iterator<String> iterator = objectSet.iterator();
-				while(iterator.hasNext()) {
-					out.write(iterator.next());
-					if (iterator.hasNext()) {
-						out.write(",");
+		for (String typeName : jsonObjects.keySet()) {
+			Map<String, Set<String>> objectsForType = jsonObjects.get(typeName);
+			for (String filename : objectsForType.keySet()) {
+				File file = initFile(filename + ".json", true, true);
+				try (OutputStreamWriter out = getOutputStreamWriter(file)) {
+					addToIndex(typeName, file.getName());
+					out.write(JsonHelper.JSON_PREFIX + "\n");
+					Set<String> objectSet = objectsForType.get(filename);
+					Iterator<String> iterator = objectSet.iterator();
+					while(iterator.hasNext()) {
+						out.write(iterator.next());
+						if (iterator.hasNext()) {
+							out.write(",");
+						}
+						out.write("\n");
 					}
-					out.write("\n");
+					out.write(JsonHelper.JSON_SUFFIX);
+				} catch (IOException e) {
+					throw new IOException("Could not write to file. " + file.getPath(), e);
 				}
-				out.write(JsonHelper.JSON_SUFFIX);
-			} catch (IOException e) {
-				throw new IOException("Could not write to file. " + file.getPath(), e);
 			}
 		}
 		writeIndexFile();
@@ -184,7 +187,7 @@ public class FileStore implements ObjectStore {
 		return directory;
 	}
 
-	protected OutputStreamWriter getOutputStreamWriterWriter(File file) throws IOException {
+	protected OutputStreamWriter getOutputStreamWriter(File file) throws IOException {
 		return new FileWriter(file);
 	}
 
@@ -285,7 +288,7 @@ public class FileStore implements ObjectStore {
 	}
 
 	private void writeIndexFileData(File file) throws IOException {
-		try (OutputStreamWriter out = getOutputStreamWriterWriter(file)) {
+		try (OutputStreamWriter out = getOutputStreamWriter(file)) {
 			Gson gson = new Gson();
 			String jsonString = gson.toJson(objectPocketIndex);
 			out.write(jsonString);

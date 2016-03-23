@@ -45,14 +45,11 @@ public interface ObjectStore extends BlobStore {
 	public Map<String, String> readJsonObjects(String typeName) throws IOException;
 	
 	/**
-	 * Writes json objects of given typeName to the object store.
-	 * @param jsonObjects json objects as strings, sorted by filenames.
-	 *   If null or an empty Map is passed as argument the type will be removed
-	 *   and will not be available anymore.
-	 * @param typeName fully qualified class name
+	 * Writes json objects to the object store.
+	 * @param jsonObjects Map<typeName, Map<filename, Set<jsonString>>>
 	 * @throws IOException If an I/O error occurs
 	 */
-	public void writeJsonObjects(Map<String, Set<String>> jsonObjects, String typeName) throws IOException;
+	public void writeJsonObjects(Map<String, Map<String, Set<String>>> jsonObjects) throws IOException;
 	
 	/**
 	 * Returns the source where data is loaded from.

@@ -31,7 +31,6 @@ import org.objectpocket.storage.CryptoFileStore;
 import org.objectpocket.storage.FileStore;
 import org.objectpocket.storage.MemoryStore;
 import org.objectpocket.storage.ObjectStore;
-import org.objectpocket.storage.ZipFileStore;
 
 import com.google.gson.GsonBuilder;
 
@@ -78,10 +77,10 @@ public class ObjectPocketBuilder {
 		return createObjectPocket(fileStore);
 	}
 	
-	public ObjectPocket createZipFileObjectPocket(String filename) {
-		ZipFileStore zipFileStore = new ZipFileStore(filename);
-		return createObjectPocket(zipFileStore);
-	}
+//	public ObjectPocket createZipFileObjectPocket(String filename) {
+//		ZipFileStore zipFileStore = new ZipFileStore(filename);
+//		return createObjectPocket(zipFileStore);
+//	}
 	
 	/**
 	 * Create an {@link ObjectPocket} instance with a given object store.

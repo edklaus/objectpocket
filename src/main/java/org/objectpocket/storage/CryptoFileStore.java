@@ -61,7 +61,7 @@ public class CryptoFileStore extends FileStore {
 	}
 
 	@Override
-	protected OutputStreamWriter getOutputStreamWriterWriter(File file) throws IOException {
+	protected OutputStreamWriter getOutputStreamWriter(File file) throws IOException {
 		try {
 			Cipher cipherWrite = Cipher.getInstance("AES");
 			cipherWrite.init(Cipher.ENCRYPT_MODE, secret);

@@ -53,7 +53,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 	private Map<Type, Set<Object>> typeAdapterMap = new HashMap<Type, Set<Object>>();
 
 	private Gson gson = null;
-	
+
 	private boolean loading = false;
 
 	// <typeName:<id,object>>
@@ -73,7 +73,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 
 	// <object, id>
 	private Map<Object, String> idsFromReadObjects = new HashMap<Object, String>();
-	
+
 	public ObjectPocketImpl(ObjectStore objectStore) {
 		this.objectStore = objectStore;
 	}
@@ -133,7 +133,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 	public void store() throws ObjectPocketException {
 		long time = System.currentTimeMillis();
 		serializeAsRoot = new HashSet<Object>();
-		
+
 		// rescan for references
 		for (String typeName : objectMap.keySet()) {
 			Map<String, Object> map = objectMap.get(typeName);
@@ -143,7 +143,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 				}
 			}
 		}
-		
+
 		// update ids for all objects, 
 		// they might have been changed by the user in the meantime
 		objectMap.clear();
@@ -160,10 +160,13 @@ public class ObjectPocketImpl implements ObjectPocket{
 			map.put(newId, obj);
 		}
 
-		// go through all types that have been add to ObjectPocket
+		// go through all types that have been add to ObjectPocket and collect
+		// data to persist
+		Map<String, Map<String, Set<String>>> jsonObjects = new HashMap<String, Map<String, Set<String>>>();
+		Set<Blob> blobsToPersist = new HashSet<Blob>();
 		Gson gson = configureGson();
 		for (String typeName : objectMap.keySet()) {
-			// store objects
+			// collect objects
 			Map<String, Object> map = objectMap.get(typeName);
 			if (map.values() == null) {
 				return;
@@ -194,33 +197,41 @@ public class ObjectPocketImpl implements ObjectPocket{
 				jsonStrings.get(filename).add(jsonString);
 				//				}
 			}
-			try {
-				objectStore.writeJsonObjects(jsonStrings, typeName);
-			} catch (IOException e) {
-				throw new ObjectPocketException("Could not persist objects for typeName. " + typeName, e);
-			}
+			jsonObjects.put(typeName, jsonStrings);
 
-			// persist blob data
+			// collect blob data
 			try {
 				Class<?> clazz = Class.forName(typeName);
 				if (Blob.class.isAssignableFrom(clazz)) {
-					Set<Blob> blobsToPersist = new HashSet<Blob>();
 					for (Object o : objectMap.get(typeName).values()) {
 						Blob blob = (Blob)o;
 						if (blob.doPersist()) {
 							blobsToPersist.add(blob);
 						}
 					}
-					if (!blobsToPersist.isEmpty()) {
-						blobStore.writeBlobs(blobsToPersist);
-					}
 				}
-			} catch (ClassNotFoundException|IOException e) {
+			} catch (ClassNotFoundException e) {
 				throw new ObjectPocketException("Could not collect blobs for typeName. " + typeName, e);
 			}
-			
+
 		}
-		
+
+		// persist object data
+		try {
+			objectStore.writeJsonObjects(jsonObjects);
+		} catch (IOException e) {
+			throw new ObjectPocketException("Could not persist objects.", e);
+		}
+
+		// persist blob data
+		if (!blobsToPersist.isEmpty()) {
+			try {
+				blobStore.writeBlobs(blobsToPersist);
+			} catch (IOException e) {
+				throw new ObjectPocketException("Could not persist blobs.", e);
+			}
+		}
+
 		Logger.getAnonymousLogger().info("Stored all objects in " + objectStore.getSource() + 
 				" in "+ (System.currentTimeMillis()-time) + " ms.");
 	}
@@ -243,7 +254,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 			throw new ObjectPocketException("Could not acquire available objects.", e);
 		}
 
-//		ExecutorService threadPool = Executors.newCachedThreadPool();
+		//		ExecutorService threadPool = Executors.newCachedThreadPool();
 
 		/**
 		 * load json objects strings into real objects
@@ -251,19 +262,19 @@ public class ObjectPocketImpl implements ObjectPocket{
 		if (availableObjectTypes != null) {
 			for (String typeName : availableObjectTypes) {
 
-//				Runnable r = new Runnable() {
-//					@Override
-//					public void run() {
-//						try {
-//							loadObjectsFromJsonStrings(typeName);	
-//						} catch (ClassNotFoundException | IOException e) {
-//							//throw new ObjectPocketException("Could not load objects for type. " + typeName, e);
-//							Logger.getAnonymousLogger().log(Level.SEVERE, "Could not load objects for type. " + typeName, e);
-//						}
-//					}
-//				};
-//
-//				threadPool.execute(r);
+				//				Runnable r = new Runnable() {
+				//					@Override
+				//					public void run() {
+				//						try {
+				//							loadObjectsFromJsonStrings(typeName);	
+				//						} catch (ClassNotFoundException | IOException e) {
+				//							//throw new ObjectPocketException("Could not load objects for type. " + typeName, e);
+				//							Logger.getAnonymousLogger().log(Level.SEVERE, "Could not load objects for type. " + typeName, e);
+				//						}
+				//					}
+				//				};
+				//
+				//				threadPool.execute(r);
 
 				try {
 					loadObjectsFromJsonStrings(typeName);	
@@ -275,16 +286,16 @@ public class ObjectPocketImpl implements ObjectPocket{
 			}
 		}
 
-//		threadPool.shutdown();
-//		try {
-//			threadPool.awaitTermination(60, TimeUnit.SECONDS);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		loading = false;
-		
-		
+		//		threadPool.shutdown();
+		//		try {
+		//			threadPool.awaitTermination(60, TimeUnit.SECONDS);
+		//		} catch (InterruptedException e) {
+		//			// TODO Auto-generated catch block
+		//			e.printStackTrace();
+		//		}
+		//		loading = false;
+
+
 		injectReferences();
 
 		Logger.getAnonymousLogger().info("Loaded all objects from " + objectStore.getSource() + 
@@ -345,7 +356,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 				loading = false;
 				return null;
 			}
-			
+
 			@Override
 			protected void done() {
 				try {
@@ -430,9 +441,9 @@ public class ObjectPocketImpl implements ObjectPocket{
 				if (setBlobStore) {
 					((Blob)object).setBlobStore(blobStore);
 				}
-				
+
 				String id = IdSupport.getId(object, jsonObjects.get(jsonObject));
-				
+
 				tracedObjects.put(object, id);
 				map.put(id, object);
 				counter++;
