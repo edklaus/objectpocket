@@ -61,24 +61,26 @@ public class CryptoFileStore extends FileStore {
 	}
 
 	@Override
-	protected OutputStreamWriter getOutputStreamWriter(File file) throws IOException {
+	protected OutputStreamWriter getOutputStreamWriter(String filename) throws IOException {
 		try {
+			File file = initFile(filename, true, true);
 			Cipher cipherWrite = Cipher.getInstance("AES");
 			cipherWrite.init(Cipher.ENCRYPT_MODE, secret);
 			return new OutputStreamWriter(new CipherOutputStream(new FileOutputStream(file), cipherWrite));
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
-			throw new IOException("Could not instanciate OutputStreamWriter for file " + file.getPath(), e);
+			throw new IOException("Could not instanciate OutputStreamWriter for file " + directory + "/" + filename, e);
 		}
 	}
 
 	@Override
-	protected BufferedReader getBufferedReader(File file) throws IOException {
+	protected BufferedReader getBufferedReader(String filename) throws IOException {
 		try {
+			File file = initFile(filename, true, false);
 			Cipher cipherRead = Cipher.getInstance("AES");
 			cipherRead.init(Cipher.DECRYPT_MODE, secret);
 			return new BufferedReader(new InputStreamReader(new CipherInputStream(new FileInputStream(file), cipherRead)));
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
-			throw new IOException("Could not instanciate BufferedReader for file " + file.getPath(), e);
+			throw new IOException("Could not instanciate BufferedReader for file " + directory + "/" + filename, e);
 		}
 	}
 

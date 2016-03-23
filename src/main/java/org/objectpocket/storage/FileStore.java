@@ -45,11 +45,11 @@ import com.google.gson.Gson;
  */
 public class FileStore implements ObjectStore {
 
-	private String directory;
-	private static final String BLOB_STORE_DIRNAME = "blobstore";
+	protected String directory;
+	protected static final String BLOB_STORE_DIRNAME = "blobstore";
 
-	private final String INDEX_FILE_NAME = ".op_index";
-	private ObjectPocketIndex objectPocketIndex = new ObjectPocketIndex();
+	protected final String INDEX_FILE_NAME = ".op_index";
+	protected ObjectPocketIndex objectPocketIndex = new ObjectPocketIndex();
 
 	public FileStore(String directory) {
 		this.directory = directory;
@@ -69,11 +69,10 @@ public class FileStore implements ObjectStore {
 		Set<String> filenames = objectPocketIndex.getTypeToFilenamesMapping().get(typeName);
 		Map<String, String> objects = new HashMap<String, String>();
 		for (String filename : filenames) {
-			File file = initFile(filename, true, false);
 
 			// maximum fast file reading
 			StringBuilder stringBuilder = new StringBuilder();
-			try (BufferedReader br = getBufferedReader(file)) {
+			try (BufferedReader br = getBufferedReader(filename)) {
 				String line = null;
 				while((line = br.readLine()) != null) {
 					stringBuilder.append(line);
@@ -87,7 +86,7 @@ public class FileStore implements ObjectStore {
 			if (index > -1) {
 				s = stringBuilder.substring(index+1, stringBuilder.length());
 			} else {
-				throw new IOException("The file " + file.getPath() + " does not contain valid JSON. " + 
+				throw new IOException("The file " + directory + "/" + filename + " does not contain valid JSON. " + 
 						getReadErrorMessage());
 			}
 			List<String> jsonStrings = JsonHelper.splitToTopLevelJsonObjects(s);
@@ -110,26 +109,25 @@ public class FileStore implements ObjectStore {
 		for (String typeName : jsonObjects.keySet()) {
 			Map<String, Set<String>> objectsForType = jsonObjects.get(typeName);
 			for (String filename : objectsForType.keySet()) {
-				File file = initFile(filename + ".json", true, true);
-				try (OutputStreamWriter out = getOutputStreamWriter(file)) {
-					addToIndex(typeName, file.getName());
-					out.write(JsonHelper.JSON_PREFIX + "\n");
-					Set<String> objectSet = objectsForType.get(filename);
-					Iterator<String> iterator = objectSet.iterator();
-					while(iterator.hasNext()) {
-						out.write(iterator.next());
-						if (iterator.hasNext()) {
-							out.write(",");
-						}
-						out.write("\n");
+				String filenameOnDisc = filename + ".json";
+				OutputStreamWriter out = getOutputStreamWriter(filenameOnDisc);
+				addToIndex(typeName, filenameOnDisc);
+				out.write(JsonHelper.JSON_PREFIX + "\n");
+				Set<String> objectSet = objectsForType.get(filename);
+				Iterator<String> iterator = objectSet.iterator();
+				while(iterator.hasNext()) {
+					out.write(iterator.next());
+					if (iterator.hasNext()) {
+						out.write(",");
 					}
-					out.write(JsonHelper.JSON_SUFFIX);
-				} catch (IOException e) {
-					throw new IOException("Could not write to file. " + file.getPath(), e);
+					out.write("\n");
 				}
+				out.write(JsonHelper.JSON_SUFFIX);
+				out.flush();
 			}
 		}
 		writeIndexFile();
+		finishWrite();
 	}
 
 	@Override
@@ -187,19 +185,25 @@ public class FileStore implements ObjectStore {
 		return directory;
 	}
 
-	protected OutputStreamWriter getOutputStreamWriter(File file) throws IOException {
+	protected OutputStreamWriter getOutputStreamWriter(String filename) throws IOException {
+		File file = initFile(filename, true, true);
 		return new FileWriter(file);
 	}
 
-	protected BufferedReader getBufferedReader(File file) throws IOException {
+	protected BufferedReader getBufferedReader(String filename) throws IOException {
+		File file = initFile(filename, true, false);
 		return new BufferedReader(new FileReader(file));
+	}
+
+	protected void finishWrite() throws IOException {
+
 	}
 
 	protected String getReadErrorMessage() {
 		return "";
 	}
 
-	private File initFile(String typeName, boolean read, boolean write) throws IOException {
+	protected File initFile(String typeName, boolean read, boolean write) throws IOException {
 		File dir = initFileStore();
 		String filename = dir.getPath() + File.separatorChar + typeName;
 		File f = new File(filename);
@@ -208,7 +212,7 @@ public class FileStore implements ObjectStore {
 				f.createNewFile();
 				if (typeName.equals(INDEX_FILE_NAME)) {
 					Logger.getAnonymousLogger().warning("Could not find index file. Will create.");
-					writeIndexFileData(f);
+					writeIndexFileData(getOutputStreamWriter(INDEX_FILE_NAME));
 				}
 			} catch (IOException e) {
 				throw new IOException("File could not be created. " + filename, e);
@@ -258,17 +262,16 @@ public class FileStore implements ObjectStore {
 		objectPocketIndex.getTypeToFilenamesMapping().get(typeName).add(filename);
 	}
 
-	private void readIndexFile() throws IOException {
-		File file = initFile(INDEX_FILE_NAME, true, false);
+	protected void readIndexFile() throws IOException {
 		StringBuilder sb = new StringBuilder();
-		try (BufferedReader br = getBufferedReader(file)) {
+		try (BufferedReader br = getBufferedReader(INDEX_FILE_NAME)) {
 			String line = null;
 			while((line = br.readLine()) != null) {
 				sb.append(line);
 			}
 		} catch (IOException e) {
-			throw new IOException("Could not read index file. " + file.getPath() + ". " + 
-					getReadErrorMessage(), e);
+			throw new IOException("Could not read index file. " + 
+					directory + "/" + INDEX_FILE_NAME + ". " + getReadErrorMessage(), e);
 		}
 		if (sb.length() > 0) {
 			Gson gson = new Gson();
@@ -278,23 +281,23 @@ public class FileStore implements ObjectStore {
 				return;
 			}
 		}
-		throw new IOException("Could not parse index file data to index object. " + file.getPath() + ". " + 
-				getReadErrorMessage());
+		throw new IOException("Could not parse index file data to index object. " + 
+				directory + "/" + INDEX_FILE_NAME + ". " + getReadErrorMessage());
 	}
 
-	private void writeIndexFile() throws IOException {
-		File file = initFile(INDEX_FILE_NAME, true, false);
-		writeIndexFileData(file);
-	}
-
-	private void writeIndexFileData(File file) throws IOException {
-		try (OutputStreamWriter out = getOutputStreamWriter(file)) {
-			Gson gson = new Gson();
-			String jsonString = gson.toJson(objectPocketIndex);
-			out.write(jsonString);
+	protected void writeIndexFile() throws IOException {
+		try {
+			writeIndexFileData(getOutputStreamWriter(INDEX_FILE_NAME));
 		} catch (IOException e) {
-			throw new IOException("Could not write index file. " + file.getPath(), e);
+			throw new IOException("Could not write index file. " + INDEX_FILE_NAME, e);
 		}
+	}
+
+	protected void writeIndexFileData(OutputStreamWriter out) throws IOException {
+		Gson gson = new Gson();
+		String jsonString = gson.toJson(objectPocketIndex);
+		out.write(jsonString);
+		out.flush();
 	}
 
 }
