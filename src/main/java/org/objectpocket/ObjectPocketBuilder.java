@@ -22,6 +22,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.objectpocket.references.ArrayReferenceSupport;
 import org.objectpocket.references.CollectionReferenceSupport;
@@ -95,7 +98,7 @@ public class ObjectPocketBuilder {
 	 * Compression will be set given compression level</br>
 	 * no encryption will be used.
 	 * @param filename
-	 * @param compressionLevel
+	 * @param compressionLevel 0-9
 	 * @return
 	 */
 	public ObjectPocket createZipFileObjectPocket(String filename, int compressionLevel) {
@@ -121,7 +124,7 @@ public class ObjectPocketBuilder {
 	 * Compression will be set given compression level</br>
 	 * zip file will be encrypted
 	 * @param filename
-	 * @param compressionLevel
+	 * @param compressionLevel 0-9
 	 * @param password
 	 * @return
 	 */
