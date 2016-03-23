@@ -17,6 +17,7 @@ class Configuration {
 ```
 The resulting file will look like:
 ```
+{"objects":[
 {
   "op_type": "org.package.Configuration",
   "op_id": "cdd4b552-4484-471a-a52f-6a66ee28e6d4",
@@ -24,6 +25,7 @@ The resulting file will look like:
   "port": 12345,
   "autoconnect": true
 }
+]}
 ```
 You can even edit the result by hand and load it into your application. It's plain JSON.
 
@@ -51,6 +53,7 @@ class Address {
 ```
 The resulting file will look like:
 ```
+{"objects":[
 {
   "op_type": "org.package.User",
   "op_id": "2c8c5270-caac-441c-94d6-3942c8a182af",
@@ -60,7 +63,7 @@ The resulting file will look like:
     "country": "Thailand",
     "postalCode": 123456
   }
-}
+]}
 ```
 
 ### Use Case: Window State
