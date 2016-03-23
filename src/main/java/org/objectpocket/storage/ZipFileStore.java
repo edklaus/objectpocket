@@ -21,7 +21,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -29,6 +31,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import com.alutam.ziputils.ZipDecryptInputStream;
+import com.alutam.ziputils.ZipEncryptOutputStream;
 import com.google.gson.Gson;
 
 /**
@@ -71,8 +75,11 @@ public class ZipFileStore extends FileStore {
 	
 	protected OutputStreamWriter getOutputStreamWriter(String filename) throws IOException {
 		if (zipOutputStream == null) {
-			FileOutputStream fileOutputStream = new FileOutputStream(zipfile);
-			zipOutputStream = new ZipOutputStream(fileOutputStream);
+			OutputStream out = new FileOutputStream(zipfile);
+			if (this.password != null && !password.isEmpty()) {
+				out = new ZipEncryptOutputStream(out, this.password);
+			}
+			zipOutputStream = new ZipOutputStream(out);
 			zipOutputStream.setMethod(ZipOutputStream.DEFLATED);
 			zipOutputStream.setLevel(this.compressionLevel);
 			outputStreamWriter = new OutputStreamWriter(zipOutputStream);
@@ -85,8 +92,11 @@ public class ZipFileStore extends FileStore {
 	}
 
 	protected BufferedReader getBufferedReader(String filename) throws IOException {
-		FileInputStream fileInputStream = new FileInputStream(zipfile);
-		ZipInputStream zipInputStream = new ZipInputStream(fileInputStream);
+		InputStream in = new FileInputStream(zipfile);
+		if (this.password != null && !password.isEmpty()) {
+			in = new ZipDecryptInputStream(in, this.password);
+		}
+		ZipInputStream zipInputStream = new ZipInputStream(in);
 		ZipEntry nextEntry = null;
 		while((nextEntry = zipInputStream.getNextEntry()) != null) {
 			if (nextEntry.getName().equals(filename)) {
@@ -109,7 +119,11 @@ public class ZipFileStore extends FileStore {
 		}
 		this.directory = f.getParent();
 		boolean indexFileFound = false;
-		try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipfile))) {
+		InputStream in = new FileInputStream(zipfile);
+		if (this.password != null && !password.isEmpty()) {
+			in = new ZipDecryptInputStream(in, this.password);
+		}
+		try (ZipInputStream zipIn = new ZipInputStream(in)) {
 			ZipEntry entry = null;
 			while ((entry = zipIn.getNextEntry()) != null) {
 				if (entry.getName().equals(INDEX_FILE_NAME)) {
@@ -129,7 +143,11 @@ public class ZipFileStore extends FileStore {
 	protected void readIndexFile() throws IOException {
 		initZipFile();
 		String line = null;
-		try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipfile))) {
+		InputStream in = new FileInputStream(zipfile);
+		if (this.password != null && !password.isEmpty()) {
+			in = new ZipDecryptInputStream(in, this.password);
+		}
+		try (ZipInputStream zipIn = new ZipInputStream(in)) {
 			ZipEntry entry = null;
 			while ((entry = zipIn.getNextEntry()) != null) {
 				if (entry.getName().equals(INDEX_FILE_NAME)) {
