@@ -78,6 +78,53 @@ public class ObjectPocketBuilder {
 		return createObjectPocket(fileStore);
 	}
 	
+	/**
+	 * Create an {@link ObjectPocket} instance that will store data into the given zip file.</br>
+	 * Compression will be set to 4 of (0-9)</br>
+	 * no encryption will be used.
+	 * @param filename
+	 * @return
+	 */
+	public ObjectPocket createZipFileObjectPocket(String filename) {
+		ZipFileStore zipFileStore = new ZipFileStore(filename, 4, null);
+		return createObjectPocket(zipFileStore);
+	}
+	
+	/**
+	 * Create an {@link ObjectPocket} instance that will store data into the given zip file.</br>
+	 * Compression will be set given compression level</br>
+	 * no encryption will be used.
+	 * @param filename
+	 * @param compressionLevel
+	 * @return
+	 */
+	public ObjectPocket createZipFileObjectPocket(String filename, int compressionLevel) {
+		ZipFileStore zipFileStore = new ZipFileStore(filename, compressionLevel, null);
+		return createObjectPocket(zipFileStore);
+	}
+	
+	/**
+	 * Create an {@link ObjectPocket} instance that will store data into the given zip file.</br>
+	 * Compression will be set to 4 of (0-9)</br>
+	 * zip file will be encrypted
+	 * @param filename
+	 * @param password
+	 * @return
+	 */
+	public ObjectPocket createZipFileObjectPocket(String filename, String password) {
+		ZipFileStore zipFileStore = new ZipFileStore(filename, 4, password);
+		return createObjectPocket(zipFileStore);
+	}
+	
+	/**
+	 * Create an {@link ObjectPocket} instance that will store data into the given zip file.</br>
+	 * Compression will be set given compression level</br>
+	 * zip file will be encrypted
+	 * @param filename
+	 * @param compressionLevel
+	 * @param password
+	 * @return
+	 */
 	public ObjectPocket createZipFileObjectPocket(String filename, int compressionLevel, String password) {
 		ZipFileStore zipFileStore = new ZipFileStore(filename, compressionLevel, password);
 		return createObjectPocket(zipFileStore);
