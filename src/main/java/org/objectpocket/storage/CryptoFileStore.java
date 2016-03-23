@@ -47,6 +47,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class CryptoFileStore extends FileStore {
 
 	private SecretKey secret = null;
+	private OutputStreamWriter outputStreamWriter;
 
 	public CryptoFileStore(String directory, String password) {
 		super(directory);
@@ -63,10 +64,12 @@ public class CryptoFileStore extends FileStore {
 	@Override
 	protected OutputStreamWriter getOutputStreamWriter(String filename) throws IOException {
 		try {
+			finishWrite();
 			File file = initFile(filename, true, true);
 			Cipher cipherWrite = Cipher.getInstance("AES");
 			cipherWrite.init(Cipher.ENCRYPT_MODE, secret);
-			return new OutputStreamWriter(new CipherOutputStream(new FileOutputStream(file), cipherWrite));
+			outputStreamWriter = new OutputStreamWriter(new CipherOutputStream(new FileOutputStream(file), cipherWrite));
+			return outputStreamWriter;
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
 			throw new IOException("Could not instanciate OutputStreamWriter for file " + directory + "/" + filename, e);
 		}
@@ -82,6 +85,14 @@ public class CryptoFileStore extends FileStore {
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
 			throw new IOException("Could not instanciate BufferedReader for file " + directory + "/" + filename, e);
 		}
+	}
+	
+	@Override
+	protected void finishWrite() throws IOException {
+		if (outputStreamWriter != null) {
+			outputStreamWriter.close();
+		}
+		outputStreamWriter = null;
 	}
 
 	protected String getReadErrorMessage() {

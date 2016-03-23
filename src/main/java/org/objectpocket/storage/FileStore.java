@@ -213,6 +213,7 @@ public class FileStore implements ObjectStore {
 				if (typeName.equals(INDEX_FILE_NAME)) {
 					Logger.getAnonymousLogger().warning("Could not find index file. Will create.");
 					writeIndexFileData(getOutputStreamWriter(INDEX_FILE_NAME));
+					finishWrite();
 				}
 			} catch (IOException e) {
 				throw new IOException("File could not be created. " + filename, e);
