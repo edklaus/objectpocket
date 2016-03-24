@@ -26,12 +26,12 @@ import java.util.logging.Logger;
 import org.objectpocket.references.ArrayReferenceSupport;
 import org.objectpocket.references.CollectionReferenceSupport;
 import org.objectpocket.references.SimpleReferenceSupport;
-import org.objectpocket.storage.BlobStore;
 import org.objectpocket.storage.CryptoFileStore;
 import org.objectpocket.storage.FileStore;
 import org.objectpocket.storage.MemoryStore;
 import org.objectpocket.storage.ObjectStore;
 import org.objectpocket.storage.ZipFileStore;
+import org.objectpocket.storage.blob.BlobStore;
 
 import com.google.gson.GsonBuilder;
 

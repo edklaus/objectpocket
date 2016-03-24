@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.objectpocket.annotations.Entity;
-import org.objectpocket.storage.BlobStore;
+import org.objectpocket.storage.blob.BlobStore;
 
 /**
  * 
@@ -35,7 +35,23 @@ public class Blob {
 	private transient byte[] bytes;
 	private transient boolean persist = false;
 	private transient BlobStore blobStore;
+	
+	public Blob() {
+	}
 
+	public Blob(byte[] bytes) {
+		this(null, bytes);
+	}
+	
+	public Blob(String path) {
+		this(path, null);
+	}
+	
+	public Blob(String path, byte[] bytes) {
+		this.setPath(path);
+		this.setBytes(bytes);
+	}
+	
 	public String getId() {
 		return id;
 	}

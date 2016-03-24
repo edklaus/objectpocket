@@ -31,8 +31,8 @@ import javax.swing.SwingWorker;
 import org.objectpocket.exception.ObjectPocketException;
 import org.objectpocket.gson.CustomTypeAdapterFactory;
 import org.objectpocket.references.ReferenceSupport;
-import org.objectpocket.storage.BlobStore;
 import org.objectpocket.storage.ObjectStore;
+import org.objectpocket.storage.blob.BlobStore;
 import org.objectpocket.util.IdSupport;
 import org.objectpocket.util.JsonHelper;
 

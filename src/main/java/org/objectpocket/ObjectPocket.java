@@ -19,7 +19,7 @@ package org.objectpocket;
 import java.util.Collection;
 
 import org.objectpocket.exception.ObjectPocketException;
-import org.objectpocket.storage.BlobStore;
+import org.objectpocket.storage.blob.BlobStore;
 
 /**
  * ObjectPocket is a Java library for simple storing and loading of Java objects.

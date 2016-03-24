@@ -88,8 +88,8 @@ public class CustomTypeAdapterFactory implements TypeAdapterFactory {
 							obj = (T)ReflectionUtil.instantiateDefaultConstructor(type.getRawType());
 						} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | 
 								NoSuchMethodException | InvocationTargetException e) {
-							throw new IOException("Could not instanciate class " + type.getRawType().getName() + "\n"
-									+ "\tMight be that the class has no default constructor!", e);
+							throw new IOException("Could not instantiate class " + type.getRawType().getName() + "\n"
+									+ "Might be that the class has no default constructor!", e);
 						}
 						objectPocket.addIdFromReadObject(obj, id);
 						return obj;

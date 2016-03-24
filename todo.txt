@@ -20,6 +20,7 @@
 - Auch beim store lässt sich sicher gut parallelisieren
 
 ## TODO ##
+- blobzip: man kann keine kompressionsrate einstellen!!
 - parallelisieren von Zugriffen beim Lesene / Schreiben
 - UnitTests
 - find Methode implementieren

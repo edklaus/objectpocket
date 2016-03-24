@@ -33,6 +33,8 @@ import java.util.logging.Logger;
 
 import org.objectpocket.Blob;
 import org.objectpocket.ProxyIn;
+import org.objectpocket.storage.blob.BlobStore;
+import org.objectpocket.storage.blob.ZipBlobStore;
 import org.objectpocket.util.JsonHelper;
 
 import com.google.gson.Gson;
@@ -43,15 +45,17 @@ import com.google.gson.Gson;
  *
  */
 public class FileStore implements ObjectStore {
-
+	
 	protected String directory;
-	protected static final String BLOB_STORE_DIRNAME = "blobstore";
 
 	protected final String INDEX_FILE_NAME = ".op_index";
 	protected ObjectPocketIndex objectPocketIndex = new ObjectPocketIndex();
+	
+	private BlobStore blobStore;
 
 	public FileStore(String directory) {
 		this.directory = directory;
+		this.blobStore = new ZipBlobStore(directory);
 	}
 
 	@Override
@@ -128,55 +132,19 @@ public class FileStore implements ObjectStore {
 		writeIndexFile();
 		finishWrite();
 	}
+	
+	public void setBlobStore(BlobStore blobStore) {
+		this.blobStore = blobStore;
+	}
 
 	@Override
 	public void writeBlobs(Set<Blob> blobs) throws IOException {
-		File blobStore = initBlobStore();
-		for (Blob blob : blobs) {
-			String path = blob.getPath();
-			if (path == null || path.trim().isEmpty()) {
-				path = blob.getId();
-			}
-			// find/create path and write blob
-			path = path.replaceAll("\\\\", "/");
-			String name = null;
-			File dir = null;
-			if (path.contains("/")) {
-				name = path.substring(path.lastIndexOf("/"));
-				path = path.substring(0, path.lastIndexOf("/"));
-				while(path.startsWith("/")) {
-					path = path.substring(1, path.length());
-				}
-				dir = new File(blobStore.getPath() + File.separatorChar + path);
-				if (!dir.exists()) {
-					if (!dir.mkdirs()) {
-						throw new IOException("Could not create directory for blob. " + dir.getPath());
-					}
-				}
-			} else {
-				name = path;
-				dir = new File(blobStore.getPath());
-			}
-			File f = new File(dir.getPath() + File.separatorChar + name);
-			try (FileOutputStream fOut = new FileOutputStream(f)) {
-				fOut.write(blob.getBytes());
-			}
-		}
+		this.blobStore.writeBlobs(blobs);
 	}
 
 	@Override
 	public byte[] loadBlobData(Blob blob) throws IOException {
-		File blobStore = initBlobStore();
-		String path = blob.getPath();
-		if (path == null || path.trim().isEmpty()) {
-			path = blob.getId();
-		}
-		File f = new File(blobStore.getPath() + File.separatorChar + path);
-		try (FileInputStream fIn = new FileInputStream(f)) {
-			byte[] bytes = new byte[(int)f.length()];
-			fIn.read(bytes);
-			return bytes;
-		}
+		return this.blobStore.loadBlobData(blob);
 	}
 
 	@Override
@@ -237,20 +205,6 @@ public class FileStore implements ObjectStore {
 		}
 		if (!dir.isDirectory()) {
 			throw new IOException("File store is not a directory. " + directory);
-		}
-		return dir;
-	}
-
-	private File initBlobStore() throws IOException {
-		File fileStore = initFileStore();
-		File dir = new File(fileStore.getPath() + File.separatorChar + BLOB_STORE_DIRNAME);
-		if (!dir.exists()) {
-			if (!dir.mkdir()) {
-				throw new IOException("Blob store could not be created. " + dir.getPath());
-			}
-		}
-		if (!dir.isDirectory()) {
-			throw new IOException("Blob stire is not a directory. " + dir.getPath());
 		}
 		return dir;
 	}

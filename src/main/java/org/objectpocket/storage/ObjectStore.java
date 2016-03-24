@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
+import org.objectpocket.storage.blob.BlobStore;
+
 /**
  * 
  * @author Edmund Klaus
