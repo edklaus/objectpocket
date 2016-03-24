@@ -27,9 +27,6 @@
   - Write zur Zeit bei 	2310
   - Japer 				2398
   - JSON to Zip 		3922
-- Zip File storage
-  - ZipEntry werden innerhalb des streams nur alle nacheinander am Stück geschrieben!
-    - Man müsste dazu also den gesamten Datensatz am Stück übergeben!
 - In den Support.injectReferences Methoden setProxy Methode aufrufen
 - JSON Ausgabe überarbeiten (s. outline)
 - setFilename für

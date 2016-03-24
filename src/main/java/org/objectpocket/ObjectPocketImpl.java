@@ -293,7 +293,6 @@ public class ObjectPocketImpl implements ObjectPocket{
 		//			// TODO Auto-generated catch block
 		//			e.printStackTrace();
 		//		}
-		//		loading = false;
 
 
 		injectReferences();

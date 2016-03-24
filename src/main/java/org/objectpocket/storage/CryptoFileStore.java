@@ -21,23 +21,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * 
@@ -45,58 +32,66 @@ import javax.crypto.spec.SecretKeySpec;
  *
  */
 public class CryptoFileStore extends FileStore {
-
-	private SecretKey secret = null;
-	private OutputStreamWriter outputStreamWriter;
+	
+	private byte shift;
 
 	public CryptoFileStore(String directory, String password) {
 		super(directory);
-		try {
-			SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-			KeySpec keySpec = new PBEKeySpec(password.toCharArray(), new byte[]{13,-45,89,-63,-76,78,9,101}, 65536, 128);
-			SecretKey secretKey = factory.generateSecret(keySpec);
-			secret = new SecretKeySpec(secretKey.getEncoded(), "AES");
-		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-			Logger.getAnonymousLogger().log(Level.SEVERE, "Could not instanciate " + this.getClass().getName(), e);
+		if (password != null && !password.isEmpty()) {
+			byte[] bytes = password.getBytes();
+			for (byte b : bytes) {
+				shift += b;
+			}
 		}
 	}
 
-	@Override
 	protected OutputStreamWriter getOutputStreamWriter(String filename) throws IOException {
-		try {
-			finishWrite();
-			File file = initFile(filename, true, true);
-			Cipher cipherWrite = Cipher.getInstance("AES");
-			cipherWrite.init(Cipher.ENCRYPT_MODE, secret);
-			outputStreamWriter = new OutputStreamWriter(new CipherOutputStream(new FileOutputStream(file), cipherWrite));
-			return outputStreamWriter;
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
-			throw new IOException("Could not instanciate OutputStreamWriter for file " + directory + "/" + filename, e);
-		}
+		File file = initFile(filename, true, true);
+		return new OutputStreamWriter(new CryptedOutputstream(new FileOutputStream(file)));
 	}
 
-	@Override
 	protected BufferedReader getBufferedReader(String filename) throws IOException {
-		try {
-			File file = initFile(filename, true, false);
-			Cipher cipherRead = Cipher.getInstance("AES");
-			cipherRead.init(Cipher.DECRYPT_MODE, secret);
-			return new BufferedReader(new InputStreamReader(new CipherInputStream(new FileInputStream(file), cipherRead)));
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
-			throw new IOException("Could not instanciate BufferedReader for file " + directory + "/" + filename, e);
+		File file = initFile(filename, true, false);
+		return new BufferedReader(new InputStreamReader(new CryptedInputStream(new FileInputStream(file))));
+	}
+	
+	private class CryptedOutputstream extends OutputStream {
+		private OutputStream delegate;
+		public CryptedOutputstream(OutputStream delegate) {
+			super();
+			this.delegate = delegate;
+		}
+		@Override
+		public void write(int b) throws IOException {
+			delegate.write(b ^ shift);
+		}
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			for (int i = off; i < len; i++) {
+				b[i] = (byte)(b[i] ^ shift);
+			}
+			delegate.write(b, off, len);
 		}
 	}
 	
-	@Override
-	protected void finishWrite() throws IOException {
-		if (outputStreamWriter != null) {
-			outputStreamWriter.close();
+	private class CryptedInputStream extends InputStream {
+		private InputStream delegate;
+		public CryptedInputStream(InputStream delegate) {
+			super();
+			this.delegate = delegate;
 		}
-		outputStreamWriter = null;
+		@Override
+		public int read() throws IOException {
+			return delegate.read() ^ shift;
+		}
+		@Override
+		public int read(byte[] b, int off, int len) throws IOException {
+			int result = delegate.read(b, off, len);
+			for (int i = off; i < result; i++) {
+				b[i] = (byte)(b[i] ^ shift);
+			}
+			return result;
+		}
 	}
-
-	protected String getReadErrorMessage() {
-		return "The given password might be wrong.";
-	}
-
+	
 }

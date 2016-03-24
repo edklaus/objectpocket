@@ -20,9 +20,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -187,12 +186,12 @@ public class FileStore implements ObjectStore {
 
 	protected OutputStreamWriter getOutputStreamWriter(String filename) throws IOException {
 		File file = initFile(filename, true, true);
-		return new FileWriter(file);
+		return new OutputStreamWriter(new FileOutputStream(file));
 	}
 
 	protected BufferedReader getBufferedReader(String filename) throws IOException {
 		File file = initFile(filename, true, false);
-		return new BufferedReader(new FileReader(file));
+		return new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 	}
 
 	protected void finishWrite() throws IOException {
