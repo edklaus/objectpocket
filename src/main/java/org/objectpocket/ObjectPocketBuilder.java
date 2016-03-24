@@ -84,52 +84,22 @@ public class ObjectPocketBuilder {
 	/**
 	 * Create an {@link ObjectPocket} instance that will store data into the given zip file.</br>
 	 * Compression will be set to 4 of (0-9)</br>
-	 * no encryption will be used.
 	 * @param filename
 	 * @return
 	 */
 	public ObjectPocket createZipFileObjectPocket(String filename) {
-		ZipFileStore zipFileStore = new ZipFileStore(filename, 4, null);
-		return createObjectPocket(zipFileStore);
+		return createZipFileObjectPocket(filename, 4);
 	}
 	
 	/**
 	 * Create an {@link ObjectPocket} instance that will store data into the given zip file.</br>
 	 * Compression will be set given compression level</br>
-	 * no encryption will be used.
 	 * @param filename
 	 * @param compressionLevel 0-9
 	 * @return
 	 */
 	public ObjectPocket createZipFileObjectPocket(String filename, int compressionLevel) {
-		ZipFileStore zipFileStore = new ZipFileStore(filename, compressionLevel, null);
-		return createObjectPocket(zipFileStore);
-	}
-	
-	/**
-	 * Create an {@link ObjectPocket} instance that will store data into the given zip file.</br>
-	 * Compression will be set to 4 of (0-9)</br>
-	 * zip file will be encrypted
-	 * @param filename
-	 * @param password
-	 * @return
-	 */
-	public ObjectPocket createZipFileObjectPocket(String filename, String password) {
-		ZipFileStore zipFileStore = new ZipFileStore(filename, 4, password);
-		return createObjectPocket(zipFileStore);
-	}
-	
-	/**
-	 * Create an {@link ObjectPocket} instance that will store data into the given zip file.</br>
-	 * Compression will be set given compression level</br>
-	 * zip file will be encrypted
-	 * @param filename
-	 * @param compressionLevel 0-9
-	 * @param password
-	 * @return
-	 */
-	public ObjectPocket createZipFileObjectPocket(String filename, int compressionLevel, String password) {
-		ZipFileStore zipFileStore = new ZipFileStore(filename, compressionLevel, password);
+		ZipFileStore zipFileStore = new ZipFileStore(filename, compressionLevel);
 		return createObjectPocket(zipFileStore);
 	}
 	
