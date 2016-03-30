@@ -18,6 +18,10 @@ package org.objectpocket.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -93,6 +97,25 @@ public class JsonHelper {
 			}
 		}
 		return jsonObjects;
+	}
+	
+	// TODO: This is a potential place to tune performance faster!
+	// maybe go through every character and extract id and type
+	public static String[] getTypeAndIdFromJson(String jsonString) {
+		
+		StringBuilder sb = new StringBuilder(jsonString);
+		
+		int startCut = sb.indexOf(TYPE + "\"")+TYPE.length()+1;
+		startCut = sb.indexOf("\"", startCut)+1;
+		int endCut = sb.indexOf("\"", startCut);
+		String type = sb.substring(startCut, endCut);
+		
+		startCut = sb.indexOf(ID + "\"")+ID.length()+1;
+		startCut = sb.indexOf("\"", startCut)+1;
+		endCut = sb.indexOf("\"", startCut);
+		String id = sb.substring(startCut, endCut);
+		
+		return new String[]{type,id};
 	}
 	
 }

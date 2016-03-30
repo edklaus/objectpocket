@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.objectpocket.Blob;
-import org.objectpocket.ProxyIn;
 import org.objectpocket.storage.blob.BlobStore;
 import org.objectpocket.storage.blob.ZipBlobStore;
 import org.objectpocket.util.JsonHelper;
@@ -93,13 +92,10 @@ public class FileStore implements ObjectStore {
 						getReadErrorMessage());
 			}
 			List<String> jsonStrings = JsonHelper.splitToTopLevelJsonObjects(s);
-			Gson gson = new Gson();
 			for (int i = 0; i < jsonStrings.size(); i++) {
-				// TODO: maybe there is more potential for optimization here!
-				// the complete string is already read in splitToTopLevelJsonObjects()!!
-				ProxyIn proxy = gson.fromJson(jsonStrings.get(i), ProxyIn.class);
-				if (proxy.getType().equals(typeName)) {
-					objects.put(jsonStrings.get(i), proxy.getId());
+				String[] typeAndIdFromJson = JsonHelper.getTypeAndIdFromJson(jsonStrings.get(i));
+				if (typeAndIdFromJson[0].equals(typeName)) {
+					objects.put(jsonStrings.get(i), typeAndIdFromJson[1]);
 				}
 			}
 		}

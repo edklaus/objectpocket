@@ -179,9 +179,6 @@ public class ObjectPocketImpl implements ObjectPocket{
 				//				if (!identifiable.isProxy()) {
 				//					identifiable.serializeAsRoot = true;
 				Object object = map.get(id);
-				if (object instanceof ProxyIn) {
-					System.out.println("proxyIn");
-				}
 				if (object instanceof ProxyOut) {
 					System.out.println("proxyOut");
 				}
