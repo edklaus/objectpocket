@@ -68,7 +68,6 @@ public class CollectionReferenceSupport extends ReferenceSupport {
 		if (field != null) {
 			field.setAccessible(true);
 			Object o = field.get(obj);
-			field.setAccessible(false);
 			if (o != null) {
 				@SuppressWarnings("unchecked")
 				Collection<Object> collection = (Collection<Object>)o;
@@ -90,7 +89,6 @@ public class CollectionReferenceSupport extends ReferenceSupport {
 		field.setAccessible(true);
 		@SuppressWarnings("unchecked")
 		Collection<Object> readObjects = (Collection<Object>)field.get(obj);
-		field.setAccessible(false);
 		if (readObjects != null) {
 			// TODO:
 			// marking proxy objects as proxy prevents from persisting proxy objects!

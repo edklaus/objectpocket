@@ -52,7 +52,6 @@ public class ArrayReferenceSupport extends ReferenceSupport {
 		if (field != null) {
 			field.setAccessible(true);
 			Object[] objectArray = (Object[])field.get(obj);
-			field.setAccessible(false);
 			if (objectArray != null) {
 				Set<Object> objects = new HashSet<Object>();
 				for (Object object : objectArray) {
@@ -69,7 +68,6 @@ public class ArrayReferenceSupport extends ReferenceSupport {
 			Map<Object, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException {
 		field.setAccessible(true);
 		Object[] readObjects = (Object[])field.get(obj);
-		field.setAccessible(false);
 		if (readObjects != null) {
 			// TODO:
 			// marking proxy objects as proxy prevents from persisting proxy objects!
@@ -85,9 +83,7 @@ public class ArrayReferenceSupport extends ReferenceSupport {
 					if (readObjects[i] != null) {
 						Object reference = typeMap.get(idsFromReadObjects.get(readObjects[i]));
 						if (reference != null) {
-							field.setAccessible(true);
 							readObjects[i] = reference;
-							field.setAccessible(false);
 						}
 					}
 				}

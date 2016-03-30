@@ -1,8 +1,10 @@
 ## HOSTSPOTS ##
 - FileStore.readJsonObjects
-  - Gson.fromJson (Umwandlung in Proxy Objekte) verbraucht ca. 10% der Zeit
+  - Gson.fromJson (Umwandlung in Proxy Objekte) verbraucht ca. 20% der Zeit
 - splitTopLevelJsonObjects braucht ca. 5%
-- mapping von objekten auf IDs in ObjectPocketImpl.idsFromReadObjects ist langsam und macht ca. 10% aus
+
+(Speichern)
+- Objektvergleich braucht relativ viel Zeit (tracedObjects)
 
 ## BUGS ##
 

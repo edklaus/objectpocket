@@ -34,7 +34,8 @@ import org.objectpocket.annotations.Id;
 public class IdSupport {
 
 	public static final String OP_REF_STRING = "op_ref:";
-	private static Map<String, Field> idFieldForType = new HashMap<String, Field>();
+	private static Map<String, Field> idFieldForType_ObjectsInMemory = new HashMap<String, Field>();
+	private static Map<String, Field> idFieldForType_ObjectsFromStore = new HashMap<String, Field>();
 
 	public static String getId(Object obj, boolean referenceForAnnotation) {
 		return getId(obj, referenceForAnnotation, null);
@@ -52,12 +53,12 @@ public class IdSupport {
 	 */
 	public static String getId(Object obj, boolean referenceForAnnotation, String existingId) {
 		String typeName = obj.getClass().getName();
-		if (!idFieldForType.containsKey(typeName)) {
+		if (!idFieldForType_ObjectsInMemory.containsKey(typeName)) {
 			Field[] fields = FieldUtils.getAllFields(obj.getClass());
 			for (Field field : fields) {
 				if (field.isAnnotationPresent(Id.class)) {
 					if (field.getType().equals(String.class)) {
-						idFieldForType.put(typeName, field);
+						idFieldForType_ObjectsInMemory.put(typeName, field);
 					} else {
 						Logger.getAnonymousLogger().warning("@Id annotated field in class " + 
 								typeName + " is not of type java.lang.String. Will generate random ids for this class.");
@@ -65,11 +66,11 @@ public class IdSupport {
 					break;
 				}
 			}
-			if (!idFieldForType.containsKey(typeName)) {
-				idFieldForType.put(typeName, null);
+			if (!idFieldForType_ObjectsInMemory.containsKey(typeName)) {
+				idFieldForType_ObjectsInMemory.put(typeName, null);
 			}
 		}
-		Field field = idFieldForType.get(typeName);
+		Field field = idFieldForType_ObjectsInMemory.get(typeName);
 		if (field != null) {
 			try {
 				field.setAccessible(true);
@@ -84,7 +85,6 @@ public class IdSupport {
 					Logger.getAnonymousLogger().warning("Id for object " + obj + " has not been set. "
 							+ "Will generate random id for this class.");
 				}
-				field.setAccessible(false);
 			} catch (IllegalAccessException e) {
 				Logger.getAnonymousLogger().log(Level.WARNING, "Could not read id from class " + typeName, e);
 			}
@@ -103,8 +103,13 @@ public class IdSupport {
 	 */
 	public static String getId(Object obj, String idFromProxyIn) {
 		if (idFromProxyIn.startsWith(OP_REF_STRING)) {
-			String fieldName = idFromProxyIn.substring(OP_REF_STRING.length(), idFromProxyIn.length());
-			Field field = FieldUtils.getField(obj.getClass(), fieldName, true);
+			String typeName = obj.getClass().getName();
+			if (!idFieldForType_ObjectsFromStore.containsKey(typeName)) {
+				String fieldName = idFromProxyIn.substring(OP_REF_STRING.length(), idFromProxyIn.length());
+				Field field = FieldUtils.getField(obj.getClass(), fieldName, true);
+				idFieldForType_ObjectsFromStore.put(typeName, field);
+			}
+			Field field = idFieldForType_ObjectsFromStore.get(typeName);
 			try {
 				idFromProxyIn = (String)field.get(obj);
 			} catch (IllegalAccessException e) {

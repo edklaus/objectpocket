@@ -52,7 +52,6 @@ public class SimpleReferenceSupport extends ReferenceSupport {
 		if (field != null) {
 			field.setAccessible(true);
 			Object object = field.get(obj);
-			field.setAccessible(false);
 			if (object != null) {
 				Set<Object> objects = new HashSet<Object>();
 				objects.add(object);
@@ -67,7 +66,6 @@ public class SimpleReferenceSupport extends ReferenceSupport {
 			Map<Object, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException {
 		field.setAccessible(true);
 		Object readObject = field.get(obj);
-		field.setAccessible(false);
 		if (readObject != null) {
 			// TODO:
 			// marking proxy objects as proxy prevents from persisting proxy objects!
@@ -75,11 +73,9 @@ public class SimpleReferenceSupport extends ReferenceSupport {
 			Map<String, Object> typeMap = objectMap.get(field.getType().getName());
 			if (typeMap != null) {
 				Object reference = typeMap.get(idsFromReadObjects.get(readObject));
-				field.setAccessible(true);
 				if (reference != null) {
 					field.set(obj, reference);
 				}
-				field.setAccessible(false);
 			}
 		}
 	}
