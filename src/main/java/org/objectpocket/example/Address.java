@@ -44,4 +44,10 @@ public class Address {
 	public void setInhabitant(Person inhabitant) {
 		this.inhabitant = inhabitant;
 	}
+	public String getStreet() {
+		return street;
+	}
+	public int getNumber() {
+		return number;
+	}
 }

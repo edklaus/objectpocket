@@ -101,4 +101,8 @@ public class FileBlobStore implements BlobStore {
 		return dir;
 	}
 
+	@Override
+	public void close() throws IOException {
+		
+	}
 }

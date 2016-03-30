@@ -146,6 +146,11 @@ public class FileStore implements ObjectStore {
 	public byte[] loadBlobData(Blob blob) throws IOException {
 		return this.blobStore.loadBlobData(blob);
 	}
+	
+	@Override
+	public void close() throws IOException {
+		this.blobStore.close();
+	}
 
 	@Override
 	public String getSource() {

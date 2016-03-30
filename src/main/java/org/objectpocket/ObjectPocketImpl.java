@@ -407,6 +407,16 @@ public class ObjectPocketImpl implements ObjectPocket{
 		throw new UnsupportedOperationException();
 
 	}
+	
+	@Override
+	public void close() throws IOException {
+		if (objectStore != null) {
+			objectStore.close();
+		}
+		if (blobStore != null) {
+			blobStore.close();
+		}
+	}
 
 	@Override
 	public void link(ObjectPocket objectPocket) {

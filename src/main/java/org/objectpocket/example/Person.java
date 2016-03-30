@@ -55,6 +55,12 @@ public class Person {
 	public void setFriends(List<Person> friends) {
 		this.friends = friends;
 	}
+	public String getSurname() {
+		return surname;
+	}
+	public Date getBirthdate() {
+		return birthdate;
+	}
 
 }
 

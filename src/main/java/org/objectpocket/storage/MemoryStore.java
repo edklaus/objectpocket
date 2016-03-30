@@ -84,6 +84,11 @@ public class MemoryStore implements ObjectStore {
 	}
 	
 	@Override
+	public void close() throws IOException {
+		
+	}
+	
+	@Override
 	public String getSource() {
 		return "MemStore." + hashCode();
 	}

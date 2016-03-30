@@ -43,4 +43,9 @@ public interface BlobStore {
 	 */
 	public byte[] loadBlobData(Blob blob) throws IOException;
 	
+	/**
+	 * close blob store
+	 */
+	public void close() throws IOException;
+	
 }

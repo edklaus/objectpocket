@@ -70,6 +70,7 @@ public class CollectionReferenceSupport extends ReferenceSupport {
 			Object o = field.get(obj);
 			field.setAccessible(false);
 			if (o != null) {
+				@SuppressWarnings("unchecked")
 				Collection<Object> collection = (Collection<Object>)o;
 				Set<Object> objects = new HashSet<Object>();
 				for (Object object : collection) {

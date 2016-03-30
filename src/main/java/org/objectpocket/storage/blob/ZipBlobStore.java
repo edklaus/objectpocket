@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -32,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.zip.ZipEntry;
 
 import org.objectpocket.Blob;
 
@@ -45,17 +43,23 @@ public class ZipBlobStore implements BlobStore {
 
 	private static final String BLOB_STORE_FILENAME = "binary";
 	
-	Map<String, String> env = new HashMap<>(); 
-    URI uri = null; 
+	private URI uri = null;
+	private FileSystem fsRead = null;
 	
 	public ZipBlobStore(String directory) {
-		env.put("create", "true");
 		Path path = Paths.get(directory + "/" + BLOB_STORE_FILENAME);
 		uri = URI.create("jar:" + path.toUri());
 	}
 	
+	private void openReadFileSystem() throws IOException {
+		Map<String, String> env = new HashMap<>();
+		fsRead = FileSystems.newFileSystem(uri, env);
+	}
+	
 	@Override
 	public void writeBlobs(Set<Blob> blobs) throws IOException {
+		Map<String, String> env = new HashMap<>(); 
+		env.put("create", "true");
 		try (FileSystem fs = FileSystems.newFileSystem(uri, env)) {
 			for (Blob blob : blobs) {
 				String path = blob.getPath();
@@ -95,23 +99,31 @@ public class ZipBlobStore implements BlobStore {
 		if (path == null || path.trim().isEmpty()) {
 			path = blob.getId();
 		}
-		try (FileSystem fs = FileSystems.newFileSystem(uri, env)) {
-			Path fileInZip = fs.getPath(path);
-			byte[] buf = new byte[1024];
-			List<Byte> bytes = new ArrayList<Byte>(1024000); // 1 MB
-			try (InputStream in = Files.newInputStream(fileInZip)) {
-				int length = -1;
-				while((length = in.read(buf)) != -1) {
-					for (int i = 0; i < length; i++) {
-						bytes.add(buf[i]);
-					}
+		if (fsRead == null || !fsRead.isOpen()) {
+			openReadFileSystem();
+		}
+		Path fileInZip = fsRead.getPath(path);
+		byte[] buf = new byte[1024];
+		List<Byte> bytes = new ArrayList<Byte>(1024000); // 1 MB
+		try (InputStream in = Files.newInputStream(fileInZip)) {
+			int length = -1;
+			while((length = in.read(buf)) != -1) {
+				for (int i = 0; i < length; i++) {
+					bytes.add(buf[i]);
 				}
 			}
-			buf = new byte[bytes.size()];
-			for (int i = 0; i < bytes.size(); i++) {
-				buf[i] = bytes.get(i);
-			}
-			return buf;
+		}
+		buf = new byte[bytes.size()];
+		for (int i = 0; i < bytes.size(); i++) {
+			buf[i] = bytes.get(i);
+		}
+		return buf;
+	}
+	
+	@Override
+	public void close() throws IOException {
+		if (fsRead != null && fsRead.isOpen()) {
+			fsRead.close();
 		}
 	}
 

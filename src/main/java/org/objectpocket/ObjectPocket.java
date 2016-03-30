@@ -16,6 +16,7 @@
 
 package org.objectpocket;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import org.objectpocket.exception.ObjectPocketException;
@@ -157,6 +158,11 @@ public interface ObjectPocket {
 	 * To really delete the data and free disk space call {@link #cleanup()}.
 	 */
 	public void cleanup();
+	
+	/**
+	 * Closes object pocket and all contained ObjectStores, files, streams.
+	 */
+	public void close() throws IOException;
 	
 	/**
 	 * Links another ObjectPocket instance to this ObjectPocket.</br>
