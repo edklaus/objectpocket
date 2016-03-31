@@ -347,7 +347,7 @@ public class ObjectPocketImpl implements ObjectPocket{
 					}
 				}
 				injectReferences();
-				Logger.getAnonymousLogger().info("Loaded all objects fomr " + objectStore.getSource() + 
+				Logger.getAnonymousLogger().info("Loaded all objects from " + objectStore.getSource() + 
 						" in " + (System.currentTimeMillis()-timeAll) + " ms.");
 				loading = false;
 				return null;
