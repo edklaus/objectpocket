@@ -50,29 +50,29 @@ public class ObjectPocketImpl implements ObjectPocket{
 	private BlobStore blobStore;
 	private boolean serializeNulls = false;
 	private boolean prettyPrinting = false;
-	private Map<Type, Set<Object>> typeAdapterMap = new HashMap<Type, Set<Object>>();
+	private Map<Type, Set<Object>> typeAdapterMap = new HashMap<Type, Set<Object>>(10);
 
 	private Gson gson = null;
 
 	private boolean loading = false;
 
 	// <typeName:<id,object>>
-	private Map<String, Map<String, Object>> objectMap = new HashMap<String, Map<String, Object>>();
+	private Map<String, Map<String, Object>> objectMap = new HashMap<String, Map<String, Object>>(1000000);
 
 	// this extra map<object,id> is necessary for faster lookup of already traced objects
 	// objectMap.values.values is too slow for a proper lookup
-	private Map<Object, String> tracedObjects = new HashMap<Object, String>();
+	private Map<Object, String> tracedObjects = new HashMap<Object, String>(1000000);
 
 	private Set<Object> serializeAsRoot;
 
 	// holds specific filenames for objects, set by the user
-	private Map<Object, String> objectFilenames = new HashMap<Object, String>();
+	private Map<Object, String> objectFilenames = new HashMap<Object, String>(10);
 
 	// support for complex referencing
-	private Set<ReferenceSupport> referenceSupportSet = new HashSet<ReferenceSupport>();
+	private Set<ReferenceSupport> referenceSupportSet = new HashSet<ReferenceSupport>(10);
 
 	// <object, id>
-	private Map<Object, String> idsFromReadObjects = new HashMap<Object, String>();
+	private Map<Object, String> idsFromReadObjects = new HashMap<Object, String>(1000000);
 
 	public ObjectPocketImpl(ObjectStore objectStore) {
 		this.objectStore = objectStore;

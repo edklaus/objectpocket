@@ -18,10 +18,6 @@ package org.objectpocket.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -76,7 +72,8 @@ public class JsonHelper {
 		int objectStartIndex = 0;
 		int objectStart = 0;
 		int objectEnd = 0;
-		for (int i = 0; i < s.length(); i++) {
+		int length = s.length();
+		for (int i = 0; i < length; i++) {
 			switch (s.charAt(i)) {
 			case '{':
 				if (objectStart == 0) {

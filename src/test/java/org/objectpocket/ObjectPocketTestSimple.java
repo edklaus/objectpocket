@@ -9,7 +9,6 @@ import java.util.UUID;
 import org.junit.Test;
 import org.objectpocket.ObjectPocketTestSimple.OuterClass.InnerClass;
 import org.objectpocket.annotations.Entity;
-import org.objectpocket.annotations.Id;
 
 /**
  * 

@@ -25,8 +25,6 @@ import java.util.Set;
 import org.objectpocket.Blob;
 import org.objectpocket.util.JsonHelper;
 
-import com.google.gson.Gson;
-
 /**
  * 
  * @author Edmund Klaus
