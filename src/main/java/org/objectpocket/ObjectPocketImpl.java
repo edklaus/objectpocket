@@ -80,6 +80,9 @@ public class ObjectPocketImpl implements ObjectPocket{
 
 	@Override
 	public void add(Object obj) {
+		if (obj == null) {
+			return;
+		}
 		// TODO: check who owns the object (in case more than 1 ObjectPocket)
 		//		if (obj.getOwningInstance() == null || obj.getOwningInstance().equals(this)) {
 		//			// attach given object to this japer instance
@@ -107,7 +110,8 @@ public class ObjectPocketImpl implements ObjectPocket{
 		// TODO: validate filename to not be something like /home... or C:/...
 		// throw exception in that case?
 		this.add(obj);
-		if (tracedObjects.containsKey(obj)) {
+		if (tracedObjects.containsKey(obj) && 
+				filename != null && !filename.isEmpty()) {
 			objectFilenames.put(obj, filename);
 		}
 	}
@@ -375,6 +379,12 @@ public class ObjectPocketImpl implements ObjectPocket{
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T find(String id, Class<T> type) {
+		if (id == null || id.isEmpty()) {
+			return null;
+		}
+		if (type == null) {
+			return null;
+		}
 		Map<String, Object> map = objectMap.get(type.getName());
 		if (map != null) {
 			return (T)map.get(id);
@@ -385,9 +395,11 @@ public class ObjectPocketImpl implements ObjectPocket{
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> Collection<T> findAll(Class<T> type) {
-		Map<String, Object> map = objectMap.get(type.getName());
-		if (map != null) {
-			return (Collection<T>)map.values();
+		if (type != null) {
+			Map<String, Object> map = objectMap.get(type.getName());
+			if (map != null) {
+				return (Collection<T>)map.values();
+			}
 		}
 		return null;
 	}

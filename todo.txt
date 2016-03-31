@@ -3,11 +3,13 @@
 
 (Speichern)
 - Objektvergleich braucht relativ viel Zeit (tracedObjects)
+- lässt sich mit hashCode optimieren -> Empfehlung in Doku
 
 ## BUGS ##
 
 
 ## OPTIMIZATION POSSIBILITIES ##
+- durch parallelisieren kriegt man beim laden nochmal ca. 15% speed zusätzlich 
 - Man kann folgende Vorgänge parallelisieren:
   - Lesen der Dateien von Platte
   - Verarbeiten der gelesenen Strings (split, ...)

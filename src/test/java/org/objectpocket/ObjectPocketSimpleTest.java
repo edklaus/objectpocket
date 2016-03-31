@@ -2,20 +2,81 @@ package org.objectpocket;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.UUID;
 
 import org.junit.Test;
-import org.objectpocket.ObjectPocketTestSimple.OuterClass.InnerClass;
-import org.objectpocket.annotations.Entity;
+import org.objectpocket.ObjectPocketSimpleTest.OuterClass.InnerClass;
 
 /**
+ * 
+ * 
  * 
  * @author Edmund Klaus
  *
  */
-public class ObjectPocketTestSimple {
+public class ObjectPocketSimpleTest {
+	
+	@Test
+	public void testAddNull() throws Exception {
+		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
+		objectPocket.add(null);
+		objectPocket.store();
+		objectPocket.load();
+		Collection<Object> findAll = objectPocket.findAll(Object.class);
+		assertNull(findAll);
+		objectPocket.add(null, "abc");
+		objectPocket.store();
+		objectPocket.load();
+		findAll = objectPocket.findAll(Object.class);
+		assertNull(findAll);
+		objectPocket.add(null, null);
+		objectPocket.store();
+		objectPocket.load();
+		findAll = objectPocket.findAll(Object.class);
+		assertNull(findAll);
+		objectPocket.add(new BeanWithCustomConstructor("abc"), null);
+		objectPocket.store();
+		objectPocket.load();
+		Collection<BeanWithCustomConstructor> strings = objectPocket.findAll(BeanWithCustomConstructor.class);
+		assertTrue(strings.size() == 1);
+	}
+	
+	@Test
+	public void testFindNull() throws Exception {
+		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
+		objectPocket.add(new BeanWithCustomConstructor("abc"));
+		objectPocket.store();
+		objectPocket.load();
+		BeanWithCustomConstructor find = objectPocket.find(null, null);
+		assertNull(find);
+		find = objectPocket.find(null, BeanWithCustomConstructor.class);
+		assertNull(find);
+		find = objectPocket.find(" ", BeanWithCustomConstructor.class);
+		assertNull(find);
+		find = objectPocket.find("ziwzd7", null);
+		assertNull(find);
+		find = objectPocket.find(" ", null);
+		assertNull(find);
+	}
+	
+	@Test
+	public void testRemoveNull() throws Exception {
+		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testFindAllNull() throws Exception {
+		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
+		objectPocket.add(new BeanWithCustomConstructor("abc"));
+		objectPocket.store();
+		objectPocket.load();
+		Collection<BeanWithCustomConstructor> findAll = objectPocket.findAll(null);
+		assertNull(findAll);
+	}
 	
 	@Test
 	public void testSimpleBean() throws Exception {
@@ -112,6 +173,7 @@ public class ObjectPocketTestSimple {
 	
 	@Test
 	public void testRemove() throws Exception {
+		fail("Not yet implemented");
 //		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
 //		SimpleBean simpleBean = new SimpleBean();
 //		simpleBean.setName("simple bean");
@@ -128,30 +190,6 @@ public class ObjectPocketTestSimple {
 //		assertTrue(objectPocket.findAll(SimpleBean.class).size() == 0);
 //		objectPocket.load();
 //		assertTrue(objectPocket.findAll(SimpleBean.class).size() == 0);
-	}
-	
-	@Test
-	public void testCyclicReferences() throws Exception {
-		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
-		Address2 address = new Address2();
-		address.setCity("Karlsruhe");
-		Person2 person = new Person2("person1", address);
-		address.setInhabitant(person);
-		objectPocket.add(person);
-		objectPocket.store();
-		objectPocket.load();
-		Collection<Person2> persons = objectPocket.findAll(Person2.class);
-		Collection<Address2> addresses = objectPocket.findAll(Address2.class);
-		assertTrue(persons.size() == 1);
-		assertTrue(addresses.size() == 1);
-		Person2 foundPerson = persons.iterator().next();
-		Address2 foundAddress = addresses.iterator().next();
-		assertFalse(foundAddress.getInhabitant() == null);
-		assertFalse(foundPerson.getAddress() == null);
-		System.out.println(foundAddress.getInhabitant());
-		System.out.println(foundPerson);
-		assertTrue(foundAddress.getInhabitant().equals(foundPerson));
-		assertTrue(foundPerson.getAddress().equals(foundAddress));
 	}
 	
 	public class SimpleBean {
@@ -249,46 +287,6 @@ public class ObjectPocketTestSimple {
 		}
 	}
 	
-	@Entity
-	public class Person2 {
-		private String name;
-		private Address2 address;
-		public Person2() {
-		}
-		public Person2(String name, Address2 address) {
-			this.name = name;
-			this.address = address;
-		}
-		public String getName() {
-			return name;
-		}
-		public void setName(String name) {
-			this.name = name;
-		}
-		public Address2 getAddress() {
-			return address;
-		}
-		public void setAddress(Address2 address) {
-			this.address = address;
-		}
-	}
-	
-	@Entity
-	public class Address2 {
-		private String city;
-		private Person2 inhabitant;
-		public String getCity() {
-			return city;
-		}
-		public void setCity(String city) {
-			this.city = city;
-		}
-		public Person2 getInhabitant() {
-			return inhabitant;
-		}
-		public void setInhabitant(Person2 inhabitant) {
-			this.inhabitant = inhabitant;
-		}
-	}
+
 
 }
