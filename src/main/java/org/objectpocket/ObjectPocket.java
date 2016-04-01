@@ -25,11 +25,12 @@ import org.objectpocket.storage.blob.BlobStore;
 /**
  * ObjectPocket is a Java library for simple storing and loading of Java
  * objects. Objects are converted to JSON strings and can be directly written to
- * files and read from files.</br> It supports object references as well as
- * Inheritance. Complex references between objects, like cross referencing or
- * cyclic referencing can be handled with annotations.</br> ObjectPocket also
- * supports storing different object types in separate files like one would do
- * with database tables.
+ * files and read from files.<br>
+ * It supports object references as well as Inheritance. Complex references
+ * between objects, like cross referencing or cyclic referencing can be handled
+ * with annotations.<br>
+ * ObjectPocket also supports storing different object types in separate files
+ * like one would do with database tables.
  * 
  * <p>
  * Store object:
@@ -64,22 +65,28 @@ import org.objectpocket.storage.blob.BlobStore;
 public interface ObjectPocket {
 
     /**
-     * Add an object to ObjectPocket persistence context.</br> All objects that
-     * this object references, will also be add to the persistence
-     * context.</br></br> All object inside the persistence context will be
-     * persisted to a given object store by calling {@link #store()}.
+     * Add an object to ObjectPocket persistence context.<br>
+     * All objects that this object references, will also be add to the
+     * persistence context.<br>
+     * <br>
+     * All object inside the persistence context will be persisted to a given
+     * object store by calling {@link #store()}.
      * 
      * @param obj
      */
     public void add(Object obj);
 
     /**
-     * Behaves like {@link #add(Object)}</br></br> In addition you can pass a
-     * filename that defines in what file the object will be stored.</br> This
-     * is useful when you store a configuration file that you also want to edit
-     * by hand from time to time.</br></br> You should be aware that when the
-     * given object is inside the ObjectPocket persistence context already, the
-     * call of this method will set/change the filename for this object.
+     * Behaves like {@link #add(Object)}<br>
+     * <br>
+     * In addition you can pass a filename that defines in what file the object
+     * will be stored.<br>
+     * This is useful when you store a configuration file that you also want to
+     * edit by hand from time to time.<br>
+     * <br>
+     * You should be aware that when the given object is inside the ObjectPocket
+     * persistence context already, the call of this method will set/change the
+     * filename for this object.
      * 
      * @param obj
      * @param filename
@@ -99,11 +106,14 @@ public interface ObjectPocket {
 
     /**
      * Loads all objects from an object store. This will override the currently
-     * available objects in the ObjectPocket.</br></br> Therefore this method
-     * should be used to: <li>load objects initially <li>reload previous object
-     * state</br></br> After a reload, the old object references will not
-     * represent the reloaded object state. One has to replace the old objects
-     * by the new ones by getting them from ObjectPocket.
+     * available objects in the ObjectPocket.<br>
+     * <br>
+     * Therefore this method should be used to: <li>load objects initially <li>
+     * reload previous object state<br>
+     * <br>
+     * After a reload, the old object references will not represent the reloaded
+     * object state. One has to replace the old objects by the new ones by
+     * getting them from ObjectPocket.
      * 
      * @throws ObjectPocketException
      */
@@ -111,10 +121,11 @@ public interface ObjectPocket {
 
     /**
      * Loads all objects from an object store. This method behaves the same way
-     * {@link #load()} does, except that it loads the objects asynchronous.</br>
-     * To find out when loading is done, you can use {@link #isLoading()}
-     * .</br></br> You also have the option to pass 0...n Classes that should be
-     * loaded in advance.
+     * {@link #load()} does, except that it loads the objects asynchronous.<br>
+     * To find out when loading is done, you can use {@link #isLoading()} .<br>
+     * <br>
+     * You also have the option to pass 0...n Classes that should be loaded in
+     * advance.
      * 
      * <pre>
      * loadAsynchronous(Address.class, Person.class);
@@ -124,10 +135,12 @@ public interface ObjectPocket {
      * and then go on with all other class types from the object store
      * asynchronous. This is convenient if you want to access parts of the
      * information as soon as possible, and load everything else asynchronous in
-     * background.</br></br> This feature comes in handy to improve user
-     * experience.</br></br> Be aware that references of "preload" objects may
-     * not represent the real data from the object store, until all object data
-     * has been loaded.
+     * background.<br>
+     * <br>
+     * This feature comes in handy to improve user experience.<br>
+     * <br>
+     * Be aware that references of "preload" objects may not represent the real
+     * data from the object store, until all object data has been loaded.
      * 
      * @param preload
      * @throws ObjectPocketException
@@ -136,9 +149,9 @@ public interface ObjectPocket {
 	    throws ObjectPocketException;
 
     /**
-     * Gives information about the loading status of ObjectPocket.</br> This is
-     * necessary when {@link #loadAsynchronous(Class...)} has been called and
-     * one wants to know when loading is finished.
+     * Gives information about the loading status of ObjectPocket.<br>
+     * This is necessary when {@link #loadAsynchronous(Class...)} has been
+     * called and one wants to know when loading is finished.
      * 
      * @return true if ObjectPocket is still loading, false otherwise
      */
@@ -157,7 +170,7 @@ public interface ObjectPocket {
     public <T> T find(String id, Class<T> type);
 
     /**
-     * Find all object by the given object type.
+     * Find all objects by the given object type.
      * 
      * @param type
      *            type of the object to find
@@ -167,9 +180,20 @@ public interface ObjectPocket {
     public <T> Collection<T> findAll(Class<T> type);
 
     /**
-     * Remove object from persistence context.</br> You need to call
-     * {@link #store()} after {@link #remove(Object)} to remove the object from
-     * the object store.</br>
+     * Remove object from persistence context. You need to call {@link #store()}
+     * after {@link #remove(Object)} to remove the object from the object store.<br>
+     * <br>
+     * The remove operation will not cascade. Objects, referenced by the removed
+     * object, will not be removed, except objects of type {@link Blob}.<br>
+     * If another object references the same {@link Blob} it will stay in
+     * persistence context and will not be removed. All other objects,
+     * referenced by the removed object, have to be removed explicitly.<br>
+     * <br>
+     * {@link Blob} data will not be removed from the {@link BlobStore} when
+     * removing a blob or an object that references a blob. Only the
+     * {@link Blob} object will be removed and the {@link Blob} data will become
+     * inaccessible. To finally remove the {@link Blob} data you need to call
+     * {@link #cleanup()}.
      * 
      * @param obj
      * @throws ObjectPocketException
@@ -178,11 +202,12 @@ public interface ObjectPocket {
     public void remove(Object obj) throws ObjectPocketException;
 
     /**
-     * Call this method to cleanup blob data from {@link BlobStore}.</br> To
-     * remove blob data just set the blob in an Identifiable object null. When
-     * calling {@link #store()} the reference to the blob data will just be
-     * removed. The data itself will stay in the {@link BlobStore}. To really
-     * delete the data and free disk space call {@link #cleanup()}.
+     * Call this method to cleanup blob data from {@link BlobStore}.<br>
+     * To remove blob data just set the blob in a referencing object null or
+     * {@link #remove(Object)} the referencing object. When calling
+     * {@link #store()} the reference to the blob data will just be removed. The
+     * data itself will stay in the {@link BlobStore}. To really delete the data
+     * and free disk space call {@link #cleanup()}.
      */
     public void cleanup();
 
@@ -192,8 +217,8 @@ public interface ObjectPocket {
     public void close() throws IOException;
 
     /**
-     * Links another ObjectPocket instance to this ObjectPocket.</br> This
-     * supports loading objects from different object stores. Objects from
+     * Links another ObjectPocket instance to this ObjectPocket.<br>
+     * This supports loading objects from different object stores. Objects from
      * different object stores can reference each other.
      * 
      * @param objectPocket
@@ -203,9 +228,10 @@ public interface ObjectPocket {
     /**
      * 
      * You can pass a filename that defines in what file the objects of the
-     * given type will be stored.</br> This will override the default behavior
-     * of creating the filename from the fully qualified class name.</br> You
-     * should also be aware that using {@link #add(Object, String)} will
+     * given type will be stored.<br>
+     * This will override the default behavior of creating the filename from the
+     * fully qualified class name.<br>
+     * You should also be aware that using {@link #add(Object, String)} will
      * override the filename setting for the given object.
      * 
      * @param type

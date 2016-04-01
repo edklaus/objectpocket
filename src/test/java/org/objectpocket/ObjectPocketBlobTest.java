@@ -16,7 +16,7 @@
 
 package org.objectpocket;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
@@ -28,7 +28,9 @@ import org.junit.Test;
 public class ObjectPocketBlobTest {
 
     @Test
-    public void test() {
+    public void testRemove() {
+	// remove objects with blobs
+	// remove multi referenced blobs
 	fail("Not yet implemented");
     }
 

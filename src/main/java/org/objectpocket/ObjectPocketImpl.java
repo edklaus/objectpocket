@@ -52,9 +52,10 @@ public class ObjectPocketImpl implements ObjectPocket {
     private boolean prettyPrinting = false;
     private Map<Type, Set<Object>> typeAdapterMap = new HashMap<Type, Set<Object>>(
 	    10);
+    private Set<ReferenceSupport> referenceSupportSet = new HashSet<ReferenceSupport>(
+	    10);
 
     private Gson gson = null;
-
     private boolean loading = false;
 
     // <typeName:<id,object>>
@@ -73,15 +74,15 @@ public class ObjectPocketImpl implements ObjectPocket {
     private Map<Object, String> objectFilenames = new HashMap<Object, String>(
 	    10);
 
-    // support for complex referencing
-    private Set<ReferenceSupport> referenceSupportSet = new HashSet<ReferenceSupport>(
-	    10);
-
     // <object, id>
     private Map<Object, String> idsFromReadObjects = new HashMap<Object, String>(
 	    1000000);
 
-    public ObjectPocketImpl(ObjectStore objectStore) {
+    @SuppressWarnings("unused")
+    private ObjectPocketImpl() {
+    }
+
+    protected ObjectPocketImpl(ObjectStore objectStore) {
 	this.objectStore = objectStore;
     }
 
@@ -148,13 +149,8 @@ public class ObjectPocketImpl implements ObjectPocket {
 	serializeAsRoot = new HashSet<Object>();
 
 	// rescan for references
-	for (String typeName : objectMap.keySet()) {
-	    Map<String, Object> map = objectMap.get(typeName);
-	    if (map.values() != null) {
-		for (Object obj : map.values()) {
-		    addReferences(obj);
-		}
-	    }
+	for (Object obj : tracedObjects.keySet()) {
+	    addReferences(obj);
 	}
 
 	// update ids for all objects,
@@ -237,12 +233,10 @@ public class ObjectPocketImpl implements ObjectPocket {
 	}
 
 	// persist blob data
-	if (!blobsToPersist.isEmpty()) {
-	    try {
-		blobStore.writeBlobs(blobsToPersist);
-	    } catch (IOException e) {
-		throw new ObjectPocketException("Could not persist blobs.", e);
-	    }
+	try {
+	    blobStore.writeBlobs(blobsToPersist);
+	} catch (IOException e) {
+	    throw new ObjectPocketException("Could not persist blobs.", e);
 	}
 
 	Logger.getAnonymousLogger().info(
@@ -256,6 +250,8 @@ public class ObjectPocketImpl implements ObjectPocket {
 	long timeAll = System.currentTimeMillis();
 
 	idsFromReadObjects.clear();
+	tracedObjects.clear();
+	objectMap.clear();
 
 	/**
 	 * get all available object types
@@ -426,7 +422,7 @@ public class ObjectPocketImpl implements ObjectPocket {
     public <T> Collection<T> findAll(Class<T> type) {
 	if (type != null) {
 	    Map<String, Object> map = objectMap.get(type.getName());
-	    if (map != null) {
+	    if (map != null && !map.isEmpty()) {
 		return (Collection<T>) map.values();
 	    }
 	}
@@ -435,9 +431,35 @@ public class ObjectPocketImpl implements ObjectPocket {
 
     @Override
     public void remove(Object obj) throws ObjectPocketException {
+	System.out.println("tracedobjects: " + tracedObjects.size());
+	System.out.println("remove: " + obj);
+	if (obj == null) {
+	    return;
+	}
+	String id = tracedObjects.get(obj);
+	if (id == null) {
+	    return;
+	}
+	Map<String, Object> map = objectMap.get(obj.getClass().getName());
+	if (map == null) {
+	    return;
+	}
+	map.remove(id);
 	tracedObjects.remove(obj);
-	throw new UnsupportedOperationException();
-
+	System.out.println("tracedobjects: " + tracedObjects.size());
+	// remove referenced Blob objects
+	if (!(obj instanceof Blob)) {
+	    for (ReferenceSupport referenceSupport : referenceSupportSet) {
+		Set<Object> references = referenceSupport.getReferences(obj);
+		if (references != null) {
+		    for (Object reference : references) {
+			if (reference != null && reference instanceof Blob) {
+			    remove(reference);
+			}
+		    }
+		}
+	    }
+	}
     }
 
     @Override
@@ -526,17 +548,17 @@ public class ObjectPocketImpl implements ObjectPocket {
 			+ " ms");
     }
 
-    private void amendMap(Map<String, Map<String, Object>> dest,
-	    Map<String, Map<String, Object>> source) {
-	for (String key : source.keySet()) {
-	    if (dest.get(key) != null) {
-		Map<String, Object> map = dest.get(key);
-		map.putAll(source.get(key));
-	    } else {
-		dest.put(key, source.get(key));
-	    }
-	}
-    }
+    // private void amendMap(Map<String, Map<String, Object>> dest,
+    // Map<String, Map<String, Object>> source) {
+    // for (String key : source.keySet()) {
+    // if (dest.get(key) != null) {
+    // Map<String, Object> map = dest.get(key);
+    // map.putAll(source.get(key));
+    // } else {
+    // dest.put(key, source.get(key));
+    // }
+    // }
+    // }
 
     public void addIdFromReadObject(Object object, String id) {
 	idsFromReadObjects.put(object, id);

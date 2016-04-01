@@ -1,9 +1,8 @@
 package org.objectpocket;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -68,7 +67,13 @@ public class ObjectPocketSimpleTest {
 
     @Test
     public void testRemoveNull() throws Exception {
-	fail("Not yet implemented");
+	ObjectPocket objectPocket = new ObjectPocketBuilder()
+		.createMemoryObjectPocket();
+	try {
+	    objectPocket.remove(null);
+	} catch (Throwable t) {
+	    assertTrue(false);
+	}
     }
 
     @Test
@@ -191,25 +196,30 @@ public class ObjectPocketSimpleTest {
 
     @Test
     public void testRemove() throws Exception {
-	fail("Not yet implemented");
-	// ObjectPocket objectPocket = new
-	// ObjectPocketBuilder().createMemoryObjectPocket();
-	// SimpleBean simpleBean = new SimpleBean();
-	// simpleBean.setName("simple bean");
-	// objectPocket.add(simpleBean);
-	// objectPocket.store();
-	// objectPocket.load();
-	// Collection<SimpleBean> findAll =
-	// objectPocket.findAll(SimpleBean.class);
-	// assertTrue(findAll.size() == 1);
-	// SimpleBean find = findAll.iterator().next();
-	// assertTrue(find.getId().equals(simpleBean.getId()));
-	// objectPocket.remove(simpleBean);
-	// assertTrue(objectPocket.findAll(SimpleBean.class).size() == 0);
-	// objectPocket.store();
-	// assertTrue(objectPocket.findAll(SimpleBean.class).size() == 0);
-	// objectPocket.load();
-	// assertTrue(objectPocket.findAll(SimpleBean.class).size() == 0);
+	ObjectPocket objectPocket = new ObjectPocketBuilder()
+		.createMemoryObjectPocket();
+	SimpleBean simpleBean = new SimpleBean();
+	simpleBean.setName("simple bean");
+	
+	objectPocket.add(simpleBean);
+	assertTrue(objectPocket.findAll(SimpleBean.class).size() == 1);
+	objectPocket.remove(simpleBean);
+	assertNull(objectPocket.findAll(SimpleBean.class));
+	
+	objectPocket.add(simpleBean);
+	objectPocket.store();
+	objectPocket.load();
+	
+	Collection<SimpleBean> findAll = objectPocket.findAll(SimpleBean.class);
+	assertTrue(findAll.size() == 1);
+	SimpleBean find = findAll.iterator().next();
+	assertTrue(find.getName().equals(simpleBean.getName()));
+	objectPocket.remove(find);
+	assertNull(objectPocket.findAll(SimpleBean.class));
+	objectPocket.store();
+	assertNull(objectPocket.findAll(SimpleBean.class));
+	objectPocket.load();
+	assertNull(objectPocket.findAll(SimpleBean.class));
     }
 
     public class SimpleBean {

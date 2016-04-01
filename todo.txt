@@ -19,7 +19,7 @@
   - So l�sst sich sicherein maximaler Geschwindigkeitsvorteil rausholen
 - Allerdings erzeugt es auch einige Fehler beim Zugriff auf Listen!!
   -> Hier muss man nochmal genau prüfen
-- Auch beim store l�sst sich sicher gut parallelisieren
+- Auch beim store lässt sich sicher gut parallelisieren
 
 ## TODO ##
 - blobzip: man kann keine kompressionsrate einstellen!!
@@ -31,11 +31,11 @@
   - Japer 				2398
   - JSON to Zip 		3922
 - In den Support.injectReferences Methoden setProxy Methode aufrufen
-- JSON Ausgabe �berarbeiten (s. outline)
-- setFilename f�r
+- JSON Ausgabe überarbeiten (s. outline)
+- setFilename für
   - Objekttypen
-- Benchmark erstellen und Zielgruppe von Projekten definieren (Anwendungsf�lle)
-- Wie l�schen??
+- Benchmark erstellen und Zielgruppe von Projekten definieren (Anwendungsfälle)
+- Wie löschen??
 
 
 ### Wofür @Id?

@@ -62,6 +62,7 @@ public class MemoryStore implements ObjectStore {
     @Override
     public void writeJsonObjects(
 	    Map<String, Map<String, Set<String>>> jsonObjects) {
+	jsonObjectMap.clear();
 	for (String typeName : jsonObjects.keySet()) {
 	    Map<String, Set<String>> objectsForType = jsonObjects.get(typeName);
 	    Set<String> allObjects = new HashSet<String>();

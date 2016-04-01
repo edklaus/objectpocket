@@ -111,6 +111,7 @@ public class FileStore implements ObjectStore {
     public void writeJsonObjects(
 	    Map<String, Map<String, Set<String>>> jsonObjects)
 	    throws IOException {
+	// TODO: delete file when receiving empty list!!
 	readIndexFile();
 	for (String typeName : jsonObjects.keySet()) {
 	    Map<String, Set<String>> objectsForType = jsonObjects.get(typeName);
