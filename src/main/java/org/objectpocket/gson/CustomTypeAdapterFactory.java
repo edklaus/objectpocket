@@ -33,77 +33,86 @@ import com.google.gson.stream.JsonWriter;
 
 /**
  * 
- * This is where references with the annotation {@link Entity} are handled to insert
- * as references into JSON strings and not as complete objects.
+ * This is where references with the annotation {@link Entity} are handled to
+ * insert as references into JSON strings and not as complete objects.
  * 
  * @author Edmund Klaus
  *
  */
 public class CustomTypeAdapterFactory implements TypeAdapterFactory {
 
-	private ObjectPocketImpl objectPocket;
+    private ObjectPocketImpl objectPocket;
 
-	public CustomTypeAdapterFactory(ObjectPocketImpl objectPocket) {
-		this.objectPocket = objectPocket;
-	}
+    public CustomTypeAdapterFactory(ObjectPocketImpl objectPocket) {
+	this.objectPocket = objectPocket;
+    }
 
-	@Override
-	public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+    @Override
+    public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
 
-		TypeAdapter<T> delegate = gson.getDelegateAdapter(this, type);
+	TypeAdapter<T> delegate = gson.getDelegateAdapter(this, type);
 
-		// @Entity
-		if (type.getRawType().getAnnotation(Entity.class) != null) {
-			return new TypeAdapter<T>() {
-				
-				// SERIALIZE
-				public void write(JsonWriter out, T obj) throws IOException {
-					if (obj != null) {
-						String id = objectPocket.getIdForObject(obj);
-						// normalize
-						if (!objectPocket.isSerializeAsRoot(obj)) {
-							gson.toJson(new ProxyOut(obj.getClass().getTypeName(), id), ProxyOut.class, out);
-							return;
-						} 
-						else {
-							objectPocket.setSerializeAsRoot(obj, false);
-						}
-					}
-					// default serialization
-					delegate.write(out, obj);
-				};
-				
-				// DESERIALIZE
-				@SuppressWarnings("unchecked")
-				@Override
-				public T read(JsonReader in) throws IOException {
-					if (in.getPath().length() > 2) {
-						in.beginObject();
-						in.nextName();
-						StringBuilder sb = new StringBuilder(in.nextString());
-						String id = sb.substring(0, sb.indexOf("@"));
-						in.endObject();
-						T obj = null;
-						try {
-							obj = (T)ReflectionUtil.instantiateDefaultConstructor(type.getRawType());
-						} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | 
-								NoSuchMethodException | InvocationTargetException e) {
-							throw new IOException("Could not instantiate class " + type.getRawType().getName() + "\n"
-									+ "Might be that the class has no default constructor!", e);
-						}
-						objectPocket.addIdFromReadObject(obj, id);
-						return obj;
-					} else {
-						T obj = delegate.read(in);
-						return obj;
-					}
-				}
-			};
+	// @Entity
+	if (type.getRawType().getAnnotation(Entity.class) != null) {
+	    return new TypeAdapter<T>() {
+
+		// SERIALIZE
+		public void write(JsonWriter out, T obj) throws IOException {
+		    if (obj != null) {
+			String id = objectPocket.getIdForObject(obj);
+			// normalize
+			if (!objectPocket.isSerializeAsRoot(obj)) {
+			    gson.toJson(new ProxyOut(obj.getClass()
+				    .getTypeName(), id), ProxyOut.class, out);
+			    return;
+			} else {
+			    objectPocket.setSerializeAsRoot(obj, false);
+			}
+		    }
+		    // default serialization
+		    delegate.write(out, obj);
+		};
+
+		// DESERIALIZE
+		@SuppressWarnings("unchecked")
+		@Override
+		public T read(JsonReader in) throws IOException {
+		    if (in.getPath().length() > 2) {
+			in.beginObject();
+			in.nextName();
+			StringBuilder sb = new StringBuilder(in.nextString());
+			String id = sb.substring(0, sb.indexOf("@"));
+			in.endObject();
+			T obj = null;
+			try {
+			    obj = (T) ReflectionUtil
+				    .instantiateDefaultConstructor(type
+					    .getRawType());
+			} catch (InstantiationException
+				| IllegalAccessException
+				| ClassNotFoundException
+				| NoSuchMethodException
+				| InvocationTargetException e) {
+			    throw new IOException(
+				    "Could not instantiate class "
+					    + type.getRawType().getName()
+					    + "\n"
+					    + "Might be that the class has no default constructor!",
+				    e);
+			}
+			objectPocket.addIdFromReadObject(obj, id);
+			return obj;
+		    } else {
+			T obj = delegate.read(in);
+			return obj;
+		    }
 		}
-		// All other
-		else {
-			return delegate;
-		}
+	    };
 	}
+	// All other
+	else {
+	    return delegate;
+	}
+    }
 
 }

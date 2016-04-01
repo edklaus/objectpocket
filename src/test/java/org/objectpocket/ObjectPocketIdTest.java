@@ -28,30 +28,35 @@ import org.objectpocket.annotations.Id;
  */
 public class ObjectPocketIdTest {
 
-	@Test
-	public void testFindById() throws Exception {
-		ObjectPocket objectPocket = new ObjectPocketBuilder().createMemoryObjectPocket();
-		objectPocket.add(new Address("Karlsruhe"));
-		objectPocket.store();
-		objectPocket.load();
-		Address find = objectPocket.find("Karlsruhe", Address.class);
-		assertTrue(find.getCity().equals("Karlsruhe"));
+    @Test
+    public void testFindById() throws Exception {
+	ObjectPocket objectPocket = new ObjectPocketBuilder()
+		.createMemoryObjectPocket();
+	objectPocket.add(new Address("Karlsruhe"));
+	objectPocket.store();
+	objectPocket.load();
+	Address find = objectPocket.find("Karlsruhe", Address.class);
+	assertTrue(find.getCity().equals("Karlsruhe"));
+    }
+
+    public class Address {
+	@Id
+	private String city;
+
+	public Address() {
 	}
-	
-	public class Address {
-		@Id
-		private String city;
-		public Address() {
-		}
-		public Address(String city) {
-			this.city = city;
-		}
-		public String getCity() {
-			return city;
-		}
-		public void setCity(String city) {
-			this.city = city;
-		}
+
+	public Address(String city) {
+	    this.city = city;
 	}
+
+	public String getCity() {
+	    return city;
+	}
+
+	public void setCity(String city) {
+	    this.city = city;
+	}
+    }
 
 }

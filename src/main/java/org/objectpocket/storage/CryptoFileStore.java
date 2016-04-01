@@ -32,66 +32,76 @@ import java.io.OutputStreamWriter;
  *
  */
 public class CryptoFileStore extends FileStore {
-	
-	private byte shift;
 
-	public CryptoFileStore(String directory, String password) {
-		super(directory);
-		if (password != null && !password.isEmpty()) {
-			byte[] bytes = password.getBytes();
-			for (byte b : bytes) {
-				shift += b;
-			}
-		}
+    private byte shift;
+
+    public CryptoFileStore(String directory, String password) {
+	super(directory);
+	if (password != null && !password.isEmpty()) {
+	    byte[] bytes = password.getBytes();
+	    for (byte b : bytes) {
+		shift += b;
+	    }
+	}
+    }
+
+    protected OutputStreamWriter getOutputStreamWriter(String filename)
+	    throws IOException {
+	File file = initFile(filename, true, true);
+	return new OutputStreamWriter(new CryptedOutputstream(
+		new FileOutputStream(file)));
+    }
+
+    protected BufferedReader getBufferedReader(String filename)
+	    throws IOException {
+	File file = initFile(filename, true, false);
+	return new BufferedReader(new InputStreamReader(new CryptedInputStream(
+		new FileInputStream(file))));
+    }
+
+    private class CryptedOutputstream extends OutputStream {
+	private OutputStream delegate;
+
+	public CryptedOutputstream(OutputStream delegate) {
+	    super();
+	    this.delegate = delegate;
 	}
 
-	protected OutputStreamWriter getOutputStreamWriter(String filename) throws IOException {
-		File file = initFile(filename, true, true);
-		return new OutputStreamWriter(new CryptedOutputstream(new FileOutputStream(file)));
+	@Override
+	public void write(int b) throws IOException {
+	    delegate.write(b ^ shift);
 	}
 
-	protected BufferedReader getBufferedReader(String filename) throws IOException {
-		File file = initFile(filename, true, false);
-		return new BufferedReader(new InputStreamReader(new CryptedInputStream(new FileInputStream(file))));
+	@Override
+	public void write(byte[] b, int off, int len) throws IOException {
+	    for (int i = off; i < len; i++) {
+		b[i] = (byte) (b[i] ^ shift);
+	    }
+	    delegate.write(b, off, len);
 	}
-	
-	private class CryptedOutputstream extends OutputStream {
-		private OutputStream delegate;
-		public CryptedOutputstream(OutputStream delegate) {
-			super();
-			this.delegate = delegate;
-		}
-		@Override
-		public void write(int b) throws IOException {
-			delegate.write(b ^ shift);
-		}
-		@Override
-		public void write(byte[] b, int off, int len) throws IOException {
-			for (int i = off; i < len; i++) {
-				b[i] = (byte)(b[i] ^ shift);
-			}
-			delegate.write(b, off, len);
-		}
+    }
+
+    private class CryptedInputStream extends InputStream {
+	private InputStream delegate;
+
+	public CryptedInputStream(InputStream delegate) {
+	    super();
+	    this.delegate = delegate;
 	}
-	
-	private class CryptedInputStream extends InputStream {
-		private InputStream delegate;
-		public CryptedInputStream(InputStream delegate) {
-			super();
-			this.delegate = delegate;
-		}
-		@Override
-		public int read() throws IOException {
-			return delegate.read() ^ shift;
-		}
-		@Override
-		public int read(byte[] b, int off, int len) throws IOException {
-			int result = delegate.read(b, off, len);
-			for (int i = off; i < result; i++) {
-				b[i] = (byte)(b[i] ^ shift);
-			}
-			return result;
-		}
+
+	@Override
+	public int read() throws IOException {
+	    return delegate.read() ^ shift;
 	}
-	
+
+	@Override
+	public int read(byte[] b, int off, int len) throws IOException {
+	    int result = delegate.read(b, off, len);
+	    for (int i = off; i < result; i++) {
+		b[i] = (byte) (b[i] ^ shift);
+	    }
+	    return result;
+	}
+    }
+
 }

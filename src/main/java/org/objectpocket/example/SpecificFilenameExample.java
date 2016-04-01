@@ -32,70 +32,75 @@ import org.objectpocket.exception.ObjectPocketException;
  */
 public class SpecificFilenameExample {
 
-	private static final String FILESTORE = System.getProperty("user.home") + "/objectpocket_example";
+    private static final String FILESTORE = System.getProperty("user.home")
+	    + "/objectpocket_example";
 
-	public void createAndPersist() {
+    public void createAndPersist() {
 
-		// define store
-		ObjectPocket objectPocket = new ObjectPocketBuilder().createFileObjectPocket(FILESTORE);
+	// define store
+	ObjectPocket objectPocket = new ObjectPocketBuilder()
+		.createFileObjectPocket(FILESTORE);
 
-		// create data
-		Address a1 = new Address();
-		a1.setCity("Karlsruhe");
-		Address a2 = new Address();
-		a2.setCity("Mannheim");
-		Person p1 = new Person("person1", a1);
-		Person p2 = new Person("person2", a2);
-		List<Person> friends = p1.getFriends();
-		if (friends == null) {
-			friends = new ArrayList<Person>();
-		}
-		friends.add(p2);
-		p1.setFriends(friends);
+	// create data
+	Address a1 = new Address();
+	a1.setCity("Karlsruhe");
+	Address a2 = new Address();
+	a2.setCity("Mannheim");
+	Person p1 = new Person("person1", a1);
+	Person p2 = new Person("person2", a2);
+	List<Person> friends = p1.getFriends();
+	if (friends == null) {
+	    friends = new ArrayList<Person>();
+	}
+	friends.add(p2);
+	p1.setFriends(friends);
 
-		// store
-		// note: all references are added automatically
-		//   you don't have to add every single object
-		objectPocket.add(p1, "person.json");
-		try {
-			objectPocket.store();;
-		} catch (ObjectPocketException e) {
-			e.printStackTrace();
-		}
+	// store
+	// note: all references are added automatically
+	// you don't have to add every single object
+	objectPocket.add(p1, "person.json");
+	try {
+	    objectPocket.store();
+	    ;
+	} catch (ObjectPocketException e) {
+	    e.printStackTrace();
+	}
+    }
+
+    public void load() {
+
+	// define store
+	ObjectPocket objectPocket = new ObjectPocketBuilder()
+		.createFileObjectPocket(FILESTORE);
+	try {
+	    objectPocket.load();
+	} catch (ObjectPocketException e) {
+	    e.printStackTrace();
 	}
 
-	public void load() {
-
-		// define store
-		ObjectPocket objectPocket = new ObjectPocketBuilder().createFileObjectPocket(FILESTORE);
-		try {
-			objectPocket.load();
-		} catch (ObjectPocketException e) {
-			e.printStackTrace();
+	// access data
+	Collection<Person> persons = objectPocket.findAll(Person.class);
+	for (Person person : persons) {
+	    System.out.println("found person: " + person.getName());
+	    Address address = person.getAddress();
+	    if (address != null) {
+		System.out.println("  with address: "
+			+ person.getAddress().getCity());
+	    }
+	    List<Person> friends = person.getFriends();
+	    if (friends != null) {
+		for (Person friend : friends) {
+		    System.out.println("  and friend " + friend.getName());
 		}
-		
-		// access data
-		Collection<Person> persons = objectPocket.findAll(Person.class);
-		for (Person person : persons) {
-			System.out.println("found person: " + person.getName());
-			Address address = person.getAddress();
-			if (address != null) {
-				System.out.println("  with address: " + person.getAddress().getCity());
-			}
-			List<Person> friends = person.getFriends();
-			if (friends != null) {
-				for (Person friend : friends) {
-					System.out.println("  and friend " + friend.getName());
-				}
-			}
-		}
-
+	    }
 	}
 
-	public static void main(String[] args) throws Exception {
-		SpecificFilenameExample simpleExample = new SpecificFilenameExample();
-		simpleExample.createAndPersist();
-		simpleExample.load();
-	}
+    }
+
+    public static void main(String[] args) throws Exception {
+	SpecificFilenameExample simpleExample = new SpecificFilenameExample();
+	simpleExample.createAndPersist();
+	simpleExample.load();
+    }
 
 }

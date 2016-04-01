@@ -22,14 +22,15 @@ package org.objectpocket;
  *
  */
 public class ProxyOut {
-	
-	private String op_ref;
-	
-	public ProxyOut(String type, String id) {
-		this.op_ref = id + "@" + type;
-	}
-	public String getRef() {
-		return op_ref;
-	}
-	
+
+    private String op_ref;
+
+    public ProxyOut(String type, String id) {
+	this.op_ref = id + "@" + type;
+    }
+
+    public String getRef() {
+	return op_ref;
+    }
+
 }

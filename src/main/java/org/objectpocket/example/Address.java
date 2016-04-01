@@ -19,7 +19,6 @@ package org.objectpocket.example;
 import java.util.Random;
 import java.util.UUID;
 
-
 /**
  * 
  * @author Edmund Klaus
@@ -27,27 +26,32 @@ import java.util.UUID;
  */
 public class Address {
 
-	private String city;
-	private Person inhabitant;
-	private String street = UUID.randomUUID().toString();
-	private int number = new Random().nextInt(2000);
+    private String city;
+    private Person inhabitant;
+    private String street = UUID.randomUUID().toString();
+    private int number = new Random().nextInt(2000);
 
-	public String getCity() {
-		return city;
-	}
-	public void setCity(String city) {
-		this.city = city;
-	}
-	public Person getInhabitant() {
-		return inhabitant;
-	}
-	public void setInhabitant(Person inhabitant) {
-		this.inhabitant = inhabitant;
-	}
-	public String getStreet() {
-		return street;
-	}
-	public int getNumber() {
-		return number;
-	}
+    public String getCity() {
+	return city;
+    }
+
+    public void setCity(String city) {
+	this.city = city;
+    }
+
+    public Person getInhabitant() {
+	return inhabitant;
+    }
+
+    public void setInhabitant(Person inhabitant) {
+	this.inhabitant = inhabitant;
+    }
+
+    public String getStreet() {
+	return street;
+    }
+
+    public int getNumber() {
+	return number;
+    }
 }

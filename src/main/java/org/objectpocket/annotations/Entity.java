@@ -24,8 +24,8 @@ import java.lang.annotation.Target;
 
 /**
  * 
- * Define class as entity to enable complex referencing and
- * advanced data structure storing/loading.
+ * Define class as entity to enable complex referencing and advanced data
+ * structure storing/loading.
  * 
  * @author Edmund Klaus
  *

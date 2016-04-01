@@ -33,51 +33,57 @@ import org.objectpocket.annotations.Entity;
  */
 public class SimpleReferenceSupport extends ReferenceSupport {
 
-	@Override
-	public List<Field> filterReferencingFields(List<Field> fields) {
-		List<Field> filteredFields = null;
-		for (Field field : fields) {
-			if (field.getType().getAnnotation(Entity.class) != null) {
-				if (filteredFields == null) {
-					filteredFields = new ArrayList<Field>();
-				}
-				filteredFields.add(field);
-			}
+    @Override
+    public List<Field> filterReferencingFields(List<Field> fields) {
+	List<Field> filteredFields = null;
+	for (Field field : fields) {
+	    if (field.getType().getAnnotation(Entity.class) != null) {
+		if (filteredFields == null) {
+		    filteredFields = new ArrayList<Field>();
 		}
-		return filteredFields;
+		filteredFields.add(field);
+	    }
 	}
-	
-	@Override
-	public Set<Object> getObjectsForField(Object obj, Field field) throws InvocationTargetException, IllegalAccessException {
-		if (field != null) {
-			field.setAccessible(true);
-			Object object = field.get(obj);
-			if (object != null) {
-				Set<Object> objects = new HashSet<Object>();
-				objects.add(object);
-				return objects;
-			}
-		}
-		return null;
-	}
+	return filteredFields;
+    }
 
-	@Override
-	public void injectReferences(Object obj, Field field, Map<String, Map<String, Object>> objectMap,
-			Map<Object, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException {
-		field.setAccessible(true);
-		Object readObject = field.get(obj);
-		if (readObject != null) {
-			// TODO:
-			// marking proxy objects as proxy prevents from persisting proxy objects!
-			//readObject.setProxy(true);
-			Map<String, Object> typeMap = objectMap.get(field.getType().getName());
-			if (typeMap != null) {
-				Object reference = typeMap.get(idsFromReadObjects.get(readObject));
-				if (reference != null) {
-					field.set(obj, reference);
-				}
-			}
-		}
+    @Override
+    public Set<Object> getObjectsForField(Object obj, Field field)
+	    throws InvocationTargetException, IllegalAccessException {
+	if (field != null) {
+	    field.setAccessible(true);
+	    Object object = field.get(obj);
+	    if (object != null) {
+		Set<Object> objects = new HashSet<Object>();
+		objects.add(object);
+		return objects;
+	    }
 	}
+	return null;
+    }
+
+    @Override
+    public void injectReferences(Object obj, Field field,
+	    Map<String, Map<String, Object>> objectMap,
+	    Map<Object, String> idsFromReadObjects)
+	    throws InvocationTargetException, IllegalAccessException {
+	field.setAccessible(true);
+	Object readObject = field.get(obj);
+	if (readObject != null) {
+	    // TODO:
+	    // marking proxy objects as proxy prevents from persisting proxy
+	    // objects!
+	    // readObject.setProxy(true);
+	    Map<String, Object> typeMap = objectMap.get(field.getType()
+		    .getName());
+	    if (typeMap != null) {
+		Object reference = typeMap.get(idsFromReadObjects
+			.get(readObject));
+		if (reference != null) {
+		    field.set(obj, reference);
+		}
+	    }
+	}
+    }
 
 }

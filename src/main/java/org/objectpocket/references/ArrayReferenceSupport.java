@@ -33,62 +33,69 @@ import org.objectpocket.annotations.Entity;
  */
 public class ArrayReferenceSupport extends ReferenceSupport {
 
-	@Override
-	public List<Field> filterReferencingFields(List<Field> fields) {
-		List<Field> filteredFields = null;
-		for (Field field : fields) {
-			if (field.getType().isArray() && field.getType().getComponentType().getAnnotation(Entity.class) != null) {
-				if (filteredFields == null) {
-					filteredFields = new ArrayList<Field>();
-				}
-				filteredFields.add(field);
-			}
+    @Override
+    public List<Field> filterReferencingFields(List<Field> fields) {
+	List<Field> filteredFields = null;
+	for (Field field : fields) {
+	    if (field.getType().isArray()
+		    && field.getType().getComponentType()
+			    .getAnnotation(Entity.class) != null) {
+		if (filteredFields == null) {
+		    filteredFields = new ArrayList<Field>();
 		}
-		return filteredFields;
+		filteredFields.add(field);
+	    }
 	}
+	return filteredFields;
+    }
 
-	@Override
-	public Set<Object> getObjectsForField(Object obj, Field field) throws InvocationTargetException, IllegalAccessException {
-		if (field != null) {
-			field.setAccessible(true);
-			Object[] objectArray = (Object[])field.get(obj);
-			if (objectArray != null) {
-				Set<Object> objects = new HashSet<Object>();
-				for (Object object : objectArray) {
-					objects.add(object);
-				}
-				return objects;
-			}
+    @Override
+    public Set<Object> getObjectsForField(Object obj, Field field)
+	    throws InvocationTargetException, IllegalAccessException {
+	if (field != null) {
+	    field.setAccessible(true);
+	    Object[] objectArray = (Object[]) field.get(obj);
+	    if (objectArray != null) {
+		Set<Object> objects = new HashSet<Object>();
+		for (Object object : objectArray) {
+		    objects.add(object);
 		}
-		return null;
+		return objects;
+	    }
 	}
+	return null;
+    }
 
-	@Override
-	public void injectReferences(Object obj, Field field, Map<String, Map<String, Object>> objectMap,
-			Map<Object, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException {
-		field.setAccessible(true);
-		Object[] readObjects = (Object[])field.get(obj);
-		if (readObjects != null) {
-			// TODO:
-			// marking proxy objects as proxy prevents from persisting proxy objects!
-//			for (Identifiable identifiable : ids) {
-//				if (identifiable != null) {
-//					identifiable.setProxy(true);
-//				}
-//			}
-			String typeName = field.getType().getComponentType().getName();
-			Map<String, Object> typeMap = objectMap.get(typeName);
-			if (typeMap != null) {
-				for (int i = 0; i < readObjects.length; i++) {
-					if (readObjects[i] != null) {
-						Object reference = typeMap.get(idsFromReadObjects.get(readObjects[i]));
-						if (reference != null) {
-							readObjects[i] = reference;
-						}
-					}
-				}
+    @Override
+    public void injectReferences(Object obj, Field field,
+	    Map<String, Map<String, Object>> objectMap,
+	    Map<Object, String> idsFromReadObjects)
+	    throws InvocationTargetException, IllegalAccessException {
+	field.setAccessible(true);
+	Object[] readObjects = (Object[]) field.get(obj);
+	if (readObjects != null) {
+	    // TODO:
+	    // marking proxy objects as proxy prevents from persisting proxy
+	    // objects!
+	    // for (Identifiable identifiable : ids) {
+	    // if (identifiable != null) {
+	    // identifiable.setProxy(true);
+	    // }
+	    // }
+	    String typeName = field.getType().getComponentType().getName();
+	    Map<String, Object> typeMap = objectMap.get(typeName);
+	    if (typeMap != null) {
+		for (int i = 0; i < readObjects.length; i++) {
+		    if (readObjects[i] != null) {
+			Object reference = typeMap.get(idsFromReadObjects
+				.get(readObjects[i]));
+			if (reference != null) {
+			    readObjects[i] = reference;
 			}
+		    }
 		}
+	    }
 	}
+    }
 
 }

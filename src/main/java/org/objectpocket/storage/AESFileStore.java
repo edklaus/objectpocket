@@ -46,57 +46,72 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class AESFileStore extends FileStore {
 
-	private SecretKey secret = null;
-	private OutputStreamWriter outputStreamWriter;
+    private SecretKey secret = null;
+    private OutputStreamWriter outputStreamWriter;
 
-	public AESFileStore(String directory, String password) {
-		super(directory);
-		try {
-			SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-			KeySpec keySpec = new PBEKeySpec(password.toCharArray(), new byte[]{13,-45,89,-63,-76,78,9,101}, 65536, 128);
-			SecretKey secretKey = factory.generateSecret(keySpec);
-			secret = new SecretKeySpec(secretKey.getEncoded(), "AES");
-		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-			Logger.getAnonymousLogger().log(Level.SEVERE, "Could not instanciate " + this.getClass().getName(), e);
-		}
+    public AESFileStore(String directory, String password) {
+	super(directory);
+	try {
+	    SecretKeyFactory factory = SecretKeyFactory
+		    .getInstance("PBKDF2WithHmacSHA1");
+	    KeySpec keySpec = new PBEKeySpec(password.toCharArray(),
+		    new byte[] { 13, -45, 89, -63, -76, 78, 9, 101 }, 65536,
+		    128);
+	    SecretKey secretKey = factory.generateSecret(keySpec);
+	    secret = new SecretKeySpec(secretKey.getEncoded(), "AES");
+	} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+	    Logger.getAnonymousLogger().log(Level.SEVERE,
+		    "Could not instanciate " + this.getClass().getName(), e);
 	}
+    }
 
-	@Override
-	protected OutputStreamWriter getOutputStreamWriter(String filename) throws IOException {
-		try {
-			finishWrite();
-			File file = initFile(filename, true, true);
-			Cipher cipherWrite = Cipher.getInstance("AES");
-			cipherWrite.init(Cipher.ENCRYPT_MODE, secret);
-			outputStreamWriter = new OutputStreamWriter(new CipherOutputStream(new FileOutputStream(file), cipherWrite));
-			return outputStreamWriter;
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
-			throw new IOException("Could not instanciate OutputStreamWriter for file " + directory + "/" + filename, e);
-		}
+    @Override
+    protected OutputStreamWriter getOutputStreamWriter(String filename)
+	    throws IOException {
+	try {
+	    finishWrite();
+	    File file = initFile(filename, true, true);
+	    Cipher cipherWrite = Cipher.getInstance("AES");
+	    cipherWrite.init(Cipher.ENCRYPT_MODE, secret);
+	    outputStreamWriter = new OutputStreamWriter(new CipherOutputStream(
+		    new FileOutputStream(file), cipherWrite));
+	    return outputStreamWriter;
+	} catch (NoSuchAlgorithmException | NoSuchPaddingException
+		| InvalidKeyException e) {
+	    throw new IOException(
+		    "Could not instanciate OutputStreamWriter for file "
+			    + directory + "/" + filename, e);
 	}
+    }
 
-	@Override
-	protected BufferedReader getBufferedReader(String filename) throws IOException {
-		try {
-			File file = initFile(filename, true, false);
-			Cipher cipherRead = Cipher.getInstance("AES");
-			cipherRead.init(Cipher.DECRYPT_MODE, secret);
-			return new BufferedReader(new InputStreamReader(new CipherInputStream(new FileInputStream(file), cipherRead)));
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
-			throw new IOException("Could not instanciate BufferedReader for file " + directory + "/" + filename, e);
-		}
+    @Override
+    protected BufferedReader getBufferedReader(String filename)
+	    throws IOException {
+	try {
+	    File file = initFile(filename, true, false);
+	    Cipher cipherRead = Cipher.getInstance("AES");
+	    cipherRead.init(Cipher.DECRYPT_MODE, secret);
+	    return new BufferedReader(
+		    new InputStreamReader(new CipherInputStream(
+			    new FileInputStream(file), cipherRead)));
+	} catch (NoSuchAlgorithmException | NoSuchPaddingException
+		| InvalidKeyException e) {
+	    throw new IOException(
+		    "Could not instanciate BufferedReader for file "
+			    + directory + "/" + filename, e);
 	}
-	
-	@Override
-	protected void finishWrite() throws IOException {
-		if (outputStreamWriter != null) {
-			outputStreamWriter.close();
-		}
-		outputStreamWriter = null;
-	}
+    }
 
-	protected String getReadErrorMessage() {
-		return "The given password might be wrong.";
+    @Override
+    protected void finishWrite() throws IOException {
+	if (outputStreamWriter != null) {
+	    outputStreamWriter.close();
 	}
+	outputStreamWriter = null;
+    }
+
+    protected String getReadErrorMessage() {
+	return "The given password might be wrong.";
+    }
 
 }

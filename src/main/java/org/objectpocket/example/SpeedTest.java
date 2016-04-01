@@ -27,39 +27,43 @@ import org.objectpocket.ObjectPocketBuilder;
  *
  */
 public class SpeedTest {
-	
-	private static final String FILESTORE = System.getProperty("user.home") + "/objectpocket_example";
-	
-	public static void main(String[] args) throws Exception {
-		
-		long time = System.currentTimeMillis();
-		ObjectPocket objectPocket = new ObjectPocketBuilder().createFileObjectPocket(FILESTORE);
-		
-		int numPersons = 100_000;
-		
-		for (int i = 0; i < numPersons; i++) {
-			Address a = new Address();
-			a.setCity("city"+i);
-			Person p = new Person("name" + i, a);
-			objectPocket.add(p);
-		}
-		time = System.currentTimeMillis();
-		objectPocket.store();
-		System.out.println("CREATE AND STORE: " + (System.currentTimeMillis()-time));
-		
-		time = System.currentTimeMillis();
-		ObjectPocket objectPocket2 = new ObjectPocketBuilder().createFileObjectPocket(FILESTORE);
-		objectPocket2.load();
-		System.out.println("LOAD: " + (System.currentTimeMillis()-time));
-		time = System.currentTimeMillis();
-		Collection<Person> findAll = objectPocket2.findAll(Person.class);
-		for (Person person : findAll) {
-			if (person.getName().equals("name789")) {
-				System.out.println("time consumed: " + (System.currentTimeMillis() - time));
-			}
-		}
-		
-		
+
+    private static final String FILESTORE = System.getProperty("user.home")
+	    + "/objectpocket_example";
+
+    public static void main(String[] args) throws Exception {
+
+	long time = System.currentTimeMillis();
+	ObjectPocket objectPocket = new ObjectPocketBuilder()
+		.createFileObjectPocket(FILESTORE);
+
+	int numPersons = 100_000;
+
+	for (int i = 0; i < numPersons; i++) {
+	    Address a = new Address();
+	    a.setCity("city" + i);
+	    Person p = new Person("name" + i, a);
+	    objectPocket.add(p);
 	}
+	time = System.currentTimeMillis();
+	objectPocket.store();
+	System.out.println("CREATE AND STORE: "
+		+ (System.currentTimeMillis() - time));
+
+	time = System.currentTimeMillis();
+	ObjectPocket objectPocket2 = new ObjectPocketBuilder()
+		.createFileObjectPocket(FILESTORE);
+	objectPocket2.load();
+	System.out.println("LOAD: " + (System.currentTimeMillis() - time));
+	time = System.currentTimeMillis();
+	Collection<Person> findAll = objectPocket2.findAll(Person.class);
+	for (Person person : findAll) {
+	    if (person.getName().equals("name789")) {
+		System.out.println("time consumed: "
+			+ (System.currentTimeMillis() - time));
+	    }
+	}
+
+    }
 
 }

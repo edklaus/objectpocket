@@ -32,64 +32,66 @@ import org.objectpocket.util.JsonHelper;
  */
 public class MemoryStore implements ObjectStore {
 
-	/**
-	 * Keep json objects in memory with this list.</br>
-	 * - key: typeName</br>
-	 * - value:	json objects for this type
-	 */
-	private Map<String, Set<String>> jsonObjectMap = new HashMap<String, Set<String>>();
-	private Map<String, byte[]> blobData = new HashMap<String, byte[]>();
+    /**
+     * Keep json objects in memory with this list.</br> - key: typeName</br> -
+     * value: json objects for this type
+     */
+    private Map<String, Set<String>> jsonObjectMap = new HashMap<String, Set<String>>();
+    private Map<String, byte[]> blobData = new HashMap<String, byte[]>();
 
-	@Override
-	public Set<String> getAvailableObjectTypes() {
-		return jsonObjectMap.keySet();
-	}
-	
-	@Override
-	public Map<String, String> readJsonObjects(String typeName) {
-		Set<String> set = jsonObjectMap.get(typeName);
-		Map<String, String> jsonObjects = new HashMap<String, String>(set.size());
-		for (String string : set) {
-			String[] typeAndIdFromJson = JsonHelper.getTypeAndIdFromJson(string);
-			if (typeName.equals(typeAndIdFromJson[0])) {
-				jsonObjects.put(string, typeAndIdFromJson[1]);
-			}
-		}
-		return jsonObjects;
-	}
+    @Override
+    public Set<String> getAvailableObjectTypes() {
+	return jsonObjectMap.keySet();
+    }
 
-	@Override
-	public void writeJsonObjects(Map<String, Map<String, Set<String>>> jsonObjects) {
-		for (String typeName : jsonObjects.keySet()) {
-			Map<String, Set<String>> objectsForType = jsonObjects.get(typeName);
-			Set<String> allObjects = new HashSet<String>();
-			for (String key : objectsForType.keySet()) {
-				allObjects.addAll(objectsForType.get(key));
-			}
-			jsonObjectMap.put(typeName, allObjects);
-		}
+    @Override
+    public Map<String, String> readJsonObjects(String typeName) {
+	Set<String> set = jsonObjectMap.get(typeName);
+	Map<String, String> jsonObjects = new HashMap<String, String>(
+		set.size());
+	for (String string : set) {
+	    String[] typeAndIdFromJson = JsonHelper
+		    .getTypeAndIdFromJson(string);
+	    if (typeName.equals(typeAndIdFromJson[0])) {
+		jsonObjects.put(string, typeAndIdFromJson[1]);
+	    }
 	}
+	return jsonObjects;
+    }
 
-	@Override
-	public void writeBlobs(Set<Blob> blobs) throws IOException {
-		for (Blob blob : blobs) {
-			blobData.put(blob.getPath(), blob.getBytes());
-		}
+    @Override
+    public void writeJsonObjects(
+	    Map<String, Map<String, Set<String>>> jsonObjects) {
+	for (String typeName : jsonObjects.keySet()) {
+	    Map<String, Set<String>> objectsForType = jsonObjects.get(typeName);
+	    Set<String> allObjects = new HashSet<String>();
+	    for (String key : objectsForType.keySet()) {
+		allObjects.addAll(objectsForType.get(key));
+	    }
+	    jsonObjectMap.put(typeName, allObjects);
 	}
+    }
 
-	@Override
-	public byte[] loadBlobData(Blob blob) {
-		return blobData.get(blob.getPath());
+    @Override
+    public void writeBlobs(Set<Blob> blobs) throws IOException {
+	for (Blob blob : blobs) {
+	    blobData.put(blob.getPath(), blob.getBytes());
 	}
-	
-	@Override
-	public void close() throws IOException {
-		
-	}
-	
-	@Override
-	public String getSource() {
-		return "MemStore." + hashCode();
-	}
+    }
+
+    @Override
+    public byte[] loadBlobData(Blob blob) {
+	return blobData.get(blob.getPath());
+    }
+
+    @Override
+    public void close() throws IOException {
+
+    }
+
+    @Override
+    public String getSource() {
+	return "MemStore." + hashCode();
+    }
 
 }

@@ -34,70 +34,77 @@ import org.objectpocket.annotations.Entity;
  */
 public abstract class ReferenceSupport {
 
-	private Map<String, List<Field>> fieldsForType = new HashMap<String, List<Field>>();
+    private Map<String, List<Field>> fieldsForType = new HashMap<String, List<Field>>();
 
-	/**
-	 * This method needs to be implemented in order to support a specific kind of reference detection.
-	 * @param fields
-	 * @return
-	 */
-	public abstract List<Field> filterReferencingFields(List<Field> fields);
+    /**
+     * This method needs to be implemented in order to support a specific kind
+     * of reference detection.
+     * 
+     * @param fields
+     * @return
+     */
+    public abstract List<Field> filterReferencingFields(List<Field> fields);
 
-	public abstract void injectReferences(Object obj, Field field, Map<String, Map<String, Object>> objectMap, 
-			Map<Object, String> idsFromReadObjects) throws InvocationTargetException, IllegalAccessException;
+    public abstract void injectReferences(Object obj, Field field,
+	    Map<String, Map<String, Object>> objectMap,
+	    Map<Object, String> idsFromReadObjects)
+	    throws InvocationTargetException, IllegalAccessException;
 
-	public abstract Set<Object> getObjectsForField(Object obj, Field field)
-			throws InvocationTargetException, IllegalAccessException;
+    public abstract Set<Object> getObjectsForField(Object obj, Field field)
+	    throws InvocationTargetException, IllegalAccessException;
 
-	/**
-	 * Detects references to other objects inside the given object that have 
-	 * been annotated with {@link Entity}.
-	 * Returns the references as a {@link Set} of objects.
-	 * @param obj
-	 * @return
-	 */
-	public Set<Object> getReferences(Object obj) {
-		List<Field> objectFields = getFields(obj);
-		if (objectFields != null && !objectFields.isEmpty()) {
-			Set<Object> references = new HashSet<Object>();
-			for (Field field : objectFields) {
-				Set<Object> objectsForField = null;
-				try {
-					objectsForField = getObjectsForField(obj, field);
-				} catch (InvocationTargetException | IllegalAccessException e) {
-					// TODO exception handling
-					e.printStackTrace();
-				}
-				if (objectsForField != null) {
-					references.addAll(objectsForField);
-				}
-			}
-			return references;
+    /**
+     * Detects references to other objects inside the given object that have
+     * been annotated with {@link Entity}. Returns the references as a
+     * {@link Set} of objects.
+     * 
+     * @param obj
+     * @return
+     */
+    public Set<Object> getReferences(Object obj) {
+	List<Field> objectFields = getFields(obj);
+	if (objectFields != null && !objectFields.isEmpty()) {
+	    Set<Object> references = new HashSet<Object>();
+	    for (Field field : objectFields) {
+		Set<Object> objectsForField = null;
+		try {
+		    objectsForField = getObjectsForField(obj, field);
+		} catch (InvocationTargetException | IllegalAccessException e) {
+		    // TODO exception handling
+		    e.printStackTrace();
 		}
-		return null;
-	}
-
-	private List<Field> getFields(Object obj) {
-		if (!fieldsForType.containsKey(obj.getClass().getName())) {
-			List<Field> allFields = FieldUtils.getAllFieldsList(obj.getClass());
-			List<Field> filteredFields = filterReferencingFields(allFields);
-			fieldsForType.put(obj.getClass().getName(), filteredFields);
+		if (objectsForField != null) {
+		    references.addAll(objectsForField);
 		}
-		return fieldsForType.get(obj.getClass().getName());
+	    }
+	    return references;
 	}
+	return null;
+    }
 
-	public void injectReferences(Object obj,  Map<String, Map<String, Object>> objectMap, Map<Object, String> idsFromReadObjects) {
-		List<Field> objectFields = getFields(obj);
-		if (objectFields != null && !objectFields.isEmpty()) {
-			for (Field field : objectFields) {
-				try {
-					injectReferences(obj, field, objectMap, idsFromReadObjects);
-				} catch (InvocationTargetException | IllegalAccessException e) {
-					// TODO exception handling
-					e.printStackTrace();
-				}
-			}
-		}
+    private List<Field> getFields(Object obj) {
+	if (!fieldsForType.containsKey(obj.getClass().getName())) {
+	    List<Field> allFields = FieldUtils.getAllFieldsList(obj.getClass());
+	    List<Field> filteredFields = filterReferencingFields(allFields);
+	    fieldsForType.put(obj.getClass().getName(), filteredFields);
 	}
+	return fieldsForType.get(obj.getClass().getName());
+    }
+
+    public void injectReferences(Object obj,
+	    Map<String, Map<String, Object>> objectMap,
+	    Map<Object, String> idsFromReadObjects) {
+	List<Field> objectFields = getFields(obj);
+	if (objectFields != null && !objectFields.isEmpty()) {
+	    for (Field field : objectFields) {
+		try {
+		    injectReferences(obj, field, objectMap, idsFromReadObjects);
+		} catch (InvocationTargetException | IllegalAccessException e) {
+		    // TODO exception handling
+		    e.printStackTrace();
+		}
+	    }
+	}
+    }
 
 }

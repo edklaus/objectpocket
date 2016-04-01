@@ -28,24 +28,28 @@ import org.objectpocket.Blob;
  */
 public interface BlobStore {
 
-	/**
-	 * Write blobs to blob store.
-	 * @param blobs
-	 * @throws IOException If an I/O error occurs
-	 */
-	public void writeBlobs(Set<Blob> blobs) throws IOException;
-	
-	/**
-	 * Load binary data for the given Blob object.
-	 * @param blob
-	 * @return
-	 * @throws IOException If an I/O error occurs
-	 */
-	public byte[] loadBlobData(Blob blob) throws IOException;
-	
-	/**
-	 * close blob store
-	 */
-	public void close() throws IOException;
-	
+    /**
+     * Write blobs to blob store.
+     * 
+     * @param blobs
+     * @throws IOException
+     *             If an I/O error occurs
+     */
+    public void writeBlobs(Set<Blob> blobs) throws IOException;
+
+    /**
+     * Load binary data for the given Blob object.
+     * 
+     * @param blob
+     * @return
+     * @throws IOException
+     *             If an I/O error occurs
+     */
+    public byte[] loadBlobData(Blob blob) throws IOException;
+
+    /**
+     * close blob store
+     */
+    public void close() throws IOException;
+
 }

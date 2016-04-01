@@ -27,40 +27,47 @@ import java.util.UUID;
  */
 public class Person {
 
-	private String name;
-	private String surname = UUID.randomUUID().toString();
-	private Date birthdate = new Date();
-	private Address address;
-	private List<Person> friends;
+    private String name;
+    private String surname = UUID.randomUUID().toString();
+    private Date birthdate = new Date();
+    private Address address;
+    private List<Person> friends;
 
-	public Person(String name, Address address) {
-		this.name = name;
-		this.address = address;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public Address getAddress() {
-		return address;
-	}
-	public void setAddress(Address address) {
-		this.address = address;
-	}
-	public List<Person> getFriends() {
-		return friends;
-	}
-	public void setFriends(List<Person> friends) {
-		this.friends = friends;
-	}
-	public String getSurname() {
-		return surname;
-	}
-	public Date getBirthdate() {
-		return birthdate;
-	}
+    public Person(String name, Address address) {
+	this.name = name;
+	this.address = address;
+    }
+
+    public String getName() {
+	return name;
+    }
+
+    public void setName(String name) {
+	this.name = name;
+    }
+
+    public Address getAddress() {
+	return address;
+    }
+
+    public void setAddress(Address address) {
+	this.address = address;
+    }
+
+    public List<Person> getFriends() {
+	return friends;
+    }
+
+    public void setFriends(List<Person> friends) {
+	this.friends = friends;
+    }
+
+    public String getSurname() {
+	return surname;
+    }
+
+    public Date getBirthdate() {
+	return birthdate;
+    }
 
 }
-

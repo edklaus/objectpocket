@@ -26,16 +26,20 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class ReflectionUtil {
 
-	public static Object instantiateDefaultConstructor(Class<?> clazz) throws InstantiationException, 
-			IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
-		String className = clazz.getName();
-		int lastSeparator = className.lastIndexOf("$");
-		if (lastSeparator > -1) {
-			String enclosingClass = className.substring(0, lastSeparator);
-			Constructor<?> constructor = clazz.getConstructor(Class.forName(enclosingClass));
-			return constructor.newInstance(instantiateDefaultConstructor(Class.forName(enclosingClass)));
-		}
-		return clazz.newInstance();
+    public static Object instantiateDefaultConstructor(Class<?> clazz)
+	    throws InstantiationException, IllegalAccessException,
+	    ClassNotFoundException, NoSuchMethodException,
+	    InvocationTargetException {
+	String className = clazz.getName();
+	int lastSeparator = className.lastIndexOf("$");
+	if (lastSeparator > -1) {
+	    String enclosingClass = className.substring(0, lastSeparator);
+	    Constructor<?> constructor = clazz.getConstructor(Class
+		    .forName(enclosingClass));
+	    return constructor.newInstance(instantiateDefaultConstructor(Class
+		    .forName(enclosingClass)));
 	}
+	return clazz.newInstance();
+    }
 
 }

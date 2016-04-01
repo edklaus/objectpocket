@@ -26,11 +26,11 @@ import java.util.Set;
  *
  */
 public class ObjectPocketIndex {
-	
-	private Map<String, Set<String>> typeToFilenamesMapping = new HashMap<String, Set<String>>();
 
-	protected Map<String, Set<String>> getTypeToFilenamesMapping() {
-		return typeToFilenamesMapping;
-	}
-	
+    private Map<String, Set<String>> typeToFilenamesMapping = new HashMap<String, Set<String>>();
+
+    protected Map<String, Set<String>> getTypeToFilenamesMapping() {
+	return typeToFilenamesMapping;
+    }
+
 }

@@ -3,23 +3,23 @@
 
 (Speichern)
 - Objektvergleich braucht relativ viel Zeit (tracedObjects)
-- lässt sich mit hashCode optimieren -> Empfehlung in Doku
+- lÃ¤sst sich mit hashCode optimieren -> Empfehlung in Doku
 
 ## BUGS ##
 
 
 ## OPTIMIZATION POSSIBILITIES ##
-- durch parallelisieren kriegt man beim laden nochmal ca. 15% speed zusätzlich 
-- Man kann folgende Vorgänge parallelisieren:
+- durch parallelisieren kriegt man beim laden nochmal ca. 15% speed zusÃ¤tzlich 
+- Man kann folgende VorgÃ¤nge parallelisieren:
   - Lesen der Dateien von Platte
   - Verarbeiten der gelesenen Strings (split, ...)
   - Umwandeln von JSON in Objekte
 - Multithreading in Methode load() bringt schon viel Geschw.vorteil
-- Es ist sicher noch besser jeden einzelnen Aufruf von "fromJson" an den ThreadPoolExecutor zu übergeben
-  - So lässt sich sicherein maximaler Geschwindigkeitsvorteil rausholen
+- Es ist sicher noch besser jeden einzelnen Aufruf von "fromJson" an den ThreadPoolExecutor zu Ã¼bergeben
+  - So lï¿½sst sich sicherein maximaler Geschwindigkeitsvorteil rausholen
 - Allerdings erzeugt es auch einige Fehler beim Zugriff auf Listen!!
-  -> Hier muss man nochmal genau prüfen
-- Auch beim store lässt sich sicher gut parallelisieren
+  -> Hier muss man nochmal genau prÃ¼fen
+- Auch beim store lï¿½sst sich sicher gut parallelisieren
 
 ## TODO ##
 - blobzip: man kann keine kompressionsrate einstellen!!
@@ -31,28 +31,28 @@
   - Japer 				2398
   - JSON to Zip 		3922
 - In den Support.injectReferences Methoden setProxy Methode aufrufen
-- JSON Ausgabe überarbeiten (s. outline)
-- setFilename für
+- JSON Ausgabe ï¿½berarbeiten (s. outline)
+- setFilename fï¿½r
   - Objekttypen
-- Benchmark erstellen und Zielgruppe von Projekten definieren (Anwendungsfälle)
-- Wie löschen??
+- Benchmark erstellen und Zielgruppe von Projekten definieren (Anwendungsfï¿½lle)
+- Wie lï¿½schen??
 
 
-### Wofür @Id?
-- Es ist nicht notwendig um Referenzen aufzulösen
-  - prinzipiell können Referenzen über erzeugte IDs intern gehandhabt werden, völlig transparent für den Nutzer
+### WofÃ¼r @Id?
+- Es ist nicht notwendig um Referenzen aufzulÃ¶sen
+  - prinzipiell kÃ¶nnen Referenzen Ã¼ber erzeugte IDs intern gehandhabt werden, vÃ¶llig transparent fÃ¼r den Nutzer
   - Einziger Sinn: Nutzer kann beim Browsen der Daten einfacher verstehen was referenziert ist
-  - Weiterer Sinn: Auffinden von Objekten anhand ihrer ID über find
+  - Weiterer Sinn: Auffinden von Objekten anhand ihrer ID Ã¼ber find
 
 ### find erweitern
-- Es macht Sinn find so zu erweitern dass nach allen möglichen Objekten und Feldern gesucht werden kann
+- Es macht Sinn find so zu erweitern dass nach allen mÃ¶glichen Objekten und Feldern gesucht werden kann
   - Wenn Objekte Inline gespeichert werden, sollten auch diese suchbar sein => komplexeres Auffinden von Referenzen
   - Alle Felder von Objekten durchsuchbar machen
     public <T> T find(String fieldname, Object value, Class<T> type);
     
 ### Ideen
-- Automatisches nachladen von änderungen wenn Speicherdatei per Hand oder von anderer Instanz geändert wurde
-- Automatisches Speichern bei Änderungen
+- Automatisches nachladen von Ã„nderungen wenn Speicherdatei per Hand oder von anderer Instanz geÃ¤ndert wurde
+- Automatisches Speichern bei Ã„nderungen
 - Asynchrones Speichern
 - tool for data inspection
 - load asynchronous / tests

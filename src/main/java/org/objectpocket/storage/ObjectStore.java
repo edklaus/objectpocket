@@ -28,35 +28,47 @@ import org.objectpocket.storage.blob.BlobStore;
  *
  */
 public interface ObjectStore extends BlobStore {
-	
-	/**
-	 * Loads all object type names from the underlying store.
-	 * @return object type names as strings</br>
-	 * 		null if no objects type names are available
-	 * @throws IOException If an I/O error occurs
-	 */
-	public Set<String> getAvailableObjectTypes() throws IOException;
-	
-	/**
-	 * Reads json objects of given typeName from the object store.
-	 * @param typeName fully qualified class name
-	 * @return map of json objects as strings, and object id (id cna be reference
-	 *  when custom id has been set with @Id)
-	 * @throws IOException If an I/O error occurs
-	 */
-	public Map<String, String> readJsonObjects(String typeName) throws IOException;
-	
-	/**
-	 * Writes json objects to the object store.
-	 * @param jsonObjects Map<typeName, Map<filename, Set<jsonString>>>
-	 * @throws IOException If an I/O error occurs
-	 */
-	public void writeJsonObjects(Map<String, Map<String, Set<String>>> jsonObjects) throws IOException;
-	
-	/**
-	 * Returns the source where data is loaded from.
-	 * @return
-	 */
-	public String getSource();
+
+    /**
+     * Loads all object type names from the underlying store.
+     * 
+     * @return object type names as strings</br> null if no objects type names
+     *         are available
+     * @throws IOException
+     *             If an I/O error occurs
+     */
+    public Set<String> getAvailableObjectTypes() throws IOException;
+
+    /**
+     * Reads json objects of given typeName from the object store.
+     * 
+     * @param typeName
+     *            fully qualified class name
+     * @return map of json objects as strings, and object id (id cna be
+     *         reference when custom id has been set with @Id)
+     * @throws IOException
+     *             If an I/O error occurs
+     */
+    public Map<String, String> readJsonObjects(String typeName)
+	    throws IOException;
+
+    /**
+     * Writes json objects to the object store.
+     * 
+     * @param jsonObjects
+     *            Map<typeName, Map<filename, Set<jsonString>>>
+     * @throws IOException
+     *             If an I/O error occurs
+     */
+    public void writeJsonObjects(
+	    Map<String, Map<String, Set<String>>> jsonObjects)
+	    throws IOException;
+
+    /**
+     * Returns the source where data is loaded from.
+     * 
+     * @return
+     */
+    public String getSource();
 
 }

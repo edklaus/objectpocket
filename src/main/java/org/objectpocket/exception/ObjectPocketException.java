@@ -23,11 +23,11 @@ package org.objectpocket.exception;
  */
 public class ObjectPocketException extends Exception {
 
-	public ObjectPocketException(String message) {
-		super(message);
-	}
-	
-	public ObjectPocketException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public ObjectPocketException(String message) {
+	super(message);
+    }
+
+    public ObjectPocketException(String message, Throwable cause) {
+	super(message, cause);
+    }
 }
