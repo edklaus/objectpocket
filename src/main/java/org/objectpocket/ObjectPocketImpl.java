@@ -50,6 +50,8 @@ public class ObjectPocketImpl implements ObjectPocket {
     private BlobStore blobStore;
     private boolean serializeNulls = false;
     private boolean prettyPrinting = false;
+    private boolean objectStoreInitialized = false;
+
     private Map<Type, Set<Object>> typeAdapterMap = new HashMap<Type, Set<Object>>(
 	    10);
     private Set<ReferenceSupport> referenceSupportSet = new HashSet<ReferenceSupport>(
@@ -87,9 +89,12 @@ public class ObjectPocketImpl implements ObjectPocket {
     }
 
     @Override
-    public void add(Object obj) {
+    public void add(Object obj) throws ObjectPocketException {
 	if (obj == null) {
 	    return;
+	}
+	if (!storeIsReady()) {
+	    throw new ObjectPocketException("The desired location contains data. Please load the data first.");
 	}
 	// TODO: check who owns the object (in case more than 1 ObjectPocket)
 	// if (obj.getOwningInstance() == null ||
@@ -115,7 +120,7 @@ public class ObjectPocketImpl implements ObjectPocket {
     }
 
     @Override
-    public void add(Object obj, String filename) {
+    public void add(Object obj, String filename) throws ObjectPocketException {
 	// TODO: validate filename to not be something like /home... or C:/...
 	// throw exception in that case?
 	this.add(obj);
@@ -125,7 +130,7 @@ public class ObjectPocketImpl implements ObjectPocket {
 	}
     }
 
-    private void addReferences(Object obj) {
+    private void addReferences(Object obj) throws ObjectPocketException {
 	for (ReferenceSupport referenceSupport : referenceSupportSet) {
 	    Set<Object> references = referenceSupport.getReferences(obj);
 	    if (references != null) {
@@ -145,6 +150,11 @@ public class ObjectPocketImpl implements ObjectPocket {
 
     @Override
     public void store() throws ObjectPocketException {
+
+	if (!storeIsReady()) {
+	    throw new ObjectPocketException("The desired location contains data. Please load the data first.");
+	}
+
 	long time = System.currentTimeMillis();
 	serializeAsRoot = new HashSet<Object>();
 
@@ -238,6 +248,8 @@ public class ObjectPocketImpl implements ObjectPocket {
 	} catch (IOException e) {
 	    throw new ObjectPocketException("Could not persist blobs.", e);
 	}
+	
+	objectStoreInitialized = true;
 
 	Logger.getAnonymousLogger().info(
 		"Stored all objects in " + objectStore.getSource() + " in "
@@ -315,6 +327,7 @@ public class ObjectPocketImpl implements ObjectPocket {
 		"Loaded all objects from " + objectStore.getSource() + " in "
 			+ (System.currentTimeMillis() - timeAll) + " ms.");
 	loading = false;
+	objectStoreInitialized = true;
     }
 
     @Override
@@ -354,7 +367,8 @@ public class ObjectPocketImpl implements ObjectPocket {
 	}
 
 	injectReferences();
-
+	objectStoreInitialized = true;
+	
 	final Set<String> otherTypes = availableObjectTypes;
 	// do everything else asynchronous
 	SwingWorker<Void, Void> sw = new SwingWorker<Void, Void>() {
@@ -374,9 +388,9 @@ public class ObjectPocketImpl implements ObjectPocket {
 		injectReferences();
 		Logger.getAnonymousLogger().info(
 			"Loaded all objects from " + objectStore.getSource()
-				+ " in "
-				+ (System.currentTimeMillis() - timeAll)
-				+ " ms.");
+			+ " in "
+			+ (System.currentTimeMillis() - timeAll)
+			+ " ms.");
 		loading = false;
 		return null;
 	    }
@@ -403,12 +417,15 @@ public class ObjectPocketImpl implements ObjectPocket {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T find(String id, Class<T> type) {
+    public <T> T find(String id, Class<T> type) throws ObjectPocketException {
 	if (id == null || id.isEmpty()) {
 	    return null;
 	}
 	if (type == null) {
 	    return null;
+	}
+	if (!storeIsReady()) {
+	    throw new ObjectPocketException("The desired location contains data. Please load the data first.");
 	}
 	Map<String, Object> map = objectMap.get(type.getName());
 	if (map != null) {
@@ -419,8 +436,11 @@ public class ObjectPocketImpl implements ObjectPocket {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Collection<T> findAll(Class<T> type) {
+    public <T> Collection<T> findAll(Class<T> type) throws ObjectPocketException {
 	if (type != null) {
+	    if (!storeIsReady()) {
+		throw new ObjectPocketException("The desired location contains data. Please load the data first.");
+	    }
 	    Map<String, Object> map = objectMap.get(type.getName());
 	    if (map != null && !map.isEmpty()) {
 		return (Collection<T>) map.values();
@@ -439,6 +459,9 @@ public class ObjectPocketImpl implements ObjectPocket {
 	String id = tracedObjects.get(obj);
 	if (id == null) {
 	    return;
+	}
+	if (!storeIsReady()) {
+	    throw new ObjectPocketException("The desired location contains data. Please load the data first.");
 	}
 	Map<String, Object> map = objectMap.get(obj.getClass().getName());
 	if (map == null) {
@@ -463,7 +486,10 @@ public class ObjectPocketImpl implements ObjectPocket {
     }
 
     @Override
-    public void cleanup() {
+    public void cleanup() throws ObjectPocketException {
+	if (!storeIsReady()) {
+	    throw new ObjectPocketException("The desired location contains data. Please load the data first.");
+	}
 	throw new UnsupportedOperationException();
 
     }
@@ -477,6 +503,11 @@ public class ObjectPocketImpl implements ObjectPocket {
 	    blobStore.close();
 	}
     }
+    
+    @Override
+    public boolean exists() {
+        return objectStore.exists();
+    }
 
     @Override
     public void link(ObjectPocket objectPocket) {
@@ -485,7 +516,10 @@ public class ObjectPocketImpl implements ObjectPocket {
     }
 
     @Override
-    public void setDefaultFilename(Class<?> type, String filename) {
+    public void setDefaultFilename(Class<?> type, String filename) throws ObjectPocketException {
+	if (!storeIsReady()) {
+	    throw new ObjectPocketException("The desired location contains data. Please load the data first.");
+	}
 	throw new UnsupportedOperationException();
     }
 
@@ -523,7 +557,7 @@ public class ObjectPocketImpl implements ObjectPocket {
 	}
 	Logger.getAnonymousLogger().info(
 		"Loaded " + counter + " objects of type\n  " + clazz.getName()
-			+ " in " + (System.currentTimeMillis() - time) + " ms");
+		+ " in " + (System.currentTimeMillis() - time) + " ms");
     }
 
     private void injectReferences() {
@@ -544,8 +578,8 @@ public class ObjectPocketImpl implements ObjectPocket {
 	    }
 	}
 	Logger.getAnonymousLogger()
-		.info("Injection took " + (System.currentTimeMillis() - time)
-			+ " ms");
+	.info("Injection took " + (System.currentTimeMillis() - time)
+		+ " ms");
     }
 
     // private void amendMap(Map<String, Map<String, Object>> dest,
@@ -574,8 +608,8 @@ public class ObjectPocketImpl implements ObjectPocket {
 
 	    // This is where the referencing entry magic happens
 	    gsonBuilder
-		    .registerTypeAdapterFactory(new CustomTypeAdapterFactory(
-			    this));
+	    .registerTypeAdapterFactory(new CustomTypeAdapterFactory(
+		    this));
 
 	    // add custom type adapters
 	    for (Type type : typeAdapterMap.keySet()) {
@@ -626,6 +660,10 @@ public class ObjectPocketImpl implements ObjectPocket {
 	} else {
 	    serializeAsRoot.remove(obj);
 	}
+    }
+
+    private boolean storeIsReady() {
+	return objectStoreInitialized || !objectStore.exists();
     }
 
 }

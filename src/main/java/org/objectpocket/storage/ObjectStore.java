@@ -28,11 +28,18 @@ import org.objectpocket.storage.blob.BlobStore;
  *
  */
 public interface ObjectStore extends BlobStore {
+    
+    /**
+     * Returns true if the given store exists.
+     * 
+     * @return
+     */
+    public boolean exists();
 
     /**
      * Loads all object type names from the underlying store.
      * 
-     * @return object type names as strings</br> null if no objects type names
+     * @return object type names as strings<br> null if no objects type names
      *         are available
      * @throws IOException
      *             If an I/O error occurs
@@ -44,7 +51,7 @@ public interface ObjectStore extends BlobStore {
      * 
      * @param typeName
      *            fully qualified class name
-     * @return map of json objects as strings, and object id (id cna be
+     * @return map of json objects as strings, and object id (id can be
      *         reference when custom id has been set with @Id)
      * @throws IOException
      *             If an I/O error occurs

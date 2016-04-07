@@ -1,3 +1,9 @@
+## DRINGEND ##
+- binary wird angelegt auch wenn es darin nichts zu speichern gibt
+- load/store
+- remove
+==> s. filestore.txt
+
 ## HOSTSPOTS ##
 - splitTopLevelJsonObjects braucht ca. 15%
 

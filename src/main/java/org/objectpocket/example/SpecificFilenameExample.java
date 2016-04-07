@@ -35,7 +35,7 @@ public class SpecificFilenameExample {
     private static final String FILESTORE = System.getProperty("user.home")
 	    + "/objectpocket_example";
 
-    public void createAndPersist() {
+    public void createAndPersist() throws Exception {
 
 	// define store
 	ObjectPocket objectPocket = new ObjectPocketBuilder()
@@ -58,16 +58,14 @@ public class SpecificFilenameExample {
 	// store
 	// note: all references are added automatically
 	// you don't have to add every single object
-	objectPocket.add(p1, "person.json");
-	try {
-	    objectPocket.store();
-	    ;
-	} catch (ObjectPocketException e) {
-	    e.printStackTrace();
+	if (objectPocket.exists()) {
+	    objectPocket.load();
 	}
+	objectPocket.add(p1, "person");
+	objectPocket.store();
     }
 
-    public void load() {
+    public void load() throws Exception {
 
 	// define store
 	ObjectPocket objectPocket = new ObjectPocketBuilder()

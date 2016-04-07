@@ -31,6 +31,8 @@ import org.objectpocket.util.JsonHelper;
  *
  */
 public class MemoryStore implements ObjectStore {
+    
+    private boolean exists = false;
 
     /**
      * Keep json objects in memory with this list.</br> - key: typeName</br> -
@@ -39,6 +41,11 @@ public class MemoryStore implements ObjectStore {
     private Map<String, Set<String>> jsonObjectMap = new HashMap<String, Set<String>>();
     private Map<String, byte[]> blobData = new HashMap<String, byte[]>();
 
+    @Override
+    public boolean exists() {
+        return exists;
+    }
+    
     @Override
     public Set<String> getAvailableObjectTypes() {
 	return jsonObjectMap.keySet();
@@ -71,6 +78,7 @@ public class MemoryStore implements ObjectStore {
 	    }
 	    jsonObjectMap.put(typeName, allObjects);
 	}
+	exists = true;
     }
 
     @Override

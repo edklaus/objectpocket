@@ -73,8 +73,10 @@ public interface ObjectPocket {
      * object store by calling {@link #store()}.
      * 
      * @param obj
+     * 
+     * @throws ObjectPocketException
      */
-    public void add(Object obj);
+    public void add(Object obj) throws ObjectPocketException;
 
     /**
      * Behaves like {@link #add(Object)}<br>
@@ -92,8 +94,10 @@ public interface ObjectPocket {
      * @param filename
      *            where to store the object, the file will be created inside the
      *            object store of your choice
+     * 
+     * @throws ObjectPocketException
      */
-    public void add(Object obj, String filename);
+    public void add(Object obj, String filename) throws ObjectPocketException;
 
     /**
      * Persist all objects inside the ObjectPocket persistence context to an
@@ -166,8 +170,10 @@ public interface ObjectPocket {
      *            type of the object to find
      * @return the object of given type and with the given id, if this exists in
      *         the persistence context, null otherwise
+     * 
+     * @throws ObjectPocketException
      */
-    public <T> T find(String id, Class<T> type);
+    public <T> T find(String id, Class<T> type) throws ObjectPocketException;
 
     /**
      * Find all objects by the given object type.
@@ -176,8 +182,11 @@ public interface ObjectPocket {
      *            type of the object to find
      * @return all objects of given type that exist in the persistence context,
      *         null otherwise
+     * 
+     * @throws ObjectPocketException
      */
-    public <T> Collection<T> findAll(Class<T> type);
+    public <T> Collection<T> findAll(Class<T> type)
+	    throws ObjectPocketException;
 
     /**
      * Remove object from persistence context. You need to call {@link #store()}
@@ -208,13 +217,22 @@ public interface ObjectPocket {
      * {@link #store()} the reference to the blob data will just be removed. The
      * data itself will stay in the {@link BlobStore}. To really delete the data
      * and free disk space call {@link #cleanup()}.
+     * 
+     * @throws ObjectPocketException
      */
-    public void cleanup();
+    public void cleanup() throws ObjectPocketException;
 
     /**
      * Closes object pocket and all contained ObjectStores, files, streams.
      */
     public void close() throws IOException;
+    
+    /**
+     * Returns true when the {@link ObjectPocket} exists in means of data already
+     * written to a directory.
+     * @return
+     */
+    public boolean exists();
 
     /**
      * Links another ObjectPocket instance to this ObjectPocket.<br>
@@ -238,7 +256,10 @@ public interface ObjectPocket {
      * @param filename
      *            filename where to store the objects of the given type, the
      *            file will be created inside the object store of your choice
+     * 
+     * @throws ObjectPocketException
      */
-    public void setDefaultFilename(Class<?> type, String filename);
+    public void setDefaultFilename(Class<?> type, String filename)
+	    throws ObjectPocketException;
 
 }

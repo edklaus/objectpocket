@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.objectpocket.Blob;
 import org.objectpocket.storage.blob.BlobStore;
@@ -55,6 +54,15 @@ public class FileStore implements ObjectStore {
     public FileStore(String directory) {
 	this.directory = directory;
 	this.blobStore = new ZipBlobStore(directory);
+    }
+
+    @Override
+    public boolean exists() {
+	File indexFile = new File(directory + "/" + INDEX_FILE_NAME);
+	if (indexFile.exists()) {
+	    return true;
+	}
+	return false;
     }
 
     @Override
@@ -112,7 +120,10 @@ public class FileStore implements ObjectStore {
 	    Map<String, Map<String, Set<String>>> jsonObjects)
 	    throws IOException {
 	// TODO: delete file when receiving empty list!!
-	readIndexFile();
+	// 1. possibility:
+	// delet all files everytime before writing
+	// 2. possibility:
+	// delete file by file when necessary (better when using zip archive)
 	for (String typeName : jsonObjects.keySet()) {
 	    Map<String, Set<String>> objectsForType = jsonObjects.get(typeName);
 	    for (String filename : objectsForType.keySet()) {
@@ -184,22 +195,19 @@ public class FileStore implements ObjectStore {
 
     protected File initFile(String typeName, boolean read, boolean write)
 	    throws IOException {
-	File dir = initFileStore();
-	String filename = dir.getPath() + File.separatorChar + typeName;
+	File dir = initFileStore(read, write);
+	String filename = dir.getPath() + "/" + typeName;
 	File f = new File(filename);
-	if (!f.exists()) {
+	if (write && !f.exists()) {
 	    try {
 		f.createNewFile();
-		if (typeName.equals(INDEX_FILE_NAME)) {
-		    Logger.getAnonymousLogger().warning(
-			    "Could not find index file. Will create.");
-		    writeIndexFileData(getOutputStreamWriter(INDEX_FILE_NAME));
-		    finishWrite();
-		}
 	    } catch (IOException e) {
 		throw new IOException("File could not be created. " + filename,
 			e);
 	    }
+	}
+	if (!f.exists()) {
+	    throw new IOException("File does not exist. " + filename);
 	}
 	if (read && !f.canRead()) {
 	    throw new IOException("File is not readable. " + filename);
@@ -210,10 +218,15 @@ public class FileStore implements ObjectStore {
 	return f;
     }
 
-    private File initFileStore() throws IOException {
+    private File initFileStore(boolean read, boolean write) throws IOException {
 	File dir = new File(directory);
 	if (!dir.exists()) {
-	    dir.mkdirs();
+	    if (write) {
+		dir.mkdirs();
+	    } else {
+		throw new IOException(
+			"Store does not exist. Nothing to load here.");
+	    }
 	}
 	if (!dir.exists()) {
 	    throw new IOException("File store does not exist. " + directory);

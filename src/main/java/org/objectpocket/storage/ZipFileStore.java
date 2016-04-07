@@ -72,6 +72,7 @@ public class ZipFileStore extends FileStore {
     protected OutputStreamWriter getOutputStreamWriter(String filename)
 	    throws IOException {
 	if (zipOutputStream == null) {
+	    initZipFile(true, true);
 	    OutputStream out = new FileOutputStream(zipfile);
 	    zipOutputStream = new ZipOutputStream(out);
 	    zipOutputStream.setMethod(ZipOutputStream.DEFLATED);
@@ -95,14 +96,19 @@ public class ZipFileStore extends FileStore {
 		return new BufferedReader(new InputStreamReader(zipInputStream));
 	    }
 	}
-	throw new IOException("Cou�l not read file " + filename + " in zip "
+	throw new IOException("Could not read file " + filename + " in zip "
 		+ zipfile);
     }
 
-    private void initZipFile() throws IOException {
+    private void initZipFile(boolean read, boolean write) throws IOException {
 	File f = new File(this.zipfile);
 	if (!f.exists()) {
-	    f.getParentFile().mkdirs();
+	    if (write) {
+		f.getParentFile().mkdirs();
+	    } else {
+		throw new IOException(
+			"Store does not exist. Nothing to load here.");
+	    }
 	}
 	if (!f.getParentFile().exists()) {
 	    throw new IOException(
@@ -135,7 +141,7 @@ public class ZipFileStore extends FileStore {
     }
 
     protected void readIndexFile() throws IOException {
-	initZipFile();
+	initZipFile(true, false);
 	String line = null;
 	InputStream in = new FileInputStream(zipfile);
 	try (ZipInputStream zipIn = new ZipInputStream(in)) {
