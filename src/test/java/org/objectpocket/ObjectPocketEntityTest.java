@@ -29,12 +29,11 @@ import org.objectpocket.annotations.Entity;
  * @author Edmund Klaus
  *
  */
-public class ObjectPocketEntityTest {
+public class ObjectPocketEntityTest extends FileStoreTest {
 
     @Test
     public void testCyclicReferences() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	Address address = new Address();
 	address.setCity("Karlsruhe");
 	Person person = new Person("person1", address);

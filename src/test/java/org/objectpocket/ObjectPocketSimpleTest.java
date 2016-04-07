@@ -17,12 +17,11 @@ import org.objectpocket.ObjectPocketSimpleTest.OuterClass.InnerClass;
  * @author Edmund Klaus
  *
  */
-public class ObjectPocketSimpleTest {
+public class ObjectPocketSimpleTest extends FileStoreTest {
 
     @Test
     public void testAddNull() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	objectPocket.add(null);
 	objectPocket.store();
 	objectPocket.load();
@@ -48,8 +47,7 @@ public class ObjectPocketSimpleTest {
 
     @Test
     public void testFindNull() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	objectPocket.add(new BeanWithCustomConstructor("abc"));
 	objectPocket.store();
 	objectPocket.load();
@@ -67,8 +65,7 @@ public class ObjectPocketSimpleTest {
 
     @Test
     public void testRemoveNull() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	try {
 	    objectPocket.remove(null);
 	} catch (Throwable t) {
@@ -78,8 +75,7 @@ public class ObjectPocketSimpleTest {
 
     @Test
     public void testFindAllNull() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	objectPocket.add(new BeanWithCustomConstructor("abc"));
 	objectPocket.store();
 	objectPocket.load();
@@ -90,8 +86,7 @@ public class ObjectPocketSimpleTest {
 
     @Test
     public void testSimpleBean() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	SimpleBean bean = new SimpleBean();
 	bean.setName("beanName");
 	objectPocket.add(bean);
@@ -106,8 +101,7 @@ public class ObjectPocketSimpleTest {
 
     @Test
     public void testBeanWithCustomConstrucor() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	BeanWithCustomConstructor bean = new BeanWithCustomConstructor(
 		"beanName");
 	objectPocket.add(bean);
@@ -123,8 +117,7 @@ public class ObjectPocketSimpleTest {
 
     @Test
     public void testBeanWithNoGettersAndSetters() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	BeanWithNoGettersAndSetters bean = new BeanWithNoGettersAndSetters();
 	bean.name = "beanName";
 	objectPocket.add(bean);
@@ -141,8 +134,7 @@ public class ObjectPocketSimpleTest {
 
     @Test
     public void testBeanWithReferenceToObject() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	Address address = new Address();
 	address.setCity("Karlsruhe");
 	Person person = new Person("person1", address);
@@ -160,8 +152,7 @@ public class ObjectPocketSimpleTest {
 
     @Test
     public void testNullConstructor() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	Person person = new Person(null, null);
 	objectPocket.add(person);
 	objectPocket.store();
@@ -176,8 +167,7 @@ public class ObjectPocketSimpleTest {
 
     @Test
     public void testInnerClass() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	OuterClass outerClass = new OuterClass();
 	outerClass.setId(UUID.randomUUID().toString());
 	InnerClass referenceToInnerClass = outerClass
@@ -196,8 +186,7 @@ public class ObjectPocketSimpleTest {
 
     @Test
     public void testRemove() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	SimpleBean simpleBean = new SimpleBean();
 	simpleBean.setName("simple bean");
 	

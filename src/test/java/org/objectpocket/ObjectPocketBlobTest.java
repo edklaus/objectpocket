@@ -25,7 +25,7 @@ import org.junit.Test;
  * @author Edmund Klaus
  *
  */
-public class ObjectPocketBlobTest {
+public class ObjectPocketBlobTest extends FileStoreTest {
 
     @Test
     public void testRemove() {

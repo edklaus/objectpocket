@@ -79,8 +79,7 @@ public class FileStore implements ObjectStore {
 	if (typeName == null) {
 	    return null;
 	}
-	Set<String> filenames = index.getTypeToFilenamesMapping()
-		.get(typeName);
+	Set<String> filenames = index.getTypeToFilenamesMapping().get(typeName);
 	Map<String, String> objects = new HashMap<String, String>();
 	for (String filename : filenames) {
 
@@ -127,6 +126,7 @@ public class FileStore implements ObjectStore {
 	// 2. possibility:
 	// delete file by file when necessary (better when using zip archive)
 	backupCurrentIndex();
+	index = new ObjectPocketIndex();
 	for (String typeName : jsonObjects.keySet()) {
 	    Map<String, Set<String>> objectsForType = jsonObjects.get(typeName);
 	    for (String filename : objectsForType.keySet()) {
@@ -145,6 +145,7 @@ public class FileStore implements ObjectStore {
 		}
 		out.write(JsonHelper.JSON_SUFFIX);
 		out.flush();
+		closeOutputStreamWriter(out);
 	    }
 	}
 	removeUnusedFiles();
@@ -179,7 +180,14 @@ public class FileStore implements ObjectStore {
     protected OutputStreamWriter getOutputStreamWriter(String filename)
 	    throws IOException {
 	File file = initFile(filename, true, true);
-	return new OutputStreamWriter(new FileOutputStream(file));
+	OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
+		new FileOutputStream(file));
+	return outputStreamWriter;
+    }
+
+    protected void closeOutputStreamWriter(OutputStreamWriter out)
+	    throws IOException {
+	out.close();
     }
 
     protected BufferedReader getBufferedReader(String filename)
@@ -246,8 +254,7 @@ public class FileStore implements ObjectStore {
 	    index.getTypeToFilenamesMapping().put(typeName,
 		    new HashSet<String>());
 	}
-	index.getTypeToFilenamesMapping().get(typeName)
-		.add(filename);
+	index.getTypeToFilenamesMapping().get(typeName).add(filename);
     }
 
     protected void readIndexFile() throws IOException {
@@ -290,18 +297,20 @@ public class FileStore implements ObjectStore {
 	String jsonString = gson.toJson(index);
 	out.write(jsonString);
 	out.flush();
+	closeOutputStreamWriter(out);
     }
 
     protected void backupCurrentIndex() {
-	indexBackup = index;
+	indexBackup = index.clone();
     }
-    
+
     protected void removeUnusedFiles() {
 	if (indexBackup == null || index == null) {
 	    return;
 	}
 	Set<String> filesToRemove = new HashSet<String>();
-	Map<String, Set<String>> oldMapping = indexBackup.getTypeToFilenamesMapping();
+	Map<String, Set<String>> oldMapping = indexBackup
+		.getTypeToFilenamesMapping();
 	Map<String, Set<String>> newMapping = index.getTypeToFilenamesMapping();
 	// add all old filenames
 	for (String typeName : oldMapping.keySet()) {
@@ -315,7 +324,8 @@ public class FileStore implements ObjectStore {
 	for (String filename : filesToRemove) {
 	    File f = new File(directory + "/" + filename);
 	    if (!f.delete()) {
-		Logger.getAnonymousLogger().severe("Could not remove file from store. " + f.getPath());
+		Logger.getAnonymousLogger().severe(
+			"Could not remove file from store. " + f.getPath());
 	    }
 	}
     }

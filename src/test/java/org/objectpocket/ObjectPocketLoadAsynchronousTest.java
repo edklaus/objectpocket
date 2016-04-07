@@ -16,7 +16,7 @@
 
 package org.objectpocket;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
@@ -25,7 +25,7 @@ import org.junit.Test;
  * @author Edmund Klaus
  *
  */
-public class ObjectPocketLoadAsynchronousTest {
+public class ObjectPocketLoadAsynchronousTest extends FileStoreTest {
 
     @Test
     public void test() {

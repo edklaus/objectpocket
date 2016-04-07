@@ -26,12 +26,11 @@ import org.objectpocket.annotations.Id;
  * @author Edmund Klaus
  *
  */
-public class ObjectPocketIdTest {
+public class ObjectPocketIdTest extends FileStoreTest {
 
     @Test
     public void testFindById() throws Exception {
-	ObjectPocket objectPocket = new ObjectPocketBuilder()
-		.createMemoryObjectPocket();
+	ObjectPocket objectPocket = getObjectPocket();
 	objectPocket.add(new Address("Karlsruhe"));
 	objectPocket.store();
 	objectPocket.load();

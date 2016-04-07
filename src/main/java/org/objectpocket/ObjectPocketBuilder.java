@@ -28,7 +28,6 @@ import org.objectpocket.references.CollectionReferenceSupport;
 import org.objectpocket.references.SimpleReferenceSupport;
 import org.objectpocket.storage.CryptoFileStore;
 import org.objectpocket.storage.FileStore;
-import org.objectpocket.storage.MemoryStore;
 import org.objectpocket.storage.ObjectStore;
 import org.objectpocket.storage.ZipFileStore;
 import org.objectpocket.storage.blob.BlobStore;
@@ -46,17 +45,6 @@ public class ObjectPocketBuilder {
     private BlobStore blobStore;
     private boolean prettyPrinting = true;
     private boolean serializeNulls = false;
-
-    /**
-     * Create an {@link ObjectPocket} instance that will store data into memory.
-     * 
-     * @return {@link ObjectPocket}, or null if {@link ObjectPocket} could not
-     *         be instantiated
-     */
-    public ObjectPocket createMemoryObjectPocket() {
-	MemoryStore memStore = new MemoryStore();
-	return createObjectPocket(memStore);
-    }
 
     /**
      * Create an {@link ObjectPocket} instance that will store data into the

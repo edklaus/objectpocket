@@ -85,6 +85,11 @@ public class ZipFileStore extends FileStore {
 	zipOutputStream.putNextEntry(entry);
 	return outputStreamWriter;
     }
+    
+    @Override
+    protected void closeOutputStreamWriter(OutputStreamWriter out)
+            throws IOException {
+    }
 
     protected BufferedReader getBufferedReader(String filename)
 	    throws IOException {

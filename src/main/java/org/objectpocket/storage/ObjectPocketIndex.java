@@ -32,5 +32,15 @@ public class ObjectPocketIndex {
     protected Map<String, Set<String>> getTypeToFilenamesMapping() {
 	return typeToFilenamesMapping;
     }
+    
+    protected void clear() {
+	typeToFilenamesMapping.clear();
+    }
+    
+    protected ObjectPocketIndex clone() {
+	ObjectPocketIndex newIndex = new ObjectPocketIndex();
+	newIndex.typeToFilenamesMapping = new HashMap<>(typeToFilenamesMapping);
+	return newIndex;
+    }
 
 }

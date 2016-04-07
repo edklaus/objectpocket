@@ -1,7 +1,7 @@
-## DRINGEND ##
-- load/store
-- remove
-==> s. filestore.txt
+## Fragen ##
+- Was passiert wenn man das gleiche Objekt einw eiteres mal hinzufügen will?
+  - Was ist mit ID...
+  - Nach load sind es zwei Objekte, die das selbe Objekt erepräsentieren!!
 
 ## HOSTSPOTS ##
 - splitTopLevelJsonObjects braucht ca. 15%
@@ -21,7 +21,7 @@
   - Umwandeln von JSON in Objekte
 - Multithreading in Methode load() bringt schon viel Geschw.vorteil
 - Es ist sicher noch besser jeden einzelnen Aufruf von "fromJson" an den ThreadPoolExecutor zu übergeben
-  - So l�sst sich sicherein maximaler Geschwindigkeitsvorteil rausholen
+  - So lässt sich sicherein maximaler Geschwindigkeitsvorteil rausholen
 - Allerdings erzeugt es auch einige Fehler beim Zugriff auf Listen!!
   -> Hier muss man nochmal genau prüfen
 - Auch beim store lässt sich sicher gut parallelisieren

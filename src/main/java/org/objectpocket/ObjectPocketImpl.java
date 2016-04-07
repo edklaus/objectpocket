@@ -451,8 +451,6 @@ public class ObjectPocketImpl implements ObjectPocket {
 
     @Override
     public void remove(Object obj) throws ObjectPocketException {
-	System.out.println("tracedobjects: " + tracedObjects.size());
-	System.out.println("remove: " + obj);
 	if (obj == null) {
 	    return;
 	}
@@ -469,7 +467,6 @@ public class ObjectPocketImpl implements ObjectPocket {
 	}
 	map.remove(id);
 	tracedObjects.remove(obj);
-	System.out.println("tracedobjects: " + tracedObjects.size());
 	// remove referenced Blob objects
 	if (!(obj instanceof Blob)) {
 	    for (ReferenceSupport referenceSupport : referenceSupportSet) {
