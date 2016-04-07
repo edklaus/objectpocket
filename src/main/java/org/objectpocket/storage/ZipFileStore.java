@@ -54,7 +54,7 @@ public class ZipFileStore extends FileStore {
     @Override
     public Set<String> getAvailableObjectTypes() throws IOException {
 	readIndexFile();
-	return objectPocketIndex.getTypeToFilenamesMapping().keySet();
+	return index.getTypeToFilenamesMapping().keySet();
     }
 
     @Override
@@ -159,7 +159,7 @@ public class ZipFileStore extends FileStore {
 	    Gson gson = new Gson();
 	    ObjectPocketIndex o = gson.fromJson(line, ObjectPocketIndex.class);
 	    if (o != null) {
-		objectPocketIndex = o;
+		index = o;
 		return;
 	    }
 	}

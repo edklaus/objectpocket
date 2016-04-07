@@ -1,5 +1,4 @@
 ## DRINGEND ##
-- binary wird angelegt auch wenn es darin nichts zu speichern gibt
 - load/store
 - remove
 ==> s. filestore.txt
@@ -28,6 +27,7 @@
 - Auch beim store lässt sich sicher gut parallelisieren
 
 ## TODO ##
+- zipFile remove files implementieren (s. filestore)
 - blobzip: man kann keine kompressionsrate einstellen!!
 - parallelisieren von Zugriffen beim Lesene / Schreiben
 - UnitTests
