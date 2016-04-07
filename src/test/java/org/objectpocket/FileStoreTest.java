@@ -31,9 +31,13 @@ public class FileStoreTest {
     
     public static final String FILESTORE = System.getProperty("user.home")
 	    + "/objectpocket_test";
+    private static ObjectPocket objectPocket;
     
     @Before
     public void prepare() throws Exception {
+	if (objectPocket != null) {
+	    objectPocket.close();
+	}
 	File f = new File(FILESTORE);
 	if (f.exists()) {
 	    FileUtils.deleteDirectory(f);
@@ -42,15 +46,19 @@ public class FileStoreTest {
     
     @AfterClass
     public static void cleanup() throws Exception {
+	if (objectPocket != null) {
+	    objectPocket.close();
+	}
 	File f = new File(FILESTORE);
 	if (f.exists()) {
 	    FileUtils.deleteDirectory(f);
 	}
     }
     
-    public ObjectPocket getObjectPocket() {
+    public ObjectPocket getObjectPocket() throws Exception {
 	ObjectPocketBuilder objectPocketBuilder = new ObjectPocketBuilder();
-	return objectPocketBuilder.createFileObjectPocket(FILESTORE);
+	objectPocket = objectPocketBuilder.createFileObjectPocket(FILESTORE);
+	return objectPocket;
     }
 
 }

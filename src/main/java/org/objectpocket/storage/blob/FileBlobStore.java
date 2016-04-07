@@ -43,7 +43,7 @@ public class FileBlobStore implements BlobStore {
 	if (blobs == null || blobs.isEmpty()) {
 	    return;
 	}
-	File blobStore = initBlobStore();
+	File blobStore = initBlobStore(true);
 	for (Blob blob : blobs) {
 	    String path = blob.getPath();
 	    if (path == null || path.trim().isEmpty()) {
@@ -80,7 +80,7 @@ public class FileBlobStore implements BlobStore {
 
     @Override
     public byte[] loadBlobData(Blob blob) throws IOException {
-	File blobStore = initBlobStore();
+	File blobStore = initBlobStore(false);
 	String path = blob.getPath();
 	if (path == null || path.trim().isEmpty()) {
 	    path = blob.getId();
@@ -93,12 +93,16 @@ public class FileBlobStore implements BlobStore {
 	}
     }
 
-    private File initBlobStore() throws IOException {
+    private File initBlobStore(boolean write) throws IOException {
 	File dir = new File(directory + "/" + BLOB_STORE_DIRNAME);
 	if (!dir.exists()) {
+	    if (write) {
 	    if (!dir.mkdirs()) {
 		throw new IOException("Blob store could not be created. "
 			+ dir.getPath());
+	    }
+	    } else {
+		throw new IOException("Blob store does not exist. Nothing to read here.");
 	    }
 	}
 	if (!dir.isDirectory()) {

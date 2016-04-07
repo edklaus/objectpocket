@@ -18,6 +18,7 @@ package org.objectpocket;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import java.util.Collection;
 
@@ -51,6 +52,58 @@ public class ObjectPocketEntityTest extends FileStoreTest {
 	assertFalse(foundPerson.getAddress() == null);
 	assertTrue(foundAddress.getInhabitant().equals(foundPerson));
 	assertTrue(foundPerson.getAddress().equals(foundAddress));
+    }
+    
+    @Test
+    public void testMultiReferencing() throws Exception {
+	ObjectPocket objectPocket = getObjectPocket();
+	Address address = new Address();
+	address.setCity("Kalrsruhe");
+	Person p1 = new Person("Hans", address);
+	Person p2 = new Person("Karl", address);
+	objectPocket.add(p1);
+	objectPocket.add(p2);
+	assertTrue(objectPocket.findAll(Address.class).size() == 1);
+	assertTrue(objectPocket.findAll(Person.class).size() == 2);
+	objectPocket.store();
+	assertTrue(objectPocket.findAll(Address.class).size() == 1);
+	assertTrue(objectPocket.findAll(Person.class).size() == 2);
+	objectPocket.load();
+	assertTrue(objectPocket.findAll(Address.class).size() == 1);
+	assertTrue(objectPocket.findAll(Person.class).size() == 2);
+    }
+    
+    @Test
+    public void testRemoveReferencing() throws Exception {
+	ObjectPocket objectPocket = getObjectPocket();
+	Address address = new Address();
+	address.setCity("Kalrsruhe");
+	Person p1 = new Person("Hans", address);
+	objectPocket.add(p1);
+	assertTrue(objectPocket.findAll(Address.class).size() == 1);
+	objectPocket.remove(p1);
+	assertTrue(objectPocket.findAll(Address.class).size() == 1);
+	objectPocket.store();
+	assertTrue(objectPocket.findAll(Address.class).size() == 1);
+	objectPocket.load();
+	assertTrue(objectPocket.findAll(Address.class).size() == 1);
+    }
+    
+    @Test
+    public void testRemoveReferenced() throws Exception {
+	ObjectPocket objectPocket = getObjectPocket();
+	Address address = new Address();
+	address.setCity("Kalrsruhe");
+	Person p1 = new Person("Hans", address);
+	objectPocket.add(p1);
+	assertTrue(objectPocket.findAll(Address.class).size() == 1);
+	Address found = objectPocket.findAll(Address.class).iterator().next();
+	objectPocket.remove(found);
+	assertNull(objectPocket.findAll(Address.class));
+	objectPocket.store();
+	assertTrue(objectPocket.findAll(Address.class).size() == 1);
+	objectPocket.load();
+	assertTrue(objectPocket.findAll(Address.class).size() == 1);
     }
 
     @Entity
