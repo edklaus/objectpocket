@@ -58,6 +58,9 @@ public class ZipBlobStore implements BlobStore {
 
     @Override
     public void writeBlobs(Set<Blob> blobs) throws IOException {
+	if (blobs == null || blobs.isEmpty()) {
+	    return;
+	}
 	Map<String, String> env = new HashMap<>();
 	env.put("create", "true");
 	try (FileSystem fs = FileSystems.newFileSystem(uri, env)) {

@@ -40,6 +40,9 @@ public class FileBlobStore implements BlobStore {
 
     @Override
     public void writeBlobs(Set<Blob> blobs) throws IOException {
+	if (blobs == null || blobs.isEmpty()) {
+	    return;
+	}
 	File blobStore = initBlobStore();
 	for (Blob blob : blobs) {
 	    String path = blob.getPath();
