@@ -1,3 +1,5 @@
+## TODO ##
+
 ## Fragen ##
 - Was passiert wenn man das gleiche Objekt einw eiteres mal hinzufügen will?
   - Was ist mit ID...

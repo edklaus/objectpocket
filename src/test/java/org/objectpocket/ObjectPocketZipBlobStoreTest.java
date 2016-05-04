@@ -16,20 +16,27 @@
 
 package org.objectpocket;
 
-import static org.junit.Assert.fail;
-
-import org.junit.Test;
+import org.objectpocket.storage.FileStore;
+import org.objectpocket.storage.blob.ZipBlobStore;
 
 /**
  * 
  * @author Edmund Klaus
  *
  */
-public class ObjectPocketCleanupTest extends FileStoreTest {
+public class ObjectPocketZipBlobStoreTest extends ObjectPocketFileBlobStoreTest {
 
-    @Test
-    public void test() {
-	fail("Not yet implemented");
+    @Override
+    public ObjectPocket getObjectPocket() throws Exception {
+	if (objectPocket != null) {
+	    objectPocket.close();
+	}
+	ObjectPocketBuilder objectPocketBuilder = new ObjectPocketBuilder();
+	FileStore objectStore = new FileStore(FILESTORE);
+	blobStore = new ZipBlobStore(FILESTORE);
+	objectStore.setBlobStore(blobStore);
+	objectPocket = objectPocketBuilder.createObjectPocket(objectStore);
+	return objectPocket;
     }
 
 }

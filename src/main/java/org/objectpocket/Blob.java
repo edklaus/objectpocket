@@ -63,7 +63,12 @@ public class Blob {
     }
 
     public final void setPath(String path) {
-	this.path = path;
+	if (path != null) {
+	    this.path = path.replaceAll("\\\\", "/");
+	    while(this.path.startsWith("/")) {
+		this.path = this.path.substring(1);
+	    }
+	}
     }
 
     public final byte[] getBytes() throws IOException {

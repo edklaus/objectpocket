@@ -51,6 +51,7 @@ public class ObjectPocketImpl implements ObjectPocket {
     private boolean serializeNulls = false;
     private boolean prettyPrinting = false;
     private boolean objectStoreInitialized = false;
+    private boolean dirty = false;
 
     private Map<Type, Set<Object>> typeAdapterMap = new HashMap<Type, Set<Object>>(
 	    10);
@@ -111,6 +112,7 @@ public class ObjectPocketImpl implements ObjectPocket {
 	    String objectId = IdSupport.getId(obj, false);
 	    tracedObjects.put(obj, objectId);
 	    map.put(objectId, obj);
+	    dirty = true;
 	}
 	// add references
 	addReferences(obj);
@@ -250,6 +252,7 @@ public class ObjectPocketImpl implements ObjectPocket {
 	}
 	
 	objectStoreInitialized = true;
+	dirty = false;
 
 	Logger.getAnonymousLogger().info(
 		"Stored all objects in " + objectStore.getSource() + " in "
@@ -328,6 +331,7 @@ public class ObjectPocketImpl implements ObjectPocket {
 			+ (System.currentTimeMillis() - timeAll) + " ms.");
 	loading = false;
 	objectStoreInitialized = true;
+	dirty = false;
     }
 
     @Override
@@ -392,12 +396,14 @@ public class ObjectPocketImpl implements ObjectPocket {
 			+ (System.currentTimeMillis() - timeAll)
 			+ " ms.");
 		loading = false;
+		dirty = false;
 		return null;
 	    }
 
 	    @Override
 	    protected void done() {
 		try {
+		    loading = false;
 		    get();
 		} catch (InterruptedException | ExecutionException e) {
 		    loading = false;
@@ -467,6 +473,7 @@ public class ObjectPocketImpl implements ObjectPocket {
 	}
 	map.remove(id);
 	tracedObjects.remove(obj);
+	dirty = true;
 	// remove referenced Blob objects
 	if (!(obj instanceof Blob)) {
 	    for (ReferenceSupport referenceSupport : referenceSupportSet) {
@@ -487,8 +494,28 @@ public class ObjectPocketImpl implements ObjectPocket {
 	if (!storeIsReady()) {
 	    throw new ObjectPocketException("The desired location contains data. Please load the data first.");
 	}
-	throw new UnsupportedOperationException();
-
+	if (dirty) {
+	    throw new ObjectPocketException("The state of ObjectPocket is dirty. Please call store() or load().");
+	}
+	Map<String, Object> blobMap = objectMap.get(Blob.class.getName());
+	if (blobMap != null) {
+	    Collection<Object> values = blobMap.values();
+	    Set<Blob> blobSet = new HashSet<Blob>(values.size());
+	    for (Object object : values) {
+		blobSet.add((Blob)object);
+	    }
+	    try {
+		blobStore.cleanup(blobSet);
+	    } catch (IOException e) {
+		throw new ObjectPocketException("Could not perform cleanup.", e);
+	    }
+	} else {
+	    try {
+		blobStore.delete();
+	    } catch (IOException e) {
+		throw new ObjectPocketException("Could not delete blob store.", e);
+	    }
+	}
     }
 
     @Override
@@ -517,6 +544,7 @@ public class ObjectPocketImpl implements ObjectPocket {
 	if (!storeIsReady()) {
 	    throw new ObjectPocketException("The desired location contains data. Please load the data first.");
 	}
+	dirty = true;
 	throw new UnsupportedOperationException();
     }
 
@@ -634,7 +662,7 @@ public class ObjectPocketImpl implements ObjectPocket {
     public void setTypeAdapterMap(Map<Type, Set<Object>> typeAdapterMap) {
 	this.typeAdapterMap = typeAdapterMap;
     }
-
+    
     public void setBlobStore(BlobStore blobStore) {
 	this.blobStore = blobStore;
     }

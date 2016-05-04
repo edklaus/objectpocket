@@ -16,7 +16,8 @@
 
 package org.objectpocket;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -28,8 +29,52 @@ import org.junit.Test;
 public class ObjectPocketLoadAsynchronousTest extends FileStoreTest {
 
     @Test
-    public void test() {
-	fail("Not yet implemented");
+    public void testLoadAsynchronous() throws Exception {
+	ObjectPocket objectPocket = getObjectPocket();
+	int duePre = 10000;
+	int dueAsync = 10000;
+	for (int i = 0; i < duePre; i++) {
+	    objectPocket.add(new BeanPreload("pre " + i));
+	}
+	for (int i = 0; i < dueAsync; i++) {
+	    objectPocket.add(new BeanAsync("async " + i));
+	}
+	objectPocket.store();
+	
+	// without preloading
+	objectPocket = getObjectPocket();
+	objectPocket.loadAsynchronous();
+	assertNull(objectPocket.findAll(BeanPreload.class));
+	assertNull(objectPocket.findAll(BeanAsync.class));
+	while(objectPocket.isLoading()){
+	    Thread.sleep(1);
+	}
+	assertTrue(duePre == objectPocket.findAll(BeanPreload.class).size());
+	assertTrue(dueAsync == objectPocket.findAll(BeanAsync.class).size());
+	
+	// with preloading
+	objectPocket = getObjectPocket();
+	objectPocket.loadAsynchronous(BeanPreload.class);
+	assertTrue(duePre == objectPocket.findAll(BeanPreload.class).size());
+	assertNull(objectPocket.findAll(BeanAsync.class));
+	while(objectPocket.isLoading()){
+	    Thread.sleep(1);
+	}
+	assertTrue(dueAsync == objectPocket.findAll(BeanAsync.class).size());
+    }
+    
+    private class BeanPreload {
+	@SuppressWarnings("unused")
+	String name;
+	public BeanPreload(String name) {
+	    this.name = name;
+	}
+    }
+    
+    private class BeanAsync extends BeanPreload {
+	public BeanAsync(String name) {
+	    super(name);
+	}
     }
 
 }
