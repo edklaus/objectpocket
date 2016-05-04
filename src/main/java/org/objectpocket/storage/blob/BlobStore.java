@@ -48,8 +48,23 @@ public interface BlobStore {
     public byte[] loadBlobData(Blob blob) throws IOException;
 
     /**
+     * Removes not referenced blobs from BlobStore.
+     * 
+     * @param Set
+     *            containing referenced Blobs
+     */
+    public void cleanup(Set<Blob> referencedBlobs) throws IOException;
+
+    /**
      * close blob store
      */
     public void close() throws IOException;
 
+    /**
+     * delete a blob store
+     * 
+     * @throws IOException
+     */
+    public void delete() throws IOException;
+    
 }

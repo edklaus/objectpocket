@@ -33,7 +33,6 @@ import java.util.logging.Logger;
 
 import org.objectpocket.Blob;
 import org.objectpocket.storage.blob.BlobStore;
-import org.objectpocket.storage.blob.ZipBlobStore;
 import org.objectpocket.util.JsonHelper;
 
 import com.google.gson.Gson;
@@ -55,7 +54,6 @@ public class FileStore implements ObjectStore {
 
     public FileStore(String directory) {
 	this.directory = directory;
-	this.blobStore = new ZipBlobStore(directory);
     }
 
     @Override
@@ -166,12 +164,22 @@ public class FileStore implements ObjectStore {
     public byte[] loadBlobData(Blob blob) throws IOException {
 	return this.blobStore.loadBlobData(blob);
     }
+    
+    @Override
+    public void cleanup(Set<Blob> referencedBlobs) throws IOException {
+        this.blobStore.cleanup(referencedBlobs);
+    }
 
     @Override
     public void close() throws IOException {
 	this.blobStore.close();
     }
 
+    @Override
+    public void delete() throws IOException {
+	this.blobStore.delete();
+    }
+    
     @Override
     public String getSource() {
 	return directory;

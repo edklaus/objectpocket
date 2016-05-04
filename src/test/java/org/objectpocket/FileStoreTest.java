@@ -21,6 +21,9 @@ import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.objectpocket.storage.FileStore;
+import org.objectpocket.storage.blob.BlobStore;
+import org.objectpocket.storage.blob.FileBlobStore;
 
 /**
  * 
@@ -31,7 +34,8 @@ public class FileStoreTest {
     
     public static final String FILESTORE = System.getProperty("user.home")
 	    + "/objectpocket_test";
-    private static ObjectPocket objectPocket;
+    protected static ObjectPocket objectPocket;
+    protected static BlobStore blobStore;
     
     @Before
     public void prepare() throws Exception {
@@ -56,9 +60,19 @@ public class FileStoreTest {
     }
     
     public ObjectPocket getObjectPocket() throws Exception {
+	if (objectPocket != null) {
+	    objectPocket.close();
+	}
 	ObjectPocketBuilder objectPocketBuilder = new ObjectPocketBuilder();
-	objectPocket = objectPocketBuilder.createFileObjectPocket(FILESTORE);
+	FileStore objectStore = new FileStore(FILESTORE);
+	blobStore = new FileBlobStore(FILESTORE);
+	objectStore.setBlobStore(blobStore);
+	objectPocket = objectPocketBuilder.createObjectPocket(objectStore);
 	return objectPocket;
+    }
+    
+    public static BlobStore getBlobStore() {
+	return blobStore;
     }
 
 }

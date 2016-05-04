@@ -20,8 +20,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.objectpocket.Blob;
 
 /**
@@ -32,7 +38,7 @@ import org.objectpocket.Blob;
 public class FileBlobStore implements BlobStore {
 
     private String directory;
-    private static final String BLOB_STORE_DIRNAME = "binary";
+    public static final String BLOB_STORE_DIRNAME = "binary";
 
     public FileBlobStore(String directory) {
 	this.directory = directory;
@@ -46,7 +52,7 @@ public class FileBlobStore implements BlobStore {
 	File blobStore = initBlobStore(true);
 	for (Blob blob : blobs) {
 	    String path = blob.getPath();
-	    if (path == null || path.trim().isEmpty()) {
+	    if (path == null || path.isEmpty()) {
 		path = blob.getId();
 	    }
 	    // find/create path and write blob
@@ -97,12 +103,13 @@ public class FileBlobStore implements BlobStore {
 	File dir = new File(directory + "/" + BLOB_STORE_DIRNAME);
 	if (!dir.exists()) {
 	    if (write) {
-	    if (!dir.mkdirs()) {
-		throw new IOException("Blob store could not be created. "
-			+ dir.getPath());
-	    }
+		if (!dir.mkdirs()) {
+		    throw new IOException("Blob store could not be created. "
+			    + dir.getPath());
+		}
 	    } else {
-		throw new IOException("Blob store does not exist. Nothing to read here.");
+		throw new IOException(
+			"Blob store does not exist. Nothing to read here.");
 	    }
 	}
 	if (!dir.isDirectory()) {
@@ -113,7 +120,60 @@ public class FileBlobStore implements BlobStore {
     }
 
     @Override
+    public void cleanup(Set<Blob> referencedBlobs) throws IOException {
+	if (referencedBlobs == null) {
+	    return;
+	}
+	File dir = new File(directory + "/" + BLOB_STORE_DIRNAME);
+	Set<String> paths = new HashSet<>(referencedBlobs.size());
+	for (Blob blob : referencedBlobs) {
+	    String path = blob.getPath();
+	    if (path == null || path.isEmpty()) {
+		path = blob.getId();
+	    }
+	    paths.add(path.replaceAll("\\\\", "/"));
+	}
+	initBlobStore(false);
+	Collection<File> files = FileUtils.listFiles(dir,
+		FileFilterUtils.fileFileFilter(), TrueFileFilter.INSTANCE);
+	for (File file : files) {
+	    String path = file.getPath().replace(dir.getPath(), "");
+	    path = path.replaceAll("\\\\", "/");
+	    while (path.startsWith("/")) {
+		path = path.substring(1);
+	    }
+	    if (!paths.contains(path)) {
+		File f = new File(directory + "/" + BLOB_STORE_DIRNAME + "/"
+			+ path);
+		f.delete();
+	    }
+	}
+	// clear empty dirs
+	Collection<File> dirs = FileUtils.listFilesAndDirs(dir,
+		DirectoryFileFilter.DIRECTORY, DirectoryFileFilter.DIRECTORY);
+	for (File d : dirs) {
+	    if (d.list().length == 0) {
+		d.delete();
+	    }
+	}
+    }
+
+    @Override
     public void close() throws IOException {
 
+    }
+
+    @Override
+    public void delete() throws IOException {
+	initBlobStore(false);
+	File dir = new File(directory + "/" + BLOB_STORE_DIRNAME);
+	FileUtils.deleteDirectory(dir);
+    }
+
+    public long numEntries() throws IOException {
+	File dir = new File(directory + "/" + BLOB_STORE_DIRNAME);
+	Collection<File> files = FileUtils.listFiles(dir,
+		FileFilterUtils.fileFileFilter(), TrueFileFilter.INSTANCE);
+	return files.size();
     }
 }

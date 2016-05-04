@@ -16,6 +16,7 @@
 
 package org.objectpocket.storage.blob;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipFile;
 
 import org.objectpocket.Blob;
 
@@ -41,13 +43,22 @@ import org.objectpocket.Blob;
  */
 public class ZipBlobStore implements BlobStore {
 
-    private static final String BLOB_STORE_FILENAME = "binary";
+    public static final String BLOB_STORE_DEFAULT_FILENAME = "binary";
 
+    private String directory;
+    private String filename;
+    private Path path;
     private URI uri = null;
     private FileSystem fsRead = null;
 
     public ZipBlobStore(String directory) {
-	Path path = Paths.get(directory + "/" + BLOB_STORE_FILENAME);
+	this(directory, BLOB_STORE_DEFAULT_FILENAME);
+    }
+
+    protected ZipBlobStore(String directory, String filename) {
+	this.directory = directory;
+	this.filename = filename;
+	path = Paths.get(directory + "/" + filename);
 	uri = URI.create("jar:" + path.toUri());
     }
 
@@ -126,10 +137,68 @@ public class ZipBlobStore implements BlobStore {
     }
 
     @Override
+    public void cleanup(Set<Blob> referencedBlobs) throws IOException {
+	if (referencedBlobs == null) {
+	    return;
+	}
+
+	ZipBlobStore newZip = new ZipBlobStore(directory, this.filename
+		+ "_tmp");
+	newZip.writeBlobs(referencedBlobs);
+	newZip.close();
+	this.close();
+	Files.delete(this.path);
+	File f = new File(this.directory + "/" + this.filename + "_tmp");
+	f.renameTo(this.path.toFile());
+
+	// // create temp zip
+	// Path path = Paths.get(directory + "/" + BLOB_STORE_FILENAME +
+	// "_tmp");
+	// URI uri = URI.create("jar:" + path.toUri());
+	// Map<String, String> env = new HashMap<>();
+	// env.put("create", "true");
+	// try (FileSystem fs = FileSystems.newFileSystem(uri, env)) {
+	// // transfer referenced blobs
+	// openReadFileSystem();
+	// for (Blob blob : referencedBlobs) {
+	// String pathString = blob.getPath();
+	// if (pathString == null || pathString.trim().isEmpty()) {
+	// pathString = blob.getId();
+	// }
+	// }
+	// close();
+	// }
+
+	// replace old zip with temp zip
+
+	// TODO:
+	// Was ist an dieser Stelle einfacher?
+	// 1. Löschen?
+	// 2. Neues Zip anlegen?
+    }
+
+    @Override
     public void close() throws IOException {
 	if (fsRead != null && fsRead.isOpen()) {
 	    fsRead.close();
 	}
+    }
+
+    @Override
+    public void delete() throws IOException {
+	if (fsRead != null) {
+	    if (fsRead.isOpen()) {
+		fsRead.close();
+	    }
+	}
+	Files.delete(path);
+    }
+
+    public long numEntries() throws IOException {
+	ZipFile zipFile = new ZipFile(path.toFile());
+	int returnVal = zipFile.size();
+	zipFile.close();
+	return returnVal;
     }
 
 }
