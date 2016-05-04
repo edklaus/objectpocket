@@ -130,18 +130,18 @@ The latest build is availabe at The Central Repository.
 ### Maven
 ```
 <dependency>
-  <groupId>org.objectpocket</groupId>
-  <artifactId>objectpocket</artifactId>
-  <version>0.0.3</version>
+    <groupId>org.objectpocket</groupId>
+    <artifactId>objectpocket</artifactId>
+    <version>0.0.4</version>
 </dependency>
 ```
 
 ### Direct Download
-http://repo1.maven.org/maven2/org/objectpocket/objectpocket/0.0.3/
+http://repo1.maven.org/maven2/org/objectpocket/objectpocket/0.0.4/
 
 ## Version
 Experimental stage. 
-current version: 0.0.3
+current version: 0.0.4
 
 ## Tech
 ObjectPocket uses the Gson library to convert Java objects to JSON. https://github.com/google/gson
