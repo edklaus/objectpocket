@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -189,7 +190,7 @@ public class FileStore implements ObjectStore {
 	    throws IOException {
 	File file = initFile(filename, true, true);
 	OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
-		new FileOutputStream(file));
+		new FileOutputStream(file), "UTF-8");
 	return outputStreamWriter;
     }
 
@@ -202,7 +203,7 @@ public class FileStore implements ObjectStore {
 	    throws IOException {
 	File file = initFile(filename, true, false);
 	return new BufferedReader(new InputStreamReader(new FileInputStream(
-		file)));
+		file), "UTF-8"));
     }
 
     protected void finishWrite() throws IOException {
