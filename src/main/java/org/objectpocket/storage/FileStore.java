@@ -91,10 +91,10 @@ public class FileStore implements ObjectStore {
 	    }
 
 	    String s = null;
-	    // remove first occurrence of "{", as this is the start of the
-	    // container object
+	    // remove first occurrence of "[", as this is the start of the
+	    // container array
 	    // all other object splitting will work with that!
-	    int index = stringBuilder.indexOf("{");
+	    int index = stringBuilder.indexOf("[");
 	    if (index > -1) {
 		s = stringBuilder.substring(index + 1, stringBuilder.length());
 	    } else {
