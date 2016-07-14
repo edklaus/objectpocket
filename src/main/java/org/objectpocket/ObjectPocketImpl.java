@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
@@ -68,7 +69,7 @@ public class ObjectPocketImpl implements ObjectPocket {
     // this extra map<object,id> is necessary for faster lookup of already
     // traced objects
     // objectMap.values.values is too slow for a proper lookup
-    private Map<Object, String> tracedObjects = new HashMap<Object, String>(
+    private Map<Object, String> tracedObjects = new ConcurrentHashMap<Object, String>(
 	    1000000);
 
     private Set<Object> serializeAsRoot;

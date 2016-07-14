@@ -105,6 +105,26 @@ public class ObjectPocketEntityTest extends FileStoreTest {
 	objectPocket.load();
 	assertTrue(objectPocket.findAll(Address.class).size() == 1);
     }
+    
+    @Test
+    public void testAddAfterLoad() throws Exception {
+	ObjectPocket objectPocket = getObjectPocket();
+	for (int i = 0; i < 100; i++) {
+	    Address address = new Address();
+	    address.city = "city"+i;
+	    objectPocket.add(address);
+	}
+	objectPocket.store();
+	objectPocket.load();
+	Address found = objectPocket.findAll(Address.class).iterator().next();
+	Person p1 = new Person();
+	p1.setName("Hans");
+	found.setInhabitant(p1);
+	objectPocket.store();
+	objectPocket.load();
+	found = objectPocket.findAll(Address.class).iterator().next();
+	assertTrue(found.getInhabitant().getName().equals(p1.getName()));
+    }
 
     @Entity
     public class Person {

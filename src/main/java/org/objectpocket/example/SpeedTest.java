@@ -16,8 +16,10 @@
 
 package org.objectpocket.example;
 
+import java.io.File;
 import java.util.Collection;
 
+import org.apache.commons.io.FileUtils;
 import org.objectpocket.ObjectPocket;
 import org.objectpocket.ObjectPocketBuilder;
 
@@ -63,6 +65,11 @@ public class SpeedTest {
 			+ (System.currentTimeMillis() - time));
 	    }
 	}
+	
+	objectPocket.close();
+	
+	File f = new File(FILESTORE);
+	FileUtils.deleteDirectory(f);
 
     }
 
