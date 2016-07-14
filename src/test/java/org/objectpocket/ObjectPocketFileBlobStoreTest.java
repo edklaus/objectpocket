@@ -174,7 +174,7 @@ public class ObjectPocketFileBlobStoreTest extends FileStoreTest {
 	}
     }
     
-    private class Bean {
+    public class Bean {
 	private String name;
 	private Blob blob;
 	public Bean(String name) {
@@ -182,6 +182,9 @@ public class ObjectPocketFileBlobStoreTest extends FileStoreTest {
 	}
 	public void setBlob(Blob blob) {
 	    this.blob = blob;
+	}
+	public Blob getBlob() {
+	    return blob;
 	}
     }
 

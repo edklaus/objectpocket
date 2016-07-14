@@ -74,6 +74,9 @@ public class ZipBlobStore implements BlobStore {
 	}
 	Map<String, String> env = new HashMap<>();
 	env.put("create", "true");
+	if (fsRead != null && fsRead.isOpen()) {
+	    fsRead.close();
+	}
 	try (FileSystem fs = FileSystems.newFileSystem(uri, env)) {
 	    for (Blob blob : blobs) {
 		String path = blob.getPath();
