@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.objectpocket.annotations.Entity;
+import org.objectpocket.annotations.Id;
 import org.objectpocket.storage.blob.BlobStore;
 
 /**
@@ -30,6 +31,7 @@ import org.objectpocket.storage.blob.BlobStore;
 @Entity
 public class Blob {
 
+    @Id
     private String id = UUID.randomUUID().toString();
     private String path;
     private transient byte[] bytes;
