@@ -11,6 +11,7 @@
 - lässt sich mit hashCode optimieren -> Empfehlung in Doku
 
 ## BUGS ##
+- Filter more than transient fields in ReferenceSupport???
 
 
 ## OPTIMIZATION POSSIBILITIES ##

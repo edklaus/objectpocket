@@ -18,6 +18,8 @@ package org.objectpocket.references;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -85,10 +87,21 @@ public abstract class ReferenceSupport {
     private List<Field> getFields(Object obj) {
 	if (!fieldsForType.containsKey(obj.getClass().getName())) {
 	    List<Field> allFields = FieldUtils.getAllFieldsList(obj.getClass());
-	    List<Field> filteredFields = filterReferencingFields(allFields);
+	    List<Field> filteredFields = filterTransientFields(allFields);
+	    filteredFields = filterReferencingFields(filteredFields);
 	    fieldsForType.put(obj.getClass().getName(), filteredFields);
 	}
 	return fieldsForType.get(obj.getClass().getName());
+    }
+    
+    private List<Field> filterTransientFields(List<Field> fields) {
+        List<Field> returnFields = new ArrayList<Field>(fields.size());
+        for (Field field : fields) {
+            if (!Modifier.isTransient(field.getModifiers())) {
+                returnFields.add(field);
+            }
+        }
+        return returnFields;
     }
 
     public void injectReferences(Object obj,
