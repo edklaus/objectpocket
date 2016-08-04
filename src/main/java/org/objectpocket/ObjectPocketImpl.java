@@ -114,6 +114,11 @@ public class ObjectPocketImpl implements ObjectPocket {
 	    tracedObjects.put(obj, objectId);
 	    map.put(objectId, obj);
 	    dirty = true;
+	    // this is necessary when copying blob data from
+	    // one ObjectPocket to another
+	    if (obj instanceof Blob) {
+	        ((Blob)obj).prepareToPersist();
+	    }
 	}
 	// add references
 	addReferences(obj);

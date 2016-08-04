@@ -18,6 +18,8 @@ package org.objectpocket;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.objectpocket.annotations.Entity;
 import org.objectpocket.annotations.Id;
@@ -90,6 +92,15 @@ public class Blob {
 	    return persist;
 	}
 	return false;
+    }
+    
+    protected void prepareToPersist() {
+        try {
+            getBytes();
+        } catch (IOException e) {
+            Logger.getAnonymousLogger().log(Level.SEVERE, "Could not load byte data for " + getPath(), e);
+        }
+        persist = true;
     }
 
     public final BlobStore getBlobStore() {
