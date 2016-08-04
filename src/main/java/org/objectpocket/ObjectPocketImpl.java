@@ -126,6 +126,9 @@ public class ObjectPocketImpl implements ObjectPocket {
     public void add(Object obj, String filename) throws ObjectPocketException {
 	// TODO: validate filename to not be something like /home... or C:/...
 	// throw exception in that case?
+        if (obj == null) {
+            return;
+        }
 	this.add(obj);
 	if (tracedObjects.containsKey(obj) && filename != null
 		&& !filename.isEmpty()) {
