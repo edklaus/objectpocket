@@ -128,7 +128,7 @@ public class ObjectPocketBuilder {
      * Configure {@link ObjectPocket} to not pretty print JSON output. By
      * default {@link ObjectPocket} will prettyPrint the JSON output.
      */
-    public ObjectPocketBuilder noPrittyPrinting() {
+    public ObjectPocketBuilder noPrettyPrinting() {
 	this.prettyPrinting = false;
 	return this;
     }
