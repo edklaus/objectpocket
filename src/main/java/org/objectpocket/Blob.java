@@ -76,7 +76,7 @@ public class Blob {
     }
 
     public final byte[] getBytes() throws IOException {
-	if (bytes == null) {
+	if (bytes == null && blobStore != null) {
 	    bytes = blobStore.loadBlobData(this);
 	}
 	return bytes;
