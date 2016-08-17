@@ -458,7 +458,7 @@ public class ObjectPocketImpl implements ObjectPocket {
 	    }
 	    Map<String, Object> map = objectMap.get(type.getName());
 	    if (map != null && !map.isEmpty()) {
-		return (Collection<T>) map.values();
+		return new HashSet<>((Collection<T>) map.values());
 	    }
 	}
 	return null;
