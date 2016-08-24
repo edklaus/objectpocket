@@ -122,7 +122,16 @@ public class ObjectPocketEntityTest extends FileStoreTest {
 	found.setInhabitant(p1);
 	objectPocket.store();
 	objectPocket.load();
-	found = objectPocket.findAll(Address.class).iterator().next();
+	Collection<Address> foundAddresses = objectPocket.findAll(Address.class);
+	boolean foundAddress = false;
+	for (Address address : foundAddresses) {
+            if (address.city.equals(found.city)) {
+                found = address;
+                foundAddress = true;
+                break;
+            }
+        }
+	assertTrue(foundAddress);
 	assertTrue(found.getInhabitant().getName().equals(p1.getName()));
     }
 
