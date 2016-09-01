@@ -118,6 +118,10 @@ public class ObjectPocketImpl implements ObjectPocket {
 	    // one ObjectPocket to another
 	    if (obj instanceof Blob) {
 	        ((Blob)obj).prepareToPersist();
+	        // set blobStore to ensure that the correct blob store is set
+	        // do not do this before prepareToPersist, it would cause problems
+	        // when copying blobs from one ObjectPocket to another!
+	        ((Blob)obj).setBlobStore(blobStore);
 	    }
 	}
 	// add references
