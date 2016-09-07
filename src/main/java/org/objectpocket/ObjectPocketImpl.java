@@ -701,7 +701,24 @@ public class ObjectPocketImpl implements ObjectPocket {
     }
 
     private boolean storeIsReady() {
-	return objectStoreInitialized || !objectStore.exists();
+        return objectStoreInitialized || !objectStore.exists();
     }
 
+    /**
+     * Returns the source where the data is loaded from.
+     * 
+     * @return
+     */
+    public String getSource() {
+        return objectStore.getSource();
+    }
+
+    public Set<String> getAvailableTypes() {
+        return objectMap.keySet();
+    }
+    
+    public Map<String, Object> getMapForType(String typeName) {
+        return objectMap.get(typeName);
+}
+    
 }
