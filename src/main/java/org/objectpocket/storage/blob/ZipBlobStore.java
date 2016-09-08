@@ -107,6 +107,7 @@ public class ZipBlobStore implements BlobStore {
 			StandardOpenOption.CREATE)) {
 		    out.write(blob.getBytes());
 		}
+		blob.setPersisted();
 	    }
 	}
 

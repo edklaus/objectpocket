@@ -102,6 +102,10 @@ public class Blob {
         }
         persist = true;
     }
+    
+    public void setPersisted() {
+        persist = false;
+    }
 
     public final BlobStore getBlobStore() {
 	return blobStore;

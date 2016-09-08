@@ -251,6 +251,7 @@ public class ObjectPocketImpl implements ObjectPocket {
 	}
 
 	// persist object data
+	System.out.println("start persist object data - " + (System.currentTimeMillis()-time));
 	try {
 	    objectStore.writeJsonObjects(jsonObjects);
 	} catch (IOException e) {
@@ -258,6 +259,7 @@ public class ObjectPocketImpl implements ObjectPocket {
 	}
 
 	// persist blob data
+	System.out.println("start persist blob data - " + (System.currentTimeMillis()-time));
 	try {
 	    blobStore.writeBlobs(blobsToPersist);
 	} catch (IOException e) {

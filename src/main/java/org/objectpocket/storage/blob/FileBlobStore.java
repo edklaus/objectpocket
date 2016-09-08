@@ -81,6 +81,7 @@ public class FileBlobStore implements BlobStore {
 	    try (FileOutputStream fOut = new FileOutputStream(f)) {
 		fOut.write(blob.getBytes());
 	    }
+	    blob.setPersisted();
 	}
     }
 
