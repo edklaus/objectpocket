@@ -73,15 +73,20 @@ public class FileStore implements ObjectStore {
     }
 
     @Override
-    public Map<String, String> readJsonObjects(String typeName) throws IOException {
+    public Map<String, Map<String, String>> readJsonObjects(String typeName) throws IOException {
+        
         if (typeName == null) {
             return null;
         }
+        
         Set<String> filenames = index.getTypeToFilenamesMapping().get(typeName);
-        Map<String, String> objects = new HashMap<String, String>();
+        Map<String, Map<String, String>> objects = new HashMap<String, Map<String, String>>();
+        
         if (filenames != null) {
             for (String filename : filenames) {
-
+                
+                Map<String, String> objectAndIdMap = new HashMap<String, String>();
+                
                 // maximum fast file reading
                 StringBuilder stringBuilder = new StringBuilder();
                 try (BufferedReader br = getBufferedReader(filename)) {
@@ -106,9 +111,11 @@ public class FileStore implements ObjectStore {
                 for (int i = 0; i < jsonStrings.size(); i++) {
                     String[] typeAndIdFromJson = JsonHelper.getTypeAndIdFromJson(jsonStrings.get(i));
                     if (typeAndIdFromJson[0].equals(typeName)) {
-                        objects.put(jsonStrings.get(i), typeAndIdFromJson[1]);
+                        objectAndIdMap.put(jsonStrings.get(i), typeAndIdFromJson[1]);
                     }
                 }
+                
+                objects.put(filename, objectAndIdMap);
             }
         } else {
             Logger.getAnonymousLogger().log(Level.WARNING,

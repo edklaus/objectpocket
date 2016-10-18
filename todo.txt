@@ -1,5 +1,19 @@
+﻿## GANZ ANDERS ##
+- Jedes Objekt als einzelne Datei
+- Dateien in Zip (=> Zip dient als Index)
+- Bei Änderungen können einzelne Objekte rausgeschrieben werden
+
+## split ZipBlobStore ##
+- Mehrere Zip Dateien => schneller schreiben/lesen
+- Zip Pfade werden in Blob reingecshrieben!
+- Für Daten Laden dann aus entsprechender Zip die Daten holen
+- Bei Daten Speichern in Zip schreiben und im Blob entsprechend hinterlegen
+- Wenn zip bestimmte Grenze erreicht hat, neue zip anlegen und dann Daten schreiben
+- Kompatibilität zu vorheriger Version wahren!
+- Netzwerkversion funktioniert dadurch per se / keine Speziallösung notwendig!
+
 ## Fragen ##
-- Was passiert wenn man das gleiche Objekt einw eiteres mal hinzufügen will?
+- Was passiert wenn man das gleiche Objekt ein weiteres mal hinzufügen will?
   - Was ist mit ID...
   - Nach load sind es zwei Objekte, die das selbe Objekt erepräsentieren!!
 
@@ -13,8 +27,10 @@
 ## BUGS ##
 - Filter more than transient fields in ReferenceSupport???
 
-
 ## OPTIMIZATION POSSIBILITIES ##
+- HTTP fähig machen!
+  - evtl. neuen HTTPObjectPocket einführen zwecks Authetifikation via HTTP
+  - wie ist es mit verschlüsselter Verbindung?
 - durch parallelisieren kriegt man beim laden nochmal ca. 15% speed zusätzlich 
 - Man kann folgende Vorgänge parallelisieren:
   - Lesen der Dateien von Platte

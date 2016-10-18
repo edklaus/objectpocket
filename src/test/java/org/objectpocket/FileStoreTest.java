@@ -59,6 +59,12 @@ public class FileStoreTest {
 	}
     }
     
+    /**
+     * Always creates a new ObjectPocket instance!
+     * 
+     * @return
+     * @throws Exception
+     */
     public ObjectPocket getObjectPocket() throws Exception {
 	if (objectPocket != null) {
 	    objectPocket.close();

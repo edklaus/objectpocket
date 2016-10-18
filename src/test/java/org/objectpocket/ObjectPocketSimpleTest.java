@@ -1,9 +1,8 @@
 package org.objectpocket;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -209,6 +208,42 @@ public class ObjectPocketSimpleTest extends FileStoreTest {
 	assertNull(objectPocket.findAll(SimpleBean.class));
 	objectPocket.load();
 	assertNull(objectPocket.findAll(SimpleBean.class));
+    }
+    
+    @Test
+    /**
+     * This ensures that the custom filename is beeing preserved.
+     * 
+     * @throws Exception
+     */
+    public void rewriteToCustomFilename() throws Exception {
+        String customFilename = "customfilename";
+        String customFilenameWithExtension = customFilename + ".json";
+        ObjectPocket objectPocket = getObjectPocket();
+        SimpleBean simpleBean = new SimpleBean();
+        simpleBean.setName("simple bean");
+        objectPocket.add(simpleBean, customFilename);
+        objectPocket.store();
+        File f = new File(FILESTORE);
+        String[] list = f.list();
+        boolean foundFile = false;
+        for (String string : list) {
+            if (string.equals(customFilenameWithExtension)) {
+                foundFile = true;
+            }
+        }
+        assertTrue(foundFile);
+        objectPocket = getObjectPocket();
+        objectPocket.load();
+        objectPocket.store();
+        list = f.list();
+        foundFile = false;
+        for (String string : list) {
+            if (string.equals(customFilenameWithExtension)) {
+                foundFile = true;
+            }
+        }
+        assertTrue(foundFile);
     }
 
     public class SimpleBean {

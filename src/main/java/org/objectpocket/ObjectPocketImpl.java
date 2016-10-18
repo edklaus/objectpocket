@@ -76,7 +76,7 @@ public class ObjectPocketImpl implements ObjectPocket {
 
     // holds specific filenames for objects, set by the user
     private Map<Object, String> objectFilenames = new HashMap<Object, String>(
-	    10);
+	    1000000);
 
     // <object, id>
     private Map<Object, String> idsFromReadObjects = new HashMap<Object, String>(
@@ -140,7 +140,7 @@ public class ObjectPocketImpl implements ObjectPocket {
         }
 	this.add(obj);
 	if (tracedObjects.containsKey(obj) && filename != null
-		&& !filename.isEmpty()) {
+		&& !filename.trim().isEmpty()) {
 	    objectFilenames.put(obj, filename);
 	}
     }
@@ -251,7 +251,6 @@ public class ObjectPocketImpl implements ObjectPocket {
 	}
 
 	// persist object data
-	System.out.println("start persist object data - " + (System.currentTimeMillis()-time));
 	try {
 	    objectStore.writeJsonObjects(jsonObjects);
 	} catch (IOException e) {
@@ -259,7 +258,6 @@ public class ObjectPocketImpl implements ObjectPocket {
 	}
 
 	// persist blob data
-	System.out.println("start persist blob data - " + (System.currentTimeMillis()-time));
 	try {
 	    blobStore.writeBlobs(blobsToPersist);
 	} catch (IOException e) {
@@ -572,28 +570,46 @@ public class ObjectPocketImpl implements ObjectPocket {
 	}
 	long time = System.currentTimeMillis();
 	int counter = 0;
-	Map<String, String> jsonObjects = objectStore.readJsonObjects(typeName);
-	if (jsonObjects != null && !jsonObjects.isEmpty()) {
-	    HashMap<String, Object> map = new HashMap<String, Object>();
-	    Gson gson = configureGson();
-	    for (String jsonObject : jsonObjects.keySet()) {
-		Object object = gson.fromJson(jsonObject, clazz);
+	Map<String, Map<String, String>> fileToJsonObjectsMapping = objectStore.readJsonObjects(typeName);
+	
+	if (fileToJsonObjectsMapping != null && !fileToJsonObjectsMapping.isEmpty()) {
+	    
+	    HashMap<String, Object> objectAndIdMap = new HashMap<String, Object>();
+	    
+	    for (String filename : fileToJsonObjectsMapping.keySet()) {
+	        
+                Map<String, String> jsonObjects = fileToJsonObjectsMapping.get(filename);
+                Gson gson = configureGson();
+                
+                // remove json file extension
+                filename = filename.substring(0, filename.length()-5);
+                
+                for (String jsonObject : jsonObjects.keySet()) {
+                    Object object = gson.fromJson(jsonObject, clazz);
 
-		// TODO: map to owning ObjectPocket
-		// object.setOwningInstance(this);
+                    // TODO: map to owning ObjectPocket
+                    // object.setOwningInstance(this);
 
-		if (setBlobStore) {
-		    ((Blob) object).setBlobStore(blobStore);
-		}
+                    if (setBlobStore) {
+                        ((Blob) object).setBlobStore(blobStore);
+                    }
 
-		String id = IdSupport
-			.getId(object, jsonObjects.get(jsonObject));
+                    String id = IdSupport
+                            .getId(object, jsonObjects.get(jsonObject));
 
-		tracedObjects.put(object, id);
-		map.put(id, object);
-		counter++;
-	    }
-	    objectMap.put(typeName, map);
+                    tracedObjects.put(object, id);
+                    objectAndIdMap.put(id, object);
+                    
+                    if (!object.getClass().getName().equals(filename)) {
+                        objectFilenames.put(object, filename);
+                    }
+                    
+                    counter++;
+                }
+            }
+	    
+            objectMap.put(typeName, objectAndIdMap);
+            
 	}
 	Logger.getAnonymousLogger().info(
 		"Loaded " + counter + " objects of type\n  " + clazz.getName()
