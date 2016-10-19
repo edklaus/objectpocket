@@ -69,6 +69,8 @@ public class ZipBlobStore implements BlobStore {
 
     @Override
     public void writeBlobs(Set<Blob> blobs) throws IOException {
+        //long time = System.currentTimeMillis();
+        //System.out.println("call: write Blobs " + (System.currentTimeMillis()-time));
 	if (blobs == null || blobs.isEmpty()) {
 	    return;
 	}
@@ -76,8 +78,10 @@ public class ZipBlobStore implements BlobStore {
 	env.put("create", "true");
 	if (fsRead != null && fsRead.isOpen()) {
 	    fsRead.close();
-	}
+	}	
+	//System.out.println("before newFilesystem " + (System.currentTimeMillis()-time));
 	try (FileSystem fs = FileSystems.newFileSystem(uri, env)) {
+	    //System.out.println("before blobloop " + (System.currentTimeMillis()-time));
 	    for (Blob blob : blobs) {
 		String path = blob.getPath();
 		if (path == null || path.trim().isEmpty()) {
@@ -109,9 +113,25 @@ public class ZipBlobStore implements BlobStore {
 		}
 		blob.setPersisted();
 	    }
+	    //System.out.println("after blobloop " + (System.currentTimeMillis()-time));
 	}
+	//System.out.println("after newFilesystem " + (System.currentTimeMillis()-time));
 
     }
+    
+//    private void populatePathMap(Map<Path, String> pathMap, Path path) throws IOException {
+//        Stream<Path> list = Files.list(path);
+//        Iterator<Path> iterator = list.iterator();
+//        while(iterator.hasNext()) {
+//            Path p = iterator.next();
+//            if (Files.isDirectory(p)) {
+//                populatePathMap(pathMap, p);
+//            } else {
+//                pathMap.put(p, "binary");
+//            }
+//        }
+//        list.close();
+//    }
 
     @Override
     public byte[] loadBlobData(Blob blob) throws IOException {
@@ -122,6 +142,17 @@ public class ZipBlobStore implements BlobStore {
 	if (fsRead == null || !fsRead.isOpen()) {
 	    openReadFileSystem();
 	}
+	
+	//long time = System.currentTimeMillis();
+	//System.out.println("start path map");
+//	Map<Path, String> pathMap = new HashMap<>(100000);
+//	Iterable<Path> rootDirectories = fsRead.getRootDirectories();
+//	Path root = rootDirectories.iterator().next();
+//	populatePathMap(pathMap, root);
+	//System.out.println("pathMap is: " + pathMap.size() + " calculated in: " + (System.currentTimeMillis()-time));
+	
+	//System.out.println("fs size: " + (fsRead.getFileStores().iterator().next().getTotalSpace()/1024));
+	
 	Path fileInZip = fsRead.getPath(path);
 	byte[] buf = new byte[1024];
 	List<Byte> bytes = new ArrayList<Byte>(1024000); // 1 MB
@@ -145,6 +176,11 @@ public class ZipBlobStore implements BlobStore {
 	if (referencedBlobs == null) {
 	    return;
 	}
+	
+	// preload blobs
+	for (Blob blob : referencedBlobs) {
+            blob.getBytes();
+        }
 
 	ZipBlobStore newZip = new ZipBlobStore(directory, this.filename
 		+ "_tmp");
