@@ -29,15 +29,15 @@ public class ObjectPocketIndex {
 
     private Map<String, Set<String>> typeToFilenamesMapping = new HashMap<String, Set<String>>();
 
-    protected Map<String, Set<String>> getTypeToFilenamesMapping() {
+    public Map<String, Set<String>> getTypeToFilenamesMapping() {
 	return typeToFilenamesMapping;
     }
     
-    protected void clear() {
+    public void clear() {
 	typeToFilenamesMapping.clear();
     }
     
-    protected ObjectPocketIndex clone() {
+    public ObjectPocketIndex clone() {
 	ObjectPocketIndex newIndex = new ObjectPocketIndex();
 	newIndex.typeToFilenamesMapping = new HashMap<>(typeToFilenamesMapping);
 	return newIndex;

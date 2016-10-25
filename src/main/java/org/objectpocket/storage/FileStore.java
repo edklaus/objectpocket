@@ -257,7 +257,7 @@ public class FileStore implements ObjectStore {
         return dir;
     }
 
-    private void addToIndex(String typeName, String filename) {
+    protected void addToIndex(String typeName, String filename) {
         if (index.getTypeToFilenamesMapping().get(typeName) == null) {
             index.getTypeToFilenamesMapping().put(typeName, new HashSet<String>());
         }
