@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,8 +33,11 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.objectpocket.Blob;
 import org.objectpocket.storage.blob.BlobStore;
+import org.objectpocket.storage.blob.MultiZipBlobStore;
 import org.objectpocket.util.JsonHelper;
 
 import com.google.gson.Gson;
@@ -74,19 +78,19 @@ public class FileStore implements ObjectStore {
 
     @Override
     public Map<String, Map<String, String>> readJsonObjects(String typeName) throws IOException {
-        
+
         if (typeName == null) {
             return null;
         }
-        
+
         Set<String> filenames = index.getTypeToFilenamesMapping().get(typeName);
         Map<String, Map<String, String>> objects = new HashMap<String, Map<String, String>>();
-        
+
         if (filenames != null) {
             for (String filename : filenames) {
-                
+
                 Map<String, String> objectAndIdMap = new HashMap<String, String>();
-                
+
                 // maximum fast file reading
                 StringBuilder stringBuilder = new StringBuilder();
                 try (BufferedReader br = getBufferedReader(filename)) {
@@ -114,7 +118,7 @@ public class FileStore implements ObjectStore {
                         objectAndIdMap.put(jsonStrings.get(i), typeAndIdFromJson[1]);
                     }
                 }
-                
+
                 objects.put(filename, objectAndIdMap);
             }
         } else {
@@ -157,6 +161,25 @@ public class FileStore implements ObjectStore {
         removeUnusedFiles();
         writeIndexFile();
         finishWrite();
+    }
+
+    @Override
+    public void createBackup() throws IOException {
+        // backup current data
+        File storeDir = new File(directory);
+        if (storeDir.exists() && storeDir.isDirectory()) {
+            Collection<File> filesToBackup = FileUtils.listFiles(storeDir, FileFilterUtils.notFileFilter(
+                    FileFilterUtils.prefixFileFilter(MultiZipBlobStore.BLOB_STORE_DEFAULT_FILENAME)), null);
+            File backupDir = new File(storeDir.getAbsolutePath() + "/" + ".bak");
+            if (backupDir.exists()) {
+                FileUtils.cleanDirectory(backupDir);
+            } else {
+                backupDir.mkdirs();
+            }
+            for (File file : filesToBackup) {
+                FileUtils.copyFileToDirectory(file, backupDir);
+            }
+        }
     }
 
     public void setBlobStore(BlobStore blobStore) {
@@ -272,8 +295,9 @@ public class FileStore implements ObjectStore {
                 sb.append(line);
             }
         } catch (IOException e) {
-            throw new IOException("Could not read index file. " + directory + "/" + INDEX_FILE_NAME + ". "
-                    + getReadErrorMessage(), e);
+            throw new IOException(
+                    "Could not read index file. " + directory + "/" + INDEX_FILE_NAME + ". " + getReadErrorMessage(),
+                    e);
         }
         if (sb.length() > 0) {
             Gson gson = new Gson();

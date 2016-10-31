@@ -70,6 +70,12 @@ public interface ObjectStore extends BlobStore {
     public void writeJsonObjects(
 	    Map<String, Map<String, Set<String>>> jsonObjects)
 	    throws IOException;
+    
+    
+    /**
+     * Creates backup of the current object data.
+     */
+    public void createBackup() throws IOException;
 
     /**
      * Returns the source where data is loaded from.

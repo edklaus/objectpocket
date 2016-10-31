@@ -245,6 +245,11 @@ public class ObjectPocketSimpleTest extends FileStoreTest {
         }
         assertTrue(foundFile);
     }
+    
+    @Test
+    public void testBackup() throws Exception {
+        
+    }
 
     public class SimpleBean {
 	private String name;
