@@ -165,6 +165,8 @@ public class MultiZipBlobStore implements BlobStore {
                     bytes.add(buf[i]);
                 }
             }
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
         buf = new byte[bytes.size()];
         for (int i = 0; i < bytes.size(); i++) {
@@ -296,7 +298,7 @@ public class MultiZipBlobStore implements BlobStore {
 
     private FileSystem getReadFileSystem(String name) throws IOException {
         FileSystem fileSystem = readFileSystems.get(name);
-        if (fileSystem == null) {
+        if (fileSystem == null || !fileSystem.isOpen()) {
             Path path = Paths.get(directory + "/" + name);
             URI uri = URI.create("jar:" + path.toUri());
             Map<String, String> env = new HashMap<>();
