@@ -30,7 +30,7 @@ import org.objectpocket.storage.FileStore;
 import org.objectpocket.storage.ObjectStore;
 import org.objectpocket.storage.ZipFileStore;
 import org.objectpocket.storage.blob.BlobStore;
-import org.objectpocket.storage.blob.ZipBlobStore;
+import org.objectpocket.storage.blob.MultiZipBlobStore;
 
 import com.google.gson.GsonBuilder;
 
@@ -56,7 +56,7 @@ public class ObjectPocketBuilder {
      */
     public ObjectPocket createFileObjectPocket(String directory) {
 	FileStore fileStore = new FileStore(directory);
-	fileStore.setBlobStore(new ZipBlobStore(directory));
+	fileStore.setBlobStore(new MultiZipBlobStore(directory));
 	return createObjectPocket(fileStore);
     }
 
