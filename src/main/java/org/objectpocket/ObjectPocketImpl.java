@@ -16,7 +16,6 @@
 
 package org.objectpocket;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -26,20 +25,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.objectpocket.exception.ObjectPocketException;
 import org.objectpocket.gson.CustomTypeAdapterFactory;
 import org.objectpocket.references.ReferenceSupport;
 import org.objectpocket.storage.ObjectStore;
 import org.objectpocket.storage.blob.BlobStore;
-import org.objectpocket.storage.blob.MultiZipBlobStore;
-import org.objectpocket.storage.blob.ZipBlobStore;
 import org.objectpocket.util.IdSupport;
 import org.objectpocket.util.JsonHelper;
 

@@ -27,11 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -39,6 +37,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.objectpocket.Blob;
 
@@ -69,13 +68,13 @@ public class MultiZipBlobStore implements BlobStore {
         if (blobs == null || blobs.isEmpty()) {
             return;
         }
-        scanForBlobContainers();
         if (blobContainerIndex == null) {
-            createIndexFromBlobContainers();
+            initIndexAndReadFileSystems();
         }
         FileSystem currentWriteFileSystem = null;
         for (Blob blob : blobs) {
 
+            // create new blob container
             if (lastBlobContainer == null || blob.getBytes().length + lastBlobContainerSize > MAX_BINARY_FILE_SIZE) {
                 if (currentWriteFileSystem != null) {
                     currentWriteFileSystem.close();
@@ -143,9 +142,8 @@ public class MultiZipBlobStore implements BlobStore {
         if (path == null || path.trim().isEmpty()) {
             path = blob.getId();
         }
-        scanForBlobContainers();
         if (blobContainerIndex == null) {
-            createIndexFromBlobContainers();
+            initIndexAndReadFileSystems();
         }
         String blobContainerName = blobContainerIndex.get(path);
         if (blobContainerName == null) {
@@ -156,21 +154,9 @@ public class MultiZipBlobStore implements BlobStore {
         FileSystem fsRead = getReadFileSystem(blobContainerName);
 
         Path fileInZip = fsRead.getPath(path);
-        byte[] buf = new byte[1024];
-        List<Byte> bytes = new ArrayList<Byte>(1024000); // 1 MB
+        byte[] buf = null;
         try (InputStream in = Files.newInputStream(fileInZip)) {
-            int length = -1;
-            while ((length = in.read(buf)) != -1) {
-                for (int i = 0; i < length; i++) {
-                    bytes.add(buf[i]);
-                }
-            }
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-        buf = new byte[bytes.size()];
-        for (int i = 0; i < bytes.size(); i++) {
-            buf[i] = bytes.get(i);
+            buf = IOUtils.toByteArray(in);
         }
         return buf;
     }
@@ -211,8 +197,8 @@ public class MultiZipBlobStore implements BlobStore {
         FileUtils.deleteDirectory(new File(tmpdir));
         
         blobContainerIndex.clear();
-        scanForBlobContainers();
-        createIndexFromBlobContainers();
+        readFileSystems.clear();
+        initIndexAndReadFileSystems();
         
     }
 
@@ -234,12 +220,18 @@ public class MultiZipBlobStore implements BlobStore {
         for (File f : blobContainers) {
             f.delete();
         }
+        blobContainerIndex.clear();
         readFileSystems.clear();
-        scanForBlobContainers();
+        initIndexAndReadFileSystems();
     }
     
     public long numEntries() throws IOException {
         return blobContainerIndex.size();
+    }
+    
+    private void initIndexAndReadFileSystems() throws IOException {
+        scanForBlobContainers();
+        createIndexFromBlobContainers();
     }
 
     private void scanForBlobContainers() throws IOException {
@@ -258,6 +250,7 @@ public class MultiZipBlobStore implements BlobStore {
                     lastBlobContainerNum = suffixInt;
                     lastBlobContainerSize = file.length();
                 }
+                // this is necessary for index creation
                 getReadFileSystem(file.getName());
             } catch (NumberFormatException e) {
                 Logger.getAnonymousLogger().log(Level.WARNING,
