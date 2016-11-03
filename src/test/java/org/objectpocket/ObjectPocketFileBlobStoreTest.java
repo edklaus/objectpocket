@@ -178,7 +178,6 @@ public class ObjectPocketFileBlobStoreTest extends FileStoreTest {
         if (getBlobStore() instanceof FileBlobStore) {
             assertTrue(((FileBlobStore) getBlobStore()).numEntries() == 1);
         } else if (getBlobStore() instanceof MultiZipBlobStore) {
-            System.out.println(((MultiZipBlobStore) getBlobStore()).numEntries());
             assertTrue(((MultiZipBlobStore) getBlobStore()).numEntries() == 1);
         }
     }

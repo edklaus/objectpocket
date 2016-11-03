@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.objectpocket.Blob;
 import org.objectpocket.storage.blob.BlobStore;
 import org.objectpocket.storage.blob.MultiZipBlobStore;
@@ -51,6 +52,7 @@ public class FileStore implements ObjectStore {
 
     protected String directory;
 
+    protected final String FILENAME_SUFFIX = ".json";
     protected final String INDEX_FILE_NAME = ".op_index";
     protected ObjectPocketIndex index = new ObjectPocketIndex();
     protected ObjectPocketIndex indexBackup = new ObjectPocketIndex();
@@ -140,7 +142,7 @@ public class FileStore implements ObjectStore {
         for (String typeName : jsonObjects.keySet()) {
             Map<String, Set<String>> objectsForType = jsonObjects.get(typeName);
             for (String filename : objectsForType.keySet()) {
-                String filenameOnDisc = filename + ".json";
+                String filenameOnDisc = filename + FILENAME_SUFFIX;
                 OutputStreamWriter out = getOutputStreamWriter(filenameOnDisc);
                 addToIndex(typeName, filenameOnDisc);
                 out.write(JsonHelper.JSON_PREFIX + "\n");
@@ -168,8 +170,14 @@ public class FileStore implements ObjectStore {
         // backup current data
         File storeDir = new File(directory);
         if (storeDir.exists() && storeDir.isDirectory()) {
-            Collection<File> filesToBackup = FileUtils.listFiles(storeDir, FileFilterUtils.notFileFilter(
-                    FileFilterUtils.prefixFileFilter(MultiZipBlobStore.BLOB_STORE_DEFAULT_FILENAME)), null);
+            Set<File> filesToBackup = new HashSet<>();
+            File[] files = storeDir.listFiles();
+            for (File file : files) {
+                String name = file.getName();
+                if (!file.isDirectory() && (name.endsWith(FILENAME_SUFFIX) || name.equals(INDEX_FILE_NAME))) {
+                    filesToBackup.add(file);
+                }
+            }
             File backupDir = new File(storeDir.getAbsolutePath() + "/" + ".bak");
             if (backupDir.exists()) {
                 FileUtils.cleanDirectory(backupDir);
