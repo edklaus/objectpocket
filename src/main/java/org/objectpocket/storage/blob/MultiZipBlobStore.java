@@ -57,7 +57,8 @@ public class MultiZipBlobStore implements BlobStore {
     private long lastBlobContainerSize = 0;
 
     private Map<String, FileSystem> readFileSystems = new HashMap<>();
-    private Map<String, String> blobContainerIndex;
+    private Map<String, FileSystem> writeFileSystems = new HashMap<>();
+    private Map<String, String> blobContainerIndex; // path, container_name
 
     public MultiZipBlobStore(String directory) {
         this.directory = directory;
@@ -74,33 +75,36 @@ public class MultiZipBlobStore implements BlobStore {
         FileSystem currentWriteFileSystem = null;
         for (Blob blob : blobs) {
 
-            // create new blob container
-            if (lastBlobContainer == null || blob.getBytes().length + lastBlobContainerSize > MAX_BINARY_FILE_SIZE) {
-                if (currentWriteFileSystem != null) {
-                    currentWriteFileSystem.close();
-                    currentWriteFileSystem = null;
-                }
-                createNextBinary();
-            }
-
-            if (currentWriteFileSystem == null) {
-                closeReadFileSystem(lastBlobContainer.getName());
-                Path path = Paths.get(lastBlobContainer.getAbsolutePath());
-                URI uri = URI.create("jar:" + path.toUri());
-                Map<String, String> env = new HashMap<>();
-                env.put("create", "true");
-                currentWriteFileSystem = FileSystems.newFileSystem(uri, env);
-            }
-
-            // persist blob data
+            // get blob path
             String path = blob.getPath();
             if (path == null || path.trim().isEmpty()) {
                 path = blob.getId();
             }
-            // find/create path and write blob
             path = path.replaceAll("\\\\", "/");
 
-            // FIXME: Das berücksichtigt keine Änderungen an einer Binary!!
+            // replace blob data
+            String blobContainer = blobContainerIndex.get(path);
+            if (blobContainer != null) {
+                currentWriteFileSystem = getWriteFileSystem(blobContainer);
+            }
+            // add blob data
+            else {
+
+                // create new blob container
+                if (lastBlobContainer == null
+                        || blob.getBytes().length + lastBlobContainerSize > MAX_BINARY_FILE_SIZE) {
+                    if (currentWriteFileSystem != null) {
+                        currentWriteFileSystem.close();
+                        currentWriteFileSystem = null;
+                    }
+                    createNextBinary();
+                }
+
+                if (currentWriteFileSystem == null) {
+                    currentWriteFileSystem = getWriteFileSystem(lastBlobContainer.getName());
+                }
+            }
+
             String name = path;
             if (path.contains("/")) {
                 name = path.substring(path.lastIndexOf("/"));
@@ -127,9 +131,12 @@ public class MultiZipBlobStore implements BlobStore {
 
         }
 
-        if (currentWriteFileSystem != null) {
-            currentWriteFileSystem.close();
+        for (FileSystem fs : writeFileSystems.values()) {
+            if (fs != null && fs.isOpen()) {
+                fs.close();
+            }
         }
+        writeFileSystems.clear();
 
     }
 
@@ -166,7 +173,7 @@ public class MultiZipBlobStore implements BlobStore {
         if (referencedBlobs == null) {
             return;
         }
-        
+
         // preload blobs
         for (Blob blob : referencedBlobs) {
             blob.getBytes();
@@ -177,14 +184,14 @@ public class MultiZipBlobStore implements BlobStore {
         newZip.writeBlobs(referencedBlobs);
         newZip.close();
         this.close();
-        
+
         // delete old
         Collection<File> blobContainers = FileUtils.listFiles(new File(directory),
                 FileFilterUtils.prefixFileFilter(BLOB_STORE_DEFAULT_FILENAME), null);
         for (File file : blobContainers) {
             file.delete();
         }
-        
+
         // move new
         blobContainers = FileUtils.listFiles(new File(tmpdir),
                 FileFilterUtils.prefixFileFilter(BLOB_STORE_DEFAULT_FILENAME), null);
@@ -192,14 +199,14 @@ public class MultiZipBlobStore implements BlobStore {
         for (File file : blobContainers) {
             FileUtils.moveToDirectory(file, destination, false);
         }
-        
+
         // delete temp
         FileUtils.deleteDirectory(new File(tmpdir));
-        
+
         blobContainerIndex.clear();
         readFileSystems.clear();
         initIndexAndReadFileSystems();
-        
+
     }
 
     @Override
@@ -224,11 +231,11 @@ public class MultiZipBlobStore implements BlobStore {
         readFileSystems.clear();
         initIndexAndReadFileSystems();
     }
-    
+
     public long numEntries() throws IOException {
         return blobContainerIndex.size();
     }
-    
+
     private void initIndexAndReadFileSystems() throws IOException {
         scanForBlobContainers();
         createIndexFromBlobContainers();
@@ -297,6 +304,20 @@ public class MultiZipBlobStore implements BlobStore {
             Map<String, String> env = new HashMap<>();
             fileSystem = FileSystems.newFileSystem(uri, env);
             readFileSystems.put(name, fileSystem);
+        }
+        return fileSystem;
+    }
+
+    private FileSystem getWriteFileSystem(String name) throws IOException {
+        FileSystem fileSystem = writeFileSystems.get(name);
+        if (fileSystem == null || !fileSystem.isOpen()) {
+            closeReadFileSystem(name);
+            Path path = Paths.get(new File(directory + "/" + name).getAbsolutePath());
+            URI uri = URI.create("jar:" + path.toUri());
+            Map<String, String> env = new HashMap<>();
+            env.put("create", "true");
+            fileSystem = FileSystems.newFileSystem(uri, env);
+            writeFileSystems.put(name, fileSystem);
         }
         return fileSystem;
     }

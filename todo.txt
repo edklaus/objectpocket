@@ -1,20 +1,10 @@
-﻿## GANZ ANDERS ##
+﻿## DRINGEND ##
+- Cleanup in MultiZipBlobStore
+
+## GANZ ANDERS ##
 - Jedes Objekt als einzelne Datei
 - Dateien in Zip (=> Zip dient als Index)
 - Bei Änderungen können einzelne Objekte rausgeschrieben werden
-
-## split ZipBlobStore ##
-- Mehrere Zip Dateien => schneller schreiben/lesen
-- >> Zip Pfade werden in Blob reingeschrieben!
-- Für Daten Laden dann aus entsprechender Zip die Daten holen
-- Bei Daten Speichern in Zip schreiben und im Blob entsprechend hinterlegen
-- Wenn zip bestimmte Grenze erreicht hat, neue zip anlegen und dann Daten schreiben
-- Kompatibilität zu vorheriger Version wahren!
-- Netzwerkversion funktioniert dadurch per se beim Lesen!
-- Für Schreiben muss jedoch die Information da sein, ob noch eine Zip Datei mit PLatz vorhanden ist
-  oder ob eine neue angelegt werden muss! Dieses Problem ist noch zu lösen!
-  Mögliche Lösung: In Blob-Objekt Größe der Binärdaten schreiben
-  => Dadurch lässt sich eine präzise Übersicht über die Binärspeicher-Zips erstellen ohne sie anfassen zu müssen!
 
 ## Fragen ##
 - Was passiert wenn man das gleiche Objekt ein weiteres mal hinzufügen will?

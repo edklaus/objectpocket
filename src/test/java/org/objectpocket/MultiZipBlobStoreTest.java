@@ -123,12 +123,39 @@ public class MultiZipBlobStoreTest extends ObjectPocketFileBlobStoreTest{
     public void testModifyBlobData() throws Exception {
         
         ObjectPocket objectPocket = getObjectPocket();
+        
+        long size = 0;
+        Random r = new Random();
+        while(size < MultiZipBlobStore.MAX_BINARY_FILE_SIZE*1.5) {
+            Bean randomBean = new Bean(UUID.randomUUID().toString());
+            byte[] bytes = new byte[r.nextInt(1024000)]; // max 1MB
+            r.nextBytes(bytes);
+            Blob blob = new Blob(bytes);
+            randomBean.setBlob(blob);
+            objectPocket.add(randomBean);
+            size += bytes.length;
+        }
+        
+        String path = "path/path/data.bin";
+        byte[] data = "abcd".getBytes();
+        
         Bean bean = new Bean("bean1");
         Blob blob = new Blob();
-        byte[] bytes = "abcd".getBytes();
-        blob.setBytes(bytes);
+        blob.setBytes(data);
+        blob.setPath(path);
         bean.setBlob(blob);
         objectPocket.add(bean);
+        
+        while(size < MultiZipBlobStore.MAX_BINARY_FILE_SIZE*1.5) {
+            Bean randomBean = new Bean(UUID.randomUUID().toString());
+            byte[] bytes = new byte[r.nextInt(1024000)]; // max 1MB
+            r.nextBytes(bytes);
+            blob = new Blob(bytes);
+            randomBean.setBlob(blob);
+            objectPocket.add(randomBean);
+            size += bytes.length;
+        }
+        
         objectPocket.store();
         
         MultiZipBlobStore multiZipBlobStore = (MultiZipBlobStore)getBlobStore();
@@ -139,19 +166,26 @@ public class MultiZipBlobStoreTest extends ObjectPocketFileBlobStoreTest{
         long oldEntryNum = multiZipBlobStore.numEntries();
         for (File file : list) {
             if (file.getName().startsWith(MultiZipBlobStore.BLOB_STORE_DEFAULT_FILENAME)) {
-                oldSize = file.length();
+                oldSize += file.length();
             }
         }
         
-        bytes = "efgh".getBytes();
-        blob.setBytes(bytes);
+        Bean bean2 = new Bean("bean2");
+        Blob blob2 = new Blob();
+        blob2.setBytes(data);
+        blob2.setPath(path);
+        bean2.setBlob(blob2);
+        objectPocket.add(bean2);
         objectPocket.store();
+        
+        long newSize = -1;
         assertTrue(oldEntryNum == multiZipBlobStore.numEntries());
         for (File file : list) {
             if (file.getName().startsWith(MultiZipBlobStore.BLOB_STORE_DEFAULT_FILENAME)) {
-                assertTrue(oldSize == file.length());
+                newSize += file.length();
             }
         }
+        assertTrue(oldSize == newSize);
         
     }
 

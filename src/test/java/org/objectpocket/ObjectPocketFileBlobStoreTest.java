@@ -25,7 +25,6 @@ import java.io.File;
 import org.junit.Test;
 import org.objectpocket.storage.blob.FileBlobStore;
 import org.objectpocket.storage.blob.MultiZipBlobStore;
-import org.objectpocket.storage.blob.ZipBlobStore;
 
 /**
  * 
@@ -48,7 +47,6 @@ public class ObjectPocketFileBlobStoreTest extends FileStoreTest {
         assertTrue(objectPocket.findAll(Blob.class).size() == 1);
         objectPocket.load();
         assertTrue(objectPocket.findAll(Blob.class).size() == 1);
-        Blob foundBlob = objectPocket.findAll(Blob.class).iterator().next();
         assertTrue(objectPocket.findAll(Blob.class).iterator().next().getBytes()[0] == bytes[0]);
         assertTrue(objectPocket.findAll(Bean.class).iterator().next().blob.getBytes()[0] == bytes[0]);
     }
