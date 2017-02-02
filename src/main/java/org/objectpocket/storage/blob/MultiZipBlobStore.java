@@ -81,30 +81,33 @@ public class MultiZipBlobStore implements BlobStore {
                 path = blob.getId();
             }
             path = path.replaceAll("\\\\", "/");
+            
+            String selectedBlobContainerName = null;
 
-            // replace blob data
+            // case 1: replace blob data
             String blobContainer = blobContainerIndex.get(path);
             if (blobContainer != null) {
                 currentWriteFileSystem = getWriteFileSystem(blobContainer);
+                selectedBlobContainerName = blobContainer;
             }
-            // add blob data
+            
+            // case 2: add blob data
             else {
-
+                
                 // create new blob container
                 if (lastBlobContainer == null
                         || blob.getBytes().length + lastBlobContainerSize > MAX_BINARY_FILE_SIZE) {
                     if (currentWriteFileSystem != null) {
                         currentWriteFileSystem.close();
-                        currentWriteFileSystem = null;
                     }
                     createNextBinary();
                 }
 
-                if (currentWriteFileSystem == null) {
-                    currentWriteFileSystem = getWriteFileSystem(lastBlobContainer.getName());
-                }
+                currentWriteFileSystem = getWriteFileSystem(lastBlobContainer.getName());
+                selectedBlobContainerName = lastBlobContainer.getName();
             }
 
+            // write data to blob container
             String name = path;
             if (path.contains("/")) {
                 name = path.substring(path.lastIndexOf("/"));
@@ -125,9 +128,11 @@ public class MultiZipBlobStore implements BlobStore {
             try (OutputStream out = Files.newOutputStream(fileInZip, StandardOpenOption.CREATE)) {
                 out.write(blob.getBytes());
             }
-            blobContainerIndex.put(path, lastBlobContainer.getName());
+            blobContainerIndex.put(path, selectedBlobContainerName);
             blob.setPersisted();
-            lastBlobContainerSize = lastBlobContainerSize + blob.getBytes().length;
+            if (lastBlobContainer.getName().equals(selectedBlobContainerName)) {
+                lastBlobContainerSize = lastBlobContainerSize + blob.getBytes().length;
+            }
 
         }
 
