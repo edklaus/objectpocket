@@ -301,7 +301,7 @@ public class MultiZipBlobStore implements BlobStore {
         lastBlobContainerSize = 0;
     }
 
-    private FileSystem getReadFileSystem(String name) throws IOException {
+    private synchronized FileSystem getReadFileSystem(String name) throws IOException {
         FileSystem fileSystem = readFileSystems.get(name);
         if (fileSystem == null || !fileSystem.isOpen()) {
             Path path = Paths.get(directory + "/" + name);
@@ -313,7 +313,7 @@ public class MultiZipBlobStore implements BlobStore {
         return fileSystem;
     }
 
-    private FileSystem getWriteFileSystem(String name) throws IOException {
+    private synchronized FileSystem getWriteFileSystem(String name) throws IOException {
         FileSystem fileSystem = writeFileSystems.get(name);
         if (fileSystem == null || !fileSystem.isOpen()) {
             closeReadFileSystem(name);
@@ -327,7 +327,7 @@ public class MultiZipBlobStore implements BlobStore {
         return fileSystem;
     }
 
-    private void closeReadFileSystem(String name) throws IOException {
+    private synchronized void closeReadFileSystem(String name) throws IOException {
         FileSystem fileSystem = readFileSystems.get(name);
         if (fileSystem != null) {
             fileSystem.close();
