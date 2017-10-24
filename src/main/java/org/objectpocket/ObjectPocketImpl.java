@@ -275,13 +275,18 @@ public class ObjectPocketImpl implements ObjectPocket {
 
     @Override
     public void load() throws ObjectPocketException {
+        
+        if (!objectStore.exists()) {
+            throw new ObjectPocketException("The given object pocket store does not exist. " + objectStore.getSource());
+        }
+        
         loading = true;
         long timeAll = System.currentTimeMillis();
 
         idsFromReadObjects.clear();
         tracedObjects.clear();
         objectMap.clear();
-
+        
         /**
          * get all available object types
          */
@@ -347,6 +352,11 @@ public class ObjectPocketImpl implements ObjectPocket {
 
     @Override
     public void loadAsynchronous(Class<?>... preload) throws ObjectPocketException {
+        
+        if (!objectStore.exists()) {
+            throw new ObjectPocketException("The given object pocket store does not exist. " + objectStore.getSource());
+        }
+        
         loading = true;
         long timeAll = System.currentTimeMillis();
         /**

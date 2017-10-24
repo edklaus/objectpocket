@@ -23,7 +23,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,11 +33,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
 import org.objectpocket.Blob;
 import org.objectpocket.storage.blob.BlobStore;
-import org.objectpocket.storage.blob.MultiZipBlobStore;
 import org.objectpocket.util.JsonHelper;
 
 import com.google.gson.Gson;
@@ -53,7 +49,8 @@ public class FileStore implements ObjectStore {
     protected String directory;
 
     protected final String FILENAME_SUFFIX = ".json";
-    protected final String INDEX_FILE_NAME = ".op_index";
+    protected final String INDEX_FILE_NAME = "_op_index";
+    protected final String INDEX_FILE_NAME_OLD = ".op_index";
     protected ObjectPocketIndex index = new ObjectPocketIndex();
     protected ObjectPocketIndex indexBackup = new ObjectPocketIndex();
 
@@ -65,6 +62,10 @@ public class FileStore implements ObjectStore {
 
     @Override
     public boolean exists() {
+        File indexFileOld = new File(directory + "/" + INDEX_FILE_NAME_OLD);
+        if (indexFileOld.exists()) {
+            indexFileOld.renameTo(new File(indexFileOld.getAbsolutePath().replace(INDEX_FILE_NAME_OLD, INDEX_FILE_NAME)));
+        }
         File indexFile = new File(directory + "/" + INDEX_FILE_NAME);
         if (indexFile.exists()) {
             return true;
