@@ -34,13 +34,11 @@ import org.objectpocket.storage.blob.BlobStore;
 public class Blob {
 
     @Id
-    private String id = UUID.randomUUID().toString();
+    private final String id = UUID.randomUUID().toString();
     private String path;
     private transient byte[] bytes;
     private transient boolean persist = false;
     private transient BlobStore blobStore;
-
-    private transient int hash = 0;
 
     public Blob() {
     }
@@ -113,35 +111,6 @@ public class Blob {
 
     public final void setBlobStore(BlobStore blobStore) {
 	this.blobStore = blobStore;
-    }
-
-    /**
-     * This is taken from String.hashCode(), it is exceptionally fast.
-     */
-    @Override
-    public int hashCode() {
-	int h = hash;
-	if (h == 0 && id.length() > 0) {
-	    char val[] = id.toCharArray();
-	    for (int i = 0; i < id.length(); i++) {
-		h = 31 * h + val[i];
-	    }
-	    hash = h;
-	}
-	return h;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-	if (this == o) {
-	    return true;
-	}
-	if (o == null || getClass() != o.getClass()) {
-	    return false;
-	}
-	Blob entity = (Blob) o;
-	hashCode();
-	return hash == entity.hash;
     }
 
 }
