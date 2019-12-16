@@ -48,6 +48,8 @@ public class FileStore implements ObjectStore {
 
     protected String directory;
 
+    protected String encoding = "UTF-8";
+
     protected final String FILENAME_SUFFIX = ".json";
     protected final String INDEX_FILE_NAME = "_op_index";
     protected final String INDEX_FILE_NAME_OLD = ".op_index";
@@ -64,7 +66,8 @@ public class FileStore implements ObjectStore {
     public boolean exists() {
         File indexFileOld = new File(directory + "/" + INDEX_FILE_NAME_OLD);
         if (indexFileOld.exists()) {
-            indexFileOld.renameTo(new File(indexFileOld.getAbsolutePath().replace(INDEX_FILE_NAME_OLD, INDEX_FILE_NAME)));
+            indexFileOld
+                    .renameTo(new File(indexFileOld.getAbsolutePath().replace(INDEX_FILE_NAME_OLD, INDEX_FILE_NAME)));
         }
         File indexFile = new File(directory + "/" + INDEX_FILE_NAME);
         if (indexFile.exists()) {
@@ -225,9 +228,14 @@ public class FileStore implements ObjectStore {
         return directory;
     }
 
+    @Override
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
     protected OutputStreamWriter getOutputStreamWriter(String filename) throws IOException {
         File file = initFile(filename, true, true);
-        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file), encoding);
         return outputStreamWriter;
     }
 
@@ -237,7 +245,7 @@ public class FileStore implements ObjectStore {
 
     protected BufferedReader getBufferedReader(String filename) throws IOException {
         File file = initFile(filename, true, false);
-        return new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+        return new BufferedReader(new InputStreamReader(new FileInputStream(file), encoding));
     }
 
     protected void finishWrite() throws IOException {

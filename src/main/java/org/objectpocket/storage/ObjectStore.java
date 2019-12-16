@@ -84,4 +84,11 @@ public interface ObjectStore extends BlobStore {
      */
     public String getSource();
     
+    /**
+     * Set specific encoding for created text files. Default is set to UTF-8.
+     * 
+     * @param encoding
+     */
+    public void setEncoding(String encoding);
+    
 }
