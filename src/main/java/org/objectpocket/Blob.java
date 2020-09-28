@@ -84,6 +84,14 @@ public class Blob {
 	this.bytes = bytes;
 	persist = true;
     }
+    
+    public final int getSize() throws IOException {
+        if (bytes != null) {
+            return bytes.length;
+        } else {
+            return blobStore.loadBlobData(this).length;
+        }
+    }
 
     public final boolean doPersist() {
 	if (bytes != null && bytes.length > 0) {
