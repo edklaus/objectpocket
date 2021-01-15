@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.FileUtils;
 import org.objectpocket.Blob;
 import org.objectpocket.storage.blob.BlobStore;
 import org.objectpocket.util.JsonHelper;
@@ -57,9 +56,11 @@ public class FileStore implements ObjectStore {
     protected ObjectPocketIndex indexBackup = new ObjectPocketIndex();
 
     private BlobStore blobStore;
+    private FileStoreBackup fileStoreBackup;
 
     public FileStore(String directory) {
         this.directory = directory;
+        fileStoreBackup = new FileStoreBackup(this);
     }
 
     @Override
@@ -171,27 +172,7 @@ public class FileStore implements ObjectStore {
 
     @Override
     public void createBackup() throws IOException {
-        // backup current data
-        File storeDir = new File(directory);
-        if (storeDir.exists() && storeDir.isDirectory()) {
-            Set<File> filesToBackup = new HashSet<>();
-            File[] files = storeDir.listFiles();
-            for (File file : files) {
-                String name = file.getName();
-                if (!file.isDirectory() && (name.endsWith(FILENAME_SUFFIX) || name.equals(INDEX_FILE_NAME))) {
-                    filesToBackup.add(file);
-                }
-            }
-            File backupDir = new File(storeDir.getAbsolutePath() + "/" + ".bak");
-            if (backupDir.exists()) {
-                FileUtils.cleanDirectory(backupDir);
-            } else {
-                backupDir.mkdirs();
-            }
-            for (File file : filesToBackup) {
-                FileUtils.copyFileToDirectory(file, backupDir);
-            }
-        }
+        fileStoreBackup.createBackup();
     }
 
     public void setBlobStore(BlobStore blobStore) {
