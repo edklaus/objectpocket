@@ -44,7 +44,7 @@ import org.apache.commons.io.FileUtils;
 public class FileStoreBackup {
 
     private FileStore fileStore;
-    protected static final String BACKUP_DIR_NAME = "_bak";
+    protected static final String BACKUP_DIR_NAME = "_backups";
     protected static final String TEMP_BACKUP_DIR_NAME = "tmp";
     private int maxBackupSizeM = 250; // MBs
 
