@@ -17,6 +17,8 @@
 package org.objectpocket;
 
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
@@ -32,13 +34,15 @@ import org.objectpocket.storage.blob.FileBlobStore;
  */
 public class FileStoreTest {
     
-    public static final String FILESTORE = System.getProperty("user.home")
+    public static final String FILESTORE = System.getProperty("java.io.tmpdir")
 	    + "/objectpocket_test";
     protected static ObjectPocket objectPocket;
     protected static BlobStore blobStore;
     
     @Before
     public void prepare() throws Exception {
+        CountDownLatch waiter = new CountDownLatch(1);
+        waiter.await(2, TimeUnit.SECONDS);
 	if (objectPocket != null) {
 	    objectPocket.close();
 	}
@@ -50,6 +54,8 @@ public class FileStoreTest {
     
     @AfterClass
     public static void cleanup() throws Exception {
+        CountDownLatch waiter = new CountDownLatch(1);
+        waiter.await(2, TimeUnit.SECONDS);
 	if (objectPocket != null) {
 	    objectPocket.close();
 	}
