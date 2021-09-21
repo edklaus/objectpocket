@@ -46,6 +46,7 @@ public class FileStoreBackup {
     private FileStore fileStore;
     protected static final String BACKUP_DIR_NAME = "_backups";
     protected static final String TEMP_BACKUP_DIR_NAME = "tmp";
+    protected static final String OLD_BACKUP_DIR_NAME = ".bak";
     private int maxBackupSizeM = 250; // MBs
 
     private File tempBackupDir;
@@ -74,6 +75,7 @@ public class FileStoreBackup {
                         Logger.getAnonymousLogger().info("Wrote backup to " + zipBackup.getAbsolutePath());
                         clearTempBackupDir();
                         cleanupBackups();
+                        removeOldBackupDir();
                     } catch (IOException e) {
                         Logger.getAnonymousLogger().log(Level.SEVERE, "Coul dnot create backup.", e);
                     }
@@ -161,6 +163,16 @@ public class FileStoreBackup {
             File[] files = backupDir.listFiles();
             Arrays.sort(files, Comparator.comparingLong(File::lastModified));
             files[0].delete();
+        }
+    }
+    
+    private void removeOldBackupDir() {
+        File storeDir = new File(fileStore.getSource());
+        if (storeDir.exists() && storeDir.isDirectory()) {
+            File oldBackupDir = new File(storeDir.getAbsolutePath() + "/" + OLD_BACKUP_DIR_NAME);
+            if (oldBackupDir.exists()) {
+                FileUtils.deleteQuietly(oldBackupDir);
+            }
         }
     }
 
