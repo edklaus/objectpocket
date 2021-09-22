@@ -50,7 +50,7 @@ public class IdSupport {
      *            representation of the id instead of the real id. This only
      *            happens for classes with custom id defined by @Id annotation.
      *            For all others the generated Id will be returned.
-     * @param put
+     * @param existingId put
      *            an existing id here if one exists, otherwise a new might be
      *            generated
      * @return
