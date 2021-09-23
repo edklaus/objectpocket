@@ -51,11 +51,12 @@ public interface ObjectStore extends BlobStore {
      * 
      * @param typeName
      *            fully qualified class name
-     * @return Map<filename, Map<jsonObject, id>> (id can be
+     * @return {@code Map<filename, Map<jsonObject, id>>} (id can be
      *         reference when custom id has been set with @Id)
      * @throws IOException
      *             If an I/O error occurs
      */
+   
     public Map<String, Map<String, String>> readJsonObjects(String typeName)
 	    throws IOException;
 
@@ -63,7 +64,7 @@ public interface ObjectStore extends BlobStore {
      * Writes json objects to the object store.
      * 
      * @param jsonObjects
-     *            Map<typeName, Map<filename, Set<jsonString>>>
+     *             {@code Map<typeName, Map<filename, Set<jsonString>>>}
      * @throws IOException
      *             If an I/O error occurs
      */

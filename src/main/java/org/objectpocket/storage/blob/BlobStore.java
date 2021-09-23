@@ -50,8 +50,7 @@ public interface BlobStore {
     /**
      * Removes not referenced blobs from BlobStore.
      * 
-     * @param Set
-     *            containing referenced Blobs
+     * @param referencedBlobs Set containing referenced Blobs
      */
     public void cleanup(Set<Blob> referencedBlobs) throws IOException;
 
