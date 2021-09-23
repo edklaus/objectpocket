@@ -1,5 +1,6 @@
 ﻿## DRINGEND ##
 - Cleanup in MultiZipBlobStore
+- write backup tests
 
 ## GANZ ANDERS ##
 - Jedes Objekt als einzelne Datei

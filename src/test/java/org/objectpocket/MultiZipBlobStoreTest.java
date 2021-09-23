@@ -39,6 +39,7 @@ public class MultiZipBlobStoreTest extends ObjectPocketFileBlobStoreTest{
             objectPocket.close();
         }
         ObjectPocketBuilder objectPocketBuilder = new ObjectPocketBuilder();
+        objectPocketBuilder.doNotWriteBackups(); // keep test footrpint/time low
         FileStore objectStore = new FileStore(FILESTORE);
         blobStore = new MultiZipBlobStore(FILESTORE);
         objectStore.setBlobStore(blobStore);

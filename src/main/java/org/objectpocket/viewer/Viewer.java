@@ -51,7 +51,6 @@ import org.objectpocket.ObjectPocket;
 import org.objectpocket.ObjectPocketBuilder;
 import org.objectpocket.ObjectPocketImpl;
 import org.objectpocket.example.Address;
-import org.objectpocket.example.Person;
 
 /**
  * 

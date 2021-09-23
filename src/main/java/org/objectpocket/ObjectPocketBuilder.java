@@ -45,6 +45,7 @@ public class ObjectPocketBuilder {
     private BlobStore blobStore;
     private boolean prettyPrinting = true;
     private boolean serializeNulls = false;
+    private boolean writeBackup = true;
 
     /**
      * Create an {@link ObjectPocket} instance that will store data into the
@@ -55,35 +56,36 @@ public class ObjectPocketBuilder {
      *         be instantiated
      */
     public ObjectPocket createFileObjectPocket(String directory) {
-	FileStore fileStore = new FileStore(directory);
-	fileStore.setBlobStore(new MultiZipBlobStore(directory));
-	return createObjectPocket(fileStore);
+        FileStore fileStore = new FileStore(directory);
+        fileStore.setBlobStore(new MultiZipBlobStore(directory));
+        return createObjectPocket(fileStore);
     }
 
     /**
      * Create an {@link ObjectPocket} instance that will store data into the
-     * given zip file.</br> Compression will be set to 4 of (0-9)</br>
+     * given zip file.</br>
+     * Compression will be set to 4 of (0-9)</br>
      * 
      * @param filename
      * @return
      */
     public ObjectPocket createZipFileObjectPocket(String filename) {
-	return createZipFileObjectPocket(filename, 4);
+        return createZipFileObjectPocket(filename, 4);
     }
 
     /**
      * Create an {@link ObjectPocket} instance that will store data into the
-     * given zip file.</br> Compression will be set given compression level</br>
+     * given zip file.</br>
+     * Compression will be set given compression level</br>
      * 
      * @param filename
      * @param compressionLevel
      *            0-9
      * @return
      */
-    public ObjectPocket createZipFileObjectPocket(String filename,
-	    int compressionLevel) {
-	ZipFileStore zipFileStore = new ZipFileStore(filename, compressionLevel);
-	return createObjectPocket(zipFileStore);
+    public ObjectPocket createZipFileObjectPocket(String filename, int compressionLevel) {
+        ZipFileStore zipFileStore = new ZipFileStore(filename, compressionLevel);
+        return createObjectPocket(zipFileStore);
     }
 
     /**
@@ -94,34 +96,38 @@ public class ObjectPocketBuilder {
      *         be instantiated
      */
     public ObjectPocket createObjectPocket(ObjectStore objectStore) {
-	if (objectStore == null) {
-	    Logger.getAnonymousLogger().severe("Argument objectStore is null.");
-	    return null;
-	}
-	ObjectPocketImpl objectPocketImpl = new ObjectPocketImpl(objectStore);
-	addReferenceSupport(objectPocketImpl);
-	if (blobStore != null) {
-	    objectPocketImpl.setBlobStore(blobStore);
-	} else {
-	    objectPocketImpl.setBlobStore(objectStore);
-	}
-	if (serializeNulls) {
-	    objectPocketImpl.serializeNulls();
-	}
-	if (prettyPrinting) {
-	    objectPocketImpl.setPrettyPrinting();
-	}
-	objectPocketImpl.setTypeAdapterMap(typeAdapterMap);
-	return objectPocketImpl;
+        if (objectStore == null) {
+            Logger.getAnonymousLogger().severe("Argument objectStore is null.");
+            return null;
+        }
+        ObjectPocketImpl objectPocketImpl = new ObjectPocketImpl(objectStore);
+        addReferenceSupport(objectPocketImpl);
+        if (blobStore != null) {
+            objectPocketImpl.setBlobStore(blobStore);
+        } else {
+            objectPocketImpl.setBlobStore(objectStore);
+        }
+        if (serializeNulls) {
+            objectPocketImpl.serializeNulls();
+        }
+        if (prettyPrinting) {
+            objectPocketImpl.setPrettyPrinting();
+        }
+        if (!writeBackup) {
+            objectPocketImpl.doNotWriteBackups();
+        }
+        objectPocketImpl.setTypeAdapterMap(typeAdapterMap);
+        return objectPocketImpl;
     }
 
     /**
-     * Configure {@link ObjectPocket} to serialize Nulls.</br> By default
-     * {@link ObjectPocket} will not serialize fields with Nulls to save space.
+     * Configure {@link ObjectPocket} to serialize Nulls.</br>
+     * By default {@link ObjectPocket} will not serialize fields with Nulls to
+     * save space.
      */
     public ObjectPocketBuilder serializeNulls() {
-	this.serializeNulls = true;
-	return this;
+        this.serializeNulls = true;
+        return this;
     }
 
     /**
@@ -129,29 +135,39 @@ public class ObjectPocketBuilder {
      * default {@link ObjectPocket} will prettyPrint the JSON output.
      */
     public ObjectPocketBuilder noPrettyPrinting() {
-	this.prettyPrinting = false;
-	return this;
+        this.prettyPrinting = false;
+        return this;
+    }
+
+    /**
+     * Configure {@link ObjectPocket} to not write backups when storing data. By
+     * default {@link ObjectPocket} will write backups.
+     */
+    public ObjectPocketBuilder doNotWriteBackups() {
+        writeBackup = false;
+        return this;
     }
 
     /**
      * Register a specific type adapter for the serialization and
-     * deserialization of objects.</br> This method directly derives from
+     * deserialization of objects.</br>
+     * This method directly derives from
      * {@link GsonBuilder#registerTypeAdapter(Type, Object)}.
      * 
      * @param type
      * @param typeAdapter
      */
     public void registerTypeAdapter(Type type, Object typeAdapter) {
-	if (typeAdapterMap.get(type) == null) {
-	    typeAdapterMap.put(type, new HashSet<Object>());
-	}
-	typeAdapterMap.get(type).add(typeAdapter);
+        if (typeAdapterMap.get(type) == null) {
+            typeAdapterMap.put(type, new HashSet<Object>());
+        }
+        typeAdapterMap.get(type).add(typeAdapter);
     }
 
     private void addReferenceSupport(ObjectPocketImpl objectPocketImpl) {
-	objectPocketImpl.addReferenceSupport(new SimpleReferenceSupport());
-	objectPocketImpl.addReferenceSupport(new ArrayReferenceSupport());
-	objectPocketImpl.addReferenceSupport(new CollectionReferenceSupport());
+        objectPocketImpl.addReferenceSupport(new SimpleReferenceSupport());
+        objectPocketImpl.addReferenceSupport(new ArrayReferenceSupport());
+        objectPocketImpl.addReferenceSupport(new CollectionReferenceSupport());
     }
 
 }

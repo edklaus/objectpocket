@@ -33,38 +33,35 @@ import org.objectpocket.storage.blob.FileBlobStore;
  *
  */
 public class FileStoreTest {
-    
-    public static final String FILESTORE = System.getProperty("java.io.tmpdir")
-	    + "/objectpocket_test";
+
+    public static final String FILESTORE = System.getProperty("java.io.tmpdir") + "/objectpocket_test";
     protected static ObjectPocket objectPocket;
     protected static BlobStore blobStore;
-    
+
     @Before
     public void prepare() throws Exception {
-        CountDownLatch waiter = new CountDownLatch(1);
-        waiter.await(2, TimeUnit.SECONDS);
-	if (objectPocket != null) {
-	    objectPocket.close();
-	}
-	File f = new File(FILESTORE);
-	if (f.exists()) {
-	    FileUtils.deleteDirectory(f);
-	}
+        if (objectPocket != null) {
+            objectPocket.close();
+        }
+        File f = new File(FILESTORE);
+        if (f.exists()) {
+            FileUtils.deleteDirectory(f);
+        }
     }
-    
+
     @AfterClass
     public static void cleanup() throws Exception {
         CountDownLatch waiter = new CountDownLatch(1);
         waiter.await(2, TimeUnit.SECONDS);
-	if (objectPocket != null) {
-	    objectPocket.close();
-	}
-	File f = new File(FILESTORE);
-	if (f.exists()) {
-	    FileUtils.deleteDirectory(f);
-	}
+        if (objectPocket != null) {
+            objectPocket.close();
+        }
+        File f = new File(FILESTORE);
+        if (f.exists()) {
+            FileUtils.deleteDirectory(f);
+        }
     }
-    
+
     /**
      * Always creates a new ObjectPocket instance!
      * 
@@ -72,19 +69,20 @@ public class FileStoreTest {
      * @throws Exception
      */
     public ObjectPocket getObjectPocket() throws Exception {
-	if (objectPocket != null) {
-	    objectPocket.close();
-	}
-	ObjectPocketBuilder objectPocketBuilder = new ObjectPocketBuilder();
-	FileStore objectStore = new FileStore(FILESTORE);
-	blobStore = new FileBlobStore(FILESTORE);
-	objectStore.setBlobStore(blobStore);
-	objectPocket = objectPocketBuilder.createObjectPocket(objectStore);
-	return objectPocket;
+        if (objectPocket != null) {
+            objectPocket.close();
+        }
+        ObjectPocketBuilder objectPocketBuilder = new ObjectPocketBuilder();
+        objectPocketBuilder.doNotWriteBackups(); // keep test footrpint/time low
+        FileStore objectStore = new FileStore(FILESTORE);
+        blobStore = new FileBlobStore(FILESTORE);
+        objectStore.setBlobStore(blobStore);
+        objectPocket = objectPocketBuilder.createObjectPocket(objectStore);
+        return objectPocket;
     }
-    
+
     public static BlobStore getBlobStore() {
-	return blobStore;
+        return blobStore;
     }
 
 }
