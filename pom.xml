@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
@@ -10,9 +11,13 @@
 	<name>objectpocket</name>
 	<description>Simple Java object store/load.</description>
 	<url>https://github.com/edklaus/objectpocket</url>
-	
+
 	<properties>
-	    <maven.compiler.release>8</maven.compiler.release>
+		<maven.compiler.source>8</maven.compiler.source>
+		<maven.compiler.target>8</maven.compiler.target>
+		<!-- Use the release flag only if you are using Java 9+ -->
+		<!-- <maven.compiler.release>8</maven.compiler.release> -->
+		<!-- verbose is useful for debugging purposes -->
 	</properties>
 
 	<licenses>
@@ -80,19 +85,9 @@
 				</configuration>
 			</plugin>
 
-			<!-- plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin-->
+			<!-- plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-gpg-plugin</artifactId> 
+				<executions> <execution> <id>sign-artifacts</id> <phase>verify</phase> <goals> 
+				<goal>sign</goal> </goals> </execution> </executions> </plugin -->
 
 		</plugins>
 	</build>
