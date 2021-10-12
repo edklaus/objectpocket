@@ -43,7 +43,7 @@ import org.apache.commons.io.FileUtils;
  */
 public class FileStoreBackup {
 
-    private FileStore fileStore;
+    private File storeDir;
     protected static final String BACKUP_DIR_NAME = "_backups";
     protected static final String TEMP_BACKUP_DIR_NAME = "tmp";
     protected static final String OLD_BACKUP_DIR_NAME = ".bak";
@@ -55,10 +55,14 @@ public class FileStoreBackup {
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
 
     public FileStoreBackup(FileStore fileStore) {
-        this.fileStore = fileStore;
+    	this.storeDir = new File(fileStore.getSource());
+    }
+    
+    public FileStoreBackup(File dir) {
+    	this.storeDir = dir;
     }
 
-    protected void createBackup() throws IOException {
+    public void createBackup() throws IOException {
         Set<File> filesToBackup = collectFilesForBackup();
         if (filesToBackup != null && !filesToBackup.isEmpty()) {
             initBackupDir();
@@ -86,14 +90,13 @@ public class FileStoreBackup {
     }
 
     private Set<File> collectFilesForBackup() {
-        File storeDir = new File(fileStore.getSource());
         if (storeDir.exists() && storeDir.isDirectory()) {
             Set<File> filesToBackup = new HashSet<>();
             File[] files = storeDir.listFiles();
             for (File file : files) {
                 String name = file.getName();
                 if (!file.isDirectory()
-                        && (name.endsWith(fileStore.FILENAME_SUFFIX) || name.equals(fileStore.INDEX_FILE_NAME))) {
+                        && (name.endsWith(FileStore.FILENAME_SUFFIX) || name.equals(FileStore.INDEX_FILE_NAME))) {
                     filesToBackup.add(file);
                 }
             }
@@ -103,7 +106,6 @@ public class FileStoreBackup {
     }
 
     private void initBackupDir() {
-        File storeDir = new File(fileStore.getSource());
         if (storeDir.exists() && storeDir.isDirectory()) {
             backupDir = new File(storeDir.getAbsolutePath() + "/" + BACKUP_DIR_NAME);
             if (!backupDir.exists()) {
@@ -167,7 +169,6 @@ public class FileStoreBackup {
     }
     
     private void removeOldBackupDir() {
-        File storeDir = new File(fileStore.getSource());
         if (storeDir.exists() && storeDir.isDirectory()) {
             File oldBackupDir = new File(storeDir.getAbsolutePath() + "/" + OLD_BACKUP_DIR_NAME);
             if (oldBackupDir.exists()) {

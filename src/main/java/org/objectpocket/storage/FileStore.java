@@ -49,9 +49,9 @@ public class FileStore implements ObjectStore {
 
     protected String encoding = "UTF-8";
 
-    protected final String FILENAME_SUFFIX = ".json";
-    protected final String INDEX_FILE_NAME = "_op_index";
-    protected final String INDEX_FILE_NAME_OLD = ".op_index";
+    protected final static String FILENAME_SUFFIX = ".json";
+    protected final static String INDEX_FILE_NAME = "_op_index";
+    protected final static String INDEX_FILE_NAME_OLD = ".op_index";
     protected ObjectPocketIndex index = new ObjectPocketIndex();
     protected ObjectPocketIndex indexBackup = new ObjectPocketIndex();
 
