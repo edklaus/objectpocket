@@ -65,7 +65,7 @@ public class MultiZipBlobStore implements BlobStore {
     }
 
     @Override
-    public void writeBlobs(Set<Blob> blobs) throws IOException {
+	public synchronized void writeBlobs(Set<Blob> blobs) throws IOException {
         if (blobs == null || blobs.isEmpty()) {
             return;
         }
@@ -146,7 +146,7 @@ public class MultiZipBlobStore implements BlobStore {
     }
 
     @Override
-    public byte[] loadBlobData(Blob blob) throws IOException {
+	public synchronized byte[] loadBlobData(Blob blob) throws IOException {
         if (blob == null) {
             return null;
         }
@@ -174,7 +174,7 @@ public class MultiZipBlobStore implements BlobStore {
     }
 
     @Override
-    public void cleanup(Set<Blob> referencedBlobs) throws IOException {
+	public synchronized void cleanup(Set<Blob> referencedBlobs) throws IOException {
         if (referencedBlobs == null) {
             return;
         }
@@ -215,7 +215,7 @@ public class MultiZipBlobStore implements BlobStore {
     }
 
     @Override
-    public void close() throws IOException {
+	public synchronized void close() throws IOException {
         for (FileSystem fs : readFileSystems.values()) {
             if (fs != null && fs.isOpen()) {
                 fs.close();
@@ -225,7 +225,7 @@ public class MultiZipBlobStore implements BlobStore {
     }
 
     @Override
-    public void delete() throws IOException {
+	public synchronized void delete() throws IOException {
         close();
         Collection<File> blobContainers = FileUtils.listFiles(new File(directory),
                 FileFilterUtils.prefixFileFilter(BLOB_STORE_DEFAULT_FILENAME), null);
@@ -237,11 +237,11 @@ public class MultiZipBlobStore implements BlobStore {
         initIndexAndReadFileSystems();
     }
 
-    public long numEntries() throws IOException {
+	public synchronized long numEntries() throws IOException {
         return blobContainerIndex.size();
     }
 
-    private void initIndexAndReadFileSystems() throws IOException {
+	private void initIndexAndReadFileSystems() throws IOException {
         scanForBlobContainers();
         createIndexFromBlobContainers();
     }
