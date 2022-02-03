@@ -29,6 +29,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -65,7 +66,7 @@ public class MultiZipBlobStore implements BlobStore {
     }
 
     @Override
-	public synchronized void writeBlobs(Set<Blob> blobs) throws IOException {
+    public synchronized void writeBlobs(Set<Blob> blobs) throws IOException {
         if (blobs == null || blobs.isEmpty()) {
             return;
         }
@@ -81,7 +82,7 @@ public class MultiZipBlobStore implements BlobStore {
                 path = blob.getId();
             }
             path = path.replaceAll("\\\\", "/");
-            
+
             String selectedBlobContainerName = null;
 
             // case 1: replace blob data
@@ -90,10 +91,10 @@ public class MultiZipBlobStore implements BlobStore {
                 currentWriteFileSystem = getWriteFileSystem(blobContainer);
                 selectedBlobContainerName = blobContainer;
             }
-            
+
             // case 2: add blob data
             else {
-                
+
                 // create new blob container
                 if (lastBlobContainer == null
                         || blob.getBytes().length + lastBlobContainerSize > MAX_BINARY_FILE_SIZE) {
@@ -146,7 +147,7 @@ public class MultiZipBlobStore implements BlobStore {
     }
 
     @Override
-	public synchronized byte[] loadBlobData(Blob blob) throws IOException {
+    public synchronized byte[] loadBlobData(Blob blob) throws IOException {
         if (blob == null) {
             return null;
         }
@@ -174,19 +175,32 @@ public class MultiZipBlobStore implements BlobStore {
     }
 
     @Override
-	public synchronized void cleanup(Set<Blob> referencedBlobs) throws IOException {
+    public synchronized void cleanup(Set<Blob> referencedBlobs) throws IOException {
         if (referencedBlobs == null) {
             return;
         }
 
-        // preload blobs
-        for (Blob blob : referencedBlobs) {
-            blob.getBytes();
-        }
-
         String tmpdir = directory + "/.tmp";
         MultiZipBlobStore newZip = new MultiZipBlobStore(tmpdir);
-        newZip.writeBlobs(referencedBlobs);
+
+        // write blobs in packets of 100 to keep memory consuption low
+        Set<Blob> blobsToWrite = new HashSet<Blob>();
+        Iterator<Blob> iterator = referencedBlobs.iterator();
+        while (iterator.hasNext()) {
+            for (int i = 0; i < 100; i++) {
+                if (iterator.hasNext()) {
+                    blobsToWrite.add(iterator.next());
+                }
+            }
+            newZip.writeBlobs(blobsToWrite);
+            for (Blob blob : blobsToWrite) {
+                // hack to remove referenced data, so we can save memory
+                blob.setBytes(null);
+                blob.setPersisted();
+            }
+            blobsToWrite.clear();
+        }
+
         newZip.close();
         this.close();
 
@@ -215,7 +229,7 @@ public class MultiZipBlobStore implements BlobStore {
     }
 
     @Override
-	public synchronized void close() throws IOException {
+    public synchronized void close() throws IOException {
         for (FileSystem fs : readFileSystems.values()) {
             if (fs != null && fs.isOpen()) {
                 fs.close();
@@ -225,7 +239,7 @@ public class MultiZipBlobStore implements BlobStore {
     }
 
     @Override
-	public synchronized void delete() throws IOException {
+    public synchronized void delete() throws IOException {
         close();
         Collection<File> blobContainers = FileUtils.listFiles(new File(directory),
                 FileFilterUtils.prefixFileFilter(BLOB_STORE_DEFAULT_FILENAME), null);
@@ -237,11 +251,11 @@ public class MultiZipBlobStore implements BlobStore {
         initIndexAndReadFileSystems();
     }
 
-	public synchronized long numEntries() throws IOException {
+    public synchronized long numEntries() throws IOException {
         return blobContainerIndex.size();
     }
 
-	private void initIndexAndReadFileSystems() throws IOException {
+    private void initIndexAndReadFileSystems() throws IOException {
         scanForBlobContainers();
         createIndexFromBlobContainers();
     }
